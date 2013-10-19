@@ -27,57 +27,68 @@ Axiom B1 : forall A B C : Prop, [[ A -> B ]] -> [[ B -> C ]] -> [[ A -> C ]].
 
 Axiom B2 : forall A B C : Prop, [[ A -> B ]] -> [[ A -> (B -> C) ]] -> [[ A -> C ]].
 
-Axiom L_Construction : forall C : Prop, L C = ([[ L C ]] -> C).
+Axiom L_Construction_1 : forall C : Prop, [[ L C -> ([[ L C ]] -> C) ]].
+Axiom L_Construction_2 : forall C : Prop, [[ ([[ L C ]] -> C) -> L C ]].
 
-Axiom C1 : forall A : Prop, [[ A -> A ]].
+Axiom C1 : forall A : Prop, A -> [[ A ]].
 
 Section lob.
   Variable C : Prop.
 
   Lemma Step1a : [[ [[ L C ]] -> [[ [[ L C ]] -> C ]] ]].
-    rewrite (L_Construction C) at 1.
+  Proof.
     apply C1.
+    apply MP.
+    apply (L_Construction_1 C).
   Qed.
 
   Lemma Step1b : [[ [[ [[ L C ]] -> C ]] -> [[ L C ]] ]].
-    rewrite (L_Construction C) at 2.
+  Proof.
     apply C1.
+    apply MP.
+    apply (L_Construction_2 C).
   Qed.
 
   Hypothesis LobsHypothesis : [[ [[ C ]] -> C ]].
 
   Lemma Step3 : [[ [[ [[ L C ]] -> C ]] -> ([[ [[ L C ]] ]] -> [[ C ]])]].
+  Proof.
     apply A3.
   Qed.
 
   Lemma Step4 : [[ [[ L C ]] -> ( [[ [[ L C ]] ]] -> [[ C ]]) ]].
-  Proof (B1 Step1a Step3).
+  Proof.
+    exact (B1 Step1a Step3).
+  Qed.
 
-    Lemma Step5 : [[ [[ L C ]] -> [[ [[ L C ]] ]] ]].
-      apply A2.
-    Qed.
+  Lemma Step5 : [[ [[ L C ]] -> [[ [[ L C ]] ]] ]].
+  Proof.
+    apply A2.
+  Qed.
 
-    Lemma Step6 : [[ [[ L C ]] -> [[ C ]] ]].
-      apply (B2 Step5 Step4).
-    Qed.
+  Lemma Step6 : [[ [[ L C ]] -> [[ C ]] ]].
+  Proof.
+    apply (B2 Step5 Step4).
+  Qed.
 
-    Lemma Step7 : [[ [[ L C ]] -> C ]].
-    Proof.
-      apply (B1 Step6 LobsHypothesis).
-    Qed.
+  Lemma Step7 : [[ [[ L C ]] -> C ]].
+  Proof.
+    apply (B1 Step6 LobsHypothesis).
+  Qed.
 
-    Lemma Step8 : [[ [[ [[ L C ]] -> C ]] ]].
-      apply (A1 Step7).
-    Qed.
-    Lemma Step9 : [[ [[ L C ]] ]].
-    Proof.
-      apply (MP Step1b Step8).
-    Qed.
+  Lemma Step8 : [[ [[ [[ L C ]] -> C ]] ]].
+  Proof.
+    apply (A1 Step7).
+  Qed.
+  Lemma Step9 : [[ [[ L C ]] ]].
+  Proof.
+    apply (MP Step1b Step8).
+  Qed.
 
-    Lemma Step10 : [[ C ]].
-    Proof.
-      apply (MP Step7 Step9).
-    Qed.
+  Lemma Step10 : [[ C ]].
+  Proof.
+    apply (MP Step7 Step9).
+  Qed.
 End lob.
 
 Lemma MaterialImplication (X Y : Prop) : ((X -> Y) -> Y) -> (~X -> Y).
