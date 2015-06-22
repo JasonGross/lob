@@ -8,8 +8,16 @@ Require Import Coq.Program.Program.
 Require Import Coq.PArith.BinPos.
 Local Open Scope string_scope.
 Local Open Scope positive_scope.
+Local Open Scope list_scope.
 
 Require Export quote_term.
+
+Definition Context := list Ast.term.
+Delimit Scope context_scope with ctx.
+Bind Scope context_scope with Context.
+Notation ε := (@nil Ast.term : Context).
+Definition context_extend (Γ : Context) (x : Ast.term) := cons x Γ.
+Notation "Γ ▻ x" := (context_extend Γ x) (at level 60, right associativity).
 
 Local Notation "x ‘→’ y" := (Ast.tProd Ast.nAnon x y) (at level 99, right associativity, y at level 200).
 
@@ -57,97 +65,132 @@ Fixpoint cbv_beta_1_helper (term : Ast.term) (orig_name : Ast.name) (orig_type :
        | Ast.tUnknown _ => term
      end.
 
-Definition cbv_beta_1 (term : Ast.term) : Ast.term
-  := match term with
+Fixpoint cbv_beta_1 (term : Ast.term) : Ast.term
+  := let cbv_beta_1_helper'
+         := (fix cbv_beta_1_helper' (xs : list Ast.term) : list Ast.term
+             := match xs with
+                  | nil => nil
+                  | cons x' xs' => cons (cbv_beta_1 x') (cbv_beta_1_helper' xs')
+                end) in
+     match term with
        | Ast.tApp term' nil
          => term'
        | Ast.tApp (Ast.tLambda orig_name typ body) (subst_in::xs')
          => Ast.tApp (cbv_beta_1_helper body orig_name typ 0 subst_in) xs'
-       | _ => term
+       | Ast.tApp term' ls
+         => Ast.tApp (cbv_beta_1 term') (cbv_beta_1_helper' ls)
+       | Ast.tCast body cst typ
+         => Ast.tCast (cbv_beta_1 body) cst (cbv_beta_1 typ)
+       | Ast.tProd name typ body
+         => Ast.tProd name (cbv_beta_1 typ) (cbv_beta_1 body)
+       | Ast.tLambda name typ body
+         => Ast.tLambda name (cbv_beta_1 typ) (cbv_beta_1 body)
+       | Ast.tLetIn name typ bodyx body
+         => Ast.tLetIn name (cbv_beta_1 typ) (cbv_beta_1 bodyx) (cbv_beta_1 body)
+       | Ast.tConst _ => term
+       | Ast.tInd _ => term
+       | Ast.tConstruct _ _ => term
+       | Ast.tCase _ _ _ _ => term
+       | Ast.tFix _ _ => term
+       | Ast.tUnknown _ => term
+       | Ast.tRel _ | Ast.tVar _ | Ast.tMeta _ | Ast.tEvar _ | Ast.tSort _ => term
      end.
 
-Inductive has_type : Ast.term -> Ast.term -> Type :=
-| has_type_tApp : forall A B f x,
-                    has_type f (A ‘→’ B)
-                    -> has_type x A
-                    -> has_type (Ast.tApp f [x]) B
-| has_type_tApp_nil : forall A x,
-                        has_type x A
-                        -> has_type (Ast.tApp x []) A
-| has_type_tApp_split : forall T f x1 x2 xs,
-                          has_type (Ast.tApp (Ast.tApp f [x1]) (cons x2 xs)) T
-                          -> has_type (Ast.tApp f (cons x1 (cons x2 xs))) T
+Inductive has_type :  Context -> Ast.term -> Ast.term -> Type :=
+| has_type_weaken : forall Γ Γ' T t,
+                      has_type Γ t T
+                      -> has_type (Γ ++ Γ') t T
+| has_type_tRel_0 : forall T Γ,
+                      has_type (Γ ▻ T) (Ast.tRel 0) T
+| has_type_tRel_S : forall T T' Γ n,
+                      has_type Γ (Ast.tRel n) T
+                      -> has_type (Γ ▻ T') (Ast.tRel (S n)) T
+| has_type_tApp : forall Γ A B f x,
+                    has_type Γ f (A ‘→’ B)
+                    -> has_type Γ x A
+                    -> has_type Γ (Ast.tApp f [x]) B
+| has_type_tApp_nil : forall Γ A x,
+                        has_type Γ x A
+                        -> has_type Γ (Ast.tApp x []) A
+| has_type_tApp_split : forall Γ T f x1 x2 xs,
+                          has_type Γ (Ast.tApp (Ast.tApp f [x1]) (cons x2 xs)) T
+                          -> has_type Γ (Ast.tApp f (cons x1 (cons x2 xs))) T
 (* TODO?: Make sure that the beta-expanded term is well-typed? *)
-| has_type_beta_1_type : forall t f T,
-                           has_type t (f (cbv_beta_1 T))
-                           -> has_type t (f T)
-| has_type_eta_1_type : forall t f T,
-                          has_type t (f T)
-                          -> has_type t (f (cbv_beta_1 T))
+| has_type_beta_1_type : forall Γ t f T,
+                           has_type Γ t (f (cbv_beta_1 T))
+                           -> has_type Γ t (f T)
+| has_type_eta_1_type : forall Γ t f T,
+                          has_type Γ t (f T)
+                          -> has_type Γ t (f (cbv_beta_1 T))
+| has_type_beta_1_term : forall Γ f t T,
+                           has_type Γ (f (cbv_beta_1 t)) T
+                           -> has_type Γ (f t) T
+| has_type_eta_1_term : forall Γ t f T,
+                          has_type Γ (f t) T
+                          -> has_type Γ (f (cbv_beta_1 t)) T
 (** TODO?: Make sure that the arguments to [sigT] are well-typed? *)
 | has_type_existT
-  : forall A P x y,
+  : forall Γ A P x y,
       (*let T := Ast.tApp ‘sigT’ [A; P] in
     has_type T (Ast.tSort U)
     -> has_type A (Ast.tSort U1
     -> has_type P (A ‘→’ Ast.tSort U2)*)
-      has_type x A
-      -> has_type y (Ast.tApp P [x])
-      -> has_type (Ast.tApp ‘existT’ [A; P; x; y]) (Ast.tApp ‘sigT’ [A; P])
-| has_type_qO : has_type qO nat'
-| has_type_qS : has_type qS (nat' ‘→’ nat')
-| has_type_qxI : has_type qxI (positive' ‘→’ positive')
-| has_type_qxO : has_type qxO (positive' ‘→’ positive')
-| has_type_qxH : has_type qxH positive'
-| has_type_qtrue : has_type qtrue bool'
-| has_type_qfalse : has_type qfalse bool'
-| has_type_qAscii : has_type qAscii (bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ ascii')
-| has_type_qEmptyString : has_type qEmptyString string'
-| has_type_qString : has_type qString (ascii' ‘→’ string' ‘→’ string')
-| has_type_qnil : forall T U, has_type T (Ast.tSort U)
-                              -> has_type (Ast.tApp qnil [T]) (Ast.tApp list' [T])
-| has_type_qcons : forall T,
-                     has_type (Ast.tApp qcons [T]) (T ‘→’ Ast.tApp list' [T] ‘→’ Ast.tApp list' [T])
-| has_type_term' : has_type term' (Ast.tSort Ast.sSet)
-| has_type_def' : has_type def' (Ast.tSort Ast.sSet ‘→’ Ast.tSort Ast.sSet)
-| has_type_qmkInd : has_type qmkInd (string' ‘→’ nat' ‘→’ inductive')
-(*| has_type_qstProp : has_type (qtSort ‘’ qsProp) (Ast.tSort (Ast.sType 1))
-| has_type_qstSet : has_type (qtSort ‘’ qsSet) (Ast.tSort (Ast.sType 1))
+      has_type Γ x A
+      -> has_type Γ y (Ast.tApp P [x])
+      -> has_type Γ (Ast.tApp ‘existT’ [A; P; x; y]) (Ast.tApp ‘sigT’ [A; P])
+| has_type_qO : forall Γ, has_type Γ qO nat'
+| has_type_qS : forall Γ, has_type Γ qS (nat' ‘→’ nat')
+| has_type_qxI : forall Γ, has_type Γ qxI (positive' ‘→’ positive')
+| has_type_qxO : forall Γ, has_type Γ qxO (positive' ‘→’ positive')
+| has_type_qxH : forall Γ, has_type Γ qxH positive'
+| has_type_qtrue : forall Γ, has_type Γ qtrue bool'
+| has_type_qfalse : forall Γ, has_type Γ qfalse bool'
+| has_type_qAscii : forall Γ, has_type Γ qAscii (bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ bool' ‘→’ ascii')
+| has_type_qEmptyString : forall Γ, has_type Γ qEmptyString string'
+| has_type_qString : forall Γ, has_type Γ qString (ascii' ‘→’ string' ‘→’ string')
+| has_type_qnil : forall Γ T U, has_type Γ T (Ast.tSort U)
+                              -> has_type Γ (Ast.tApp qnil [T]) (Ast.tApp list' [T])
+| has_type_qcons : forall Γ T,
+                     has_type Γ (Ast.tApp qcons [T]) (T ‘→’ Ast.tApp list' [T] ‘→’ Ast.tApp list' [T])
+| has_type_term' : forall Γ, has_type Γ term' (Ast.tSort Ast.sSet)
+| has_type_def' : forall Γ, has_type Γ def' (Ast.tSort Ast.sSet ‘→’ Ast.tSort Ast.sSet)
+| has_type_qmkInd : forall Γ, has_type Γ qmkInd (string' ‘→’ nat' ‘→’ inductive')
+(*| has_type_qstProp : has_type Γ (qtSort ‘’ qsProp) (Ast.tSort (Ast.sType 1))
+| has_type_qstSet : has_type Γ (qtSort ‘’ qsSet) (Ast.tSort (Ast.sType 1))
 | has_type_qstType : forall p p',
                       denote_positive p = Some p'
-                      -> has_type (qtSort ‘’ (Ast.tApp qsType [p]))
+                      -> has_type Γ (qtSort ‘’ (Ast.tApp qsType [p]))
                                   (Ast.tSort (Ast.sType (1 + p')))*)
-| has_type_qsProp : has_type qsProp sort'
-| has_type_qsSet : has_type qsSet sort'
-| has_type_qsType : has_type qsType (positive' ‘→’ sort')
-| has_type_qnAnon : has_type qnAnon name'
-| has_type_qnNamed : has_type qnNamed (ident' ‘→’ name')
-| has_type_qVmCast : has_type qVmCast cast_kind'
-| has_type_qNativeCast : has_type qNativeCast cast_kind'
-| has_type_qCast : has_type qCast cast_kind'
-| has_type_qRevertCast : has_type qRevertCast cast_kind'
-| has_type_qtRel : has_type qtRel (nat' ‘→’ term')
-| has_type_qtVar : has_type qtVar (ident' ‘→’ term')
-| has_type_qtMeta : has_type qtMeta (nat' ‘→’ term')
-| has_type_qtEvar : has_type qtEvar (nat' ‘→’ term')
-| has_type_qtSort : has_type qtSort (sort' ‘→’ term')
-| has_type_qtCast : has_type qtCast (term' ‘→’ cast_kind' ‘→’ term' ‘→’ term')
-| has_type_qtProd : has_type qtProd (name' ‘→’ term' ‘→’ term' ‘→’ term')
-| has_type_qtLambda : has_type qtLambda (name' ‘→’ term' ‘→’ term' ‘→’ term')
-| has_type_qtLetIn : has_type qtLetIn (name' ‘→’ term' ‘→’ term' ‘→’ term' ‘→’ term')
-| has_type_qtApp : has_type qtApp (term' ‘→’ Ast.tApp list' [term'] ‘→’ term')
-| has_type_qtConst : has_type qtConst (string' ‘→’ term')
-| has_type_qtInd : has_type qtInd (inductive' ‘→’ term')
-| has_type_qtConstruct : has_type qtConstruct (inductive' ‘→’ nat' ‘→’ term')
-| has_type_qtCase : has_type qtCase (nat' ‘→’ term' ‘→’ term' ‘→’ Ast.tApp list' [term'] ‘→’ term')
-| has_type_qtFix : has_type qtFix (mfixpoint' term' ‘→’ nat' ‘→’ term')
-| has_type_qtUnknown : has_type qtUnknown (string' ‘→’ term')
-| has_type_qmkdef : forall T, has_type qmkdef (name' ‘→’ T ‘→’ T ‘→’ nat' ‘→’ Ast.tApp def' [T]).
-(* XXX TODO: How should this be done? *)
-Axiom has_type_tLambda
-: forall name name' A B body,
-    (has_type (Ast.tRel 0) A -> has_type body B)
-    -> has_type (Ast.tLambda name A body) (Ast.tProd name' A B).
+| has_type_qsProp : forall Γ, has_type Γ qsProp sort'
+| has_type_qsSet : forall Γ, has_type Γ qsSet sort'
+| has_type_qsType : forall Γ, has_type Γ qsType (positive' ‘→’ sort')
+| has_type_qnAnon : forall Γ, has_type Γ qnAnon name'
+| has_type_qnNamed : forall Γ, has_type Γ qnNamed (ident' ‘→’ name')
+| has_type_qVmCast : forall Γ, has_type Γ qVmCast cast_kind'
+| has_type_qNativeCast : forall Γ, has_type Γ qNativeCast cast_kind'
+| has_type_qCast : forall Γ, has_type Γ qCast cast_kind'
+| has_type_qRevertCast : forall Γ, has_type Γ qRevertCast cast_kind'
+| has_type_qtRel : forall Γ, has_type Γ qtRel (nat' ‘→’ term')
+| has_type_qtVar : forall Γ, has_type Γ qtVar (ident' ‘→’ term')
+| has_type_qtMeta : forall Γ, has_type Γ qtMeta (nat' ‘→’ term')
+| has_type_qtEvar : forall Γ, has_type Γ qtEvar (nat' ‘→’ term')
+| has_type_qtSort : forall Γ, has_type Γ qtSort (sort' ‘→’ term')
+| has_type_qtCast : forall Γ, has_type Γ qtCast (term' ‘→’ cast_kind' ‘→’ term' ‘→’ term')
+| has_type_qtProd : forall Γ, has_type Γ qtProd (name' ‘→’ term' ‘→’ term' ‘→’ term')
+| has_type_qtLambda : forall Γ, has_type Γ qtLambda (name' ‘→’ term' ‘→’ term' ‘→’ term')
+| has_type_qtLetIn : forall Γ, has_type Γ qtLetIn (name' ‘→’ term' ‘→’ term' ‘→’ term' ‘→’ term')
+| has_type_qtApp : forall Γ, has_type Γ qtApp (term' ‘→’ Ast.tApp list' [term'] ‘→’ term')
+| has_type_qtConst : forall Γ, has_type Γ qtConst (string' ‘→’ term')
+| has_type_qtInd : forall Γ, has_type Γ qtInd (inductive' ‘→’ term')
+| has_type_qtConstruct : forall Γ, has_type Γ qtConstruct (inductive' ‘→’ nat' ‘→’ term')
+| has_type_qtCase : forall Γ, has_type Γ qtCase (nat' ‘→’ term' ‘→’ term' ‘→’ Ast.tApp list' [term'] ‘→’ term')
+| has_type_qtFix : forall Γ, has_type Γ qtFix (mfixpoint' term' ‘→’ nat' ‘→’ term')
+| has_type_qtUnknown : forall Γ, has_type Γ qtUnknown (string' ‘→’ term')
+| has_type_qmkdef : forall Γ T, has_type Γ qmkdef (name' ‘→’ T ‘→’ T ‘→’ nat' ‘→’ Ast.tApp def' [T])
+| has_type_tLambda
+  : forall Γ name name' A B body,
+      has_type (A::Γ) body B
+      -> has_type Γ (Ast.tLambda name A body) (Ast.tProd name' A B).
 
 Existing Class has_type.
 Existing Instances
@@ -163,58 +206,59 @@ Existing Instances
          has_type_qnAnon has_type_qnNamed
          has_type_qVmCast has_type_qNativeCast has_type_qCast has_type_qRevertCast
          has_type_qmkInd has_type_qmkdef
-         has_type_term' has_type_def'.
+         has_type_term' has_type_def'
+         has_type_tRel_S has_type_tRel_0.
 
-Instance quote_nat_has_type (n : nat)
-: has_type (quote n) nat'.
+Instance quote_nat_has_type {Γ} (n : nat)
+: has_type Γ (quote n) nat'.
 Proof. induction n; simpl; exact _. Defined.
 
-Instance quote_bool_has_type (x : bool)
-: has_type (quote x) bool'.
+Instance quote_bool_has_type {Γ} (x : bool)
+: has_type Γ (quote x) bool'.
 Proof. destruct x; simpl; exact _. Defined.
 
-Instance quote_ascii_has_type (x : Ascii.ascii)
-: has_type (quote x) ascii'.
+Instance quote_ascii_has_type {Γ} (x : Ascii.ascii)
+: has_type Γ (quote x) ascii'.
 Proof. destruct x; simpl; try exact _. Defined.
 
-Instance quote_string_has_type (x : string)
-: has_type (quote x) string'.
+Instance quote_string_has_type {Γ} (x : string)
+: has_type Γ (quote x) string'.
 Proof. induction x; simpl; try exact _. Defined.
 
-Instance quote_ident_has_type (x : Ast.ident)
-: has_type (quote x) string'
+Instance quote_ident_has_type {Γ} (x : Ast.ident)
+: has_type Γ (quote x) string'
   := quote_string_has_type x.
 
-Instance quote_positive_has_type (x : positive)
-: has_type (quote x) positive'.
+Instance quote_positive_has_type {Γ} (x : positive)
+: has_type Γ (quote x) positive'.
 Proof. induction x; simpl; try exact _. Defined.
 
-Instance quote_list_has_type {T T' U}
-         `{Quotable T, has_type T' (Ast.tSort U), forall a : T, has_type (quote a) T'}
+Instance quote_list_has_type {Γ T T' U}
+         `{Quotable T, has_type Γ T' (Ast.tSort U), forall a : T, has_type Γ (quote a) T'}
          (x : list T)
-: has_type (quote_list T' x) (Ast.tApp list' [T']).
+: has_type Γ (quote_list T' x) (Ast.tApp list' [T']).
 Proof. unfold quote; induction x; simpl; try exact _. Defined.
 
-Instance quote_inductive_has_type (x : Ast.inductive)
-: has_type (quote x) inductive'.
+Instance quote_inductive_has_type {Γ} (x : Ast.inductive)
+: has_type Γ (quote x) inductive'.
 Proof. unfold quote; destruct x; simpl; try exact _. Defined.
 
-Instance quote_sort_has_type (x : Ast.sort)
-: has_type (quote x) sort'.
+Instance quote_sort_has_type {Γ} (x : Ast.sort)
+: has_type Γ (quote x) sort'.
 Proof. unfold quote; destruct x; try exact _. Defined.
 
-Instance quote_name_has_type (x : Ast.name)
-: has_type (quote x) name'.
+Instance quote_name_has_type {Γ} (x : Ast.name)
+: has_type Γ (quote x) name'.
 Proof. unfold quote; destruct x; simpl; try exact _. Defined.
 
-Instance quote_cast_kind_has_type (x : Ast.cast_kind)
-: has_type (quote x) cast_kind'.
+Instance quote_cast_kind_has_type {Γ} (x : Ast.cast_kind)
+: has_type Γ (quote x) cast_kind'.
 Proof. unfold quote; destruct x; simpl; try exact _. Defined.
 
 Local Arguments quote_term_step : simpl never.
 
-Fixpoint quote_term_has_type (x : Ast.term)
-: has_type (quote x) term'.
+Fixpoint quote_term_has_type {Γ} (x : Ast.term)
+: has_type Γ (quote x) term'.
 Proof.
   destruct x; try (unfold quote; simpl; exact _).
   { unfold quote, term_quotable; simpl.

@@ -15,11 +15,17 @@ Notation "( x ; y )" := (existT _ x y).
 Notation "x .1" := (projT1 x) (at level 3, format "x '.1'").
 Notation "x .2" := (projT2 x) (at level 3, format "x '.2'").
 
-Notation "x ‘→’ y" := (Ast.tProd Ast.nAnon x y) (at level 99, right associativity, y at level 200).
-Notation "x ‘’ y" := (Ast.tApp x (cons y nil )) (at level 15, left associativity).
+Delimit Scope preterm_scope with preterm.
+Bind Scope preterm_scope with Ast.term.
+Local Open Scope preterm_scope.
+
+Notation "x ‘→’ y" := (Ast.tProd Ast.nAnon x%preterm y%preterm) (at level 99, right associativity, y at level 200) : preterm_scope.
+Notation "x ‘’ y" := (Ast.tApp x%preterm (cons y%preterm nil)) (at level 15, left associativity) : preterm_scope.
 
 Definition Preterm := Ast.term.
 Quote Definition Preterm' := Ast.term.
+
+Bind Scope preterm_scope with Preterm.
 
 Notation "‘Preterm’" := Preterm'.
 
@@ -28,10 +34,13 @@ Quote Definition qX := X.
 Check qX : Preterm.
 Notation "‘X’" := qX.
 
-Definition box (T : Preterm) : Type
-  := { t : Preterm & has_type t T }.
+Definition box (Γ : Context) (T : Preterm) : Type
+  := { t : Preterm & has_type Γ t T }.
 
-Notation "□" := box.
+Notation "□" := (box nil).
+
+Delimit Scope well_typed_term_scope with wtt.
+Bind Scope well_typed_term_scope with box.
 
 Axiom f : □ ‘X’ -> X.
 Quote Definition qf := f.
@@ -45,7 +54,7 @@ Notation "‘f’" := qf.
 
 Definition box' : Preterm.
 Proof.
-  let term := (eval cbv delta in box) in
+  let term := (eval cbv delta in □) in
   quote_term term (fun x => exact x).
 Defined.
 
@@ -64,8 +73,15 @@ Notation "⌜ x ⌝" := (quote x).
 Notation "‘λ’ ( x : T ) ‘⇒’ body"
   := (Ast.tLambda (Ast.nNamed x) T body) (at level 15).
 
-Axiom has_type_f : has_type ‘f’ ((‘□’ ‘’ ⌜ ‘X’ ⌝) ‘→’ ‘X’).
-Existing Instance has_type_f.
+Axiom has_type_f : has_type nil ‘f’ ((‘□’ ‘’ ⌜ ‘X’ ⌝) ‘→’ ‘X’).
+
+Global Instance f_has_type {Γ} : has_type Γ ‘f’ ((‘□’ ‘’ ⌜ ‘X’ ⌝) ‘→’ ‘X’).
+Proof.
+  apply (has_type_weaken nil).
+  apply has_type_f.
+Defined.
+
+Notation "‘‘f’’" := (‘f’; f_has_type).
 
 Definition App {A' B' : Preterm}
 : □ (A' ‘→’ B') -> □ A' -> □ B'.
@@ -85,30 +101,20 @@ Defined.
 
 Notation "‘App’" := App'.
 
-Definition Quot {T' : Preterm}
+Definition Quot0 {T' : Preterm}
 : □ T' -> □ (‘□’ ‘’ ⌜ T' ⌝).
 Proof.
   intros box_T'.
   refine (Ast.tApp ‘existT’ [‘Preterm’; _; quote box_T'.1; _]; _).
-  apply has_type_beta_1_type with (f := fun x => x); simpl.
-  apply has_type_beta_1_type with (f := fun x => x); simpl.
+  do 4 (apply has_type_beta_1_type with (f := fun x => x); simpl).
   eapply has_type_existT.
   { apply quote_term_has_type. }
-  { apply has_type_beta_1_type with (f := fun x => x); simpl.
-    apply has_type_beta_1_type with (f := fun x => x); simpl.
+  { do 1 (apply has_type_beta_1_type with (f := fun x => x); simpl).
     (** Need to somehow lift (quine?) typing derivation here *)
     exfalso; admit.
     Grab Existential Variables.
     admit. }
 Defined.
-
-Definition Quot' : Preterm.
-Proof.
-  let t := (eval cbv delta [Quot] in @Quot) in
-  quote_term t (fun x => exact x).
-Defined.
-
-Notation "‘Quot’" := Quot'.
 
 Definition L0 (h : Preterm) : Preterm
   := ‘□’ ‘’ (h ‘’ (quote h)) ‘→’ ‘X’.
@@ -125,22 +131,45 @@ Definition L' : Preterm
 
 Notation "‘L’" := L'.
 
-Definition Conv_has_type (box_box_L : □ (‘□’ ‘’ ⌜ L ⌝))
-: has_type box_box_L.1 (‘□’ ‘’ ‘L’).
+Definition Quot
+: □ L -> □ (‘□’ ‘’ ⌜ L ⌝)
+  := Eval cbv beta delta [Quot0] in @Quot0 L.
+
+Definition Quot' : Preterm.
 Proof.
-  unfold box' in *.
+  let t := (eval cbv delta [Quot box] in @Quot) in
+  quote_term t (fun x => exact x).
+Defined.
+
+Notation "‘Quot’" := Quot'.
+
+Definition Quot'_has_type {Γ : Context}
+: has_type Γ ‘Quot’ (‘□’ ‘’ ‘L’ ‘→’ ‘□’ ‘’ (⌜ (‘□’ ‘’ ⌜ L ⌝) ⌝)).
+Proof.
+  apply (has_type_weaken nil).
+  Timeout 5 apply has_type_beta_1_term with (f := fun x => x).
+  Timeout 5 apply has_type_beta_1_type with (f := fun x => x).
+  admit.
+Admitted.
+
+Notation "‘‘Quot’’" := (Quot'; Quot'_has_type).
+
+Definition Conv_has_type (box_box_L : □ (‘□’ ‘’ ⌜ L ⌝))
+: has_type nil box_box_L.1 (‘□’ ‘’ ‘L’).
+Proof.
+  (*unfold box' in *.
   apply has_type_beta_1_type with (f := fun x => x); simpl.
   apply has_type_beta_1_type with (f := fun x => x); simpl.
   destruct box_box_L as [x h]; simpl.
   apply has_type_eta_1_type with (f := fun x => x) in h; simpl in h.
   apply has_type_eta_1_type with (f := fun x => x) in h; simpl in h.
   unfold quote, term_quotable in *.
-  let T := match type of h with has_type _ ?T => constr:T end in
+  let T := match type of h with has_type _ _ ?T => constr:T end in
   let T' := (match eval pattern (quote_term L) in T with ?T' _ => constr:T' end) in
-  let x := match type of h with has_type ?x ?T => constr:x end in
+  let x := match type of h with has_type _ ?x ?T => constr:x end in
   revert h;
     set (T'' := T');
-    change (has_type x (T'' (quote_term L)) -> has_type x (T'' ‘L’));
+    change (has_type nil x (T'' (quote_term L)) -> has_type nil x (T'' ‘L’));
     clearbody T'';
     intro h.
   unfold L, L' in *.
@@ -150,7 +179,7 @@ Proof.
   simpl in h.
   unfold quote_term_step in h.
   simpl in h.
-  apply has_type_beta_1_type with (f := T''); simpl.
+  apply has_type_beta_1_type with (f := T''); simpl.*)
   admit.
 Admitted.
 
@@ -169,16 +198,71 @@ Defined.
 
 Notation "‘Conv’" := Conv'.
 
+Definition Conv'_has_type {Γ : Context}
+: has_type Γ ‘Conv’ (‘□’ ‘’ ⌜‘□’ ‘’ ⌜L ⌝ ⌝ ‘→’ ‘□’ ‘’ ⌜ ‘□’ ‘’ ‘L’ ⌝).
+Proof.
+  apply (has_type_weaken nil).
+  admit.
+Defined.
+
+Notation "‘‘Conv’’" := (‘Conv’; Conv'_has_type).
+
+(*Definition Conv2
+: □ (‘□’ ‘’ ‘L’) -> □ (‘X’ ‘→’
+(from ‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝ ‘→’ ‘□’ ‘’ ⌜‘X’ ⌝
+     (‘□’ ‘’ ‘L’ ‘→’ ‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝ ‘→’ ‘□’ ‘’ ⌜‘X’ ⌝)*)
+
+Definition ttLambda_nd {Γ : Context} {B' : Preterm}
+: Ast.name -> forall A' : Preterm, box (Γ ▻ A') B' -> box Γ (A' ‘→’ B').
+Proof.
+  refine (fun n A' body
+          => (Ast.tLambda n A' body.1;
+              _)).
+  apply has_type_tLambda.
+  exact body.2.
+Defined.
+
+Definition ttApp_1_nd {Γ : Context} {A' B' : Preterm}
+: box Γ (A' ‘→’ B') -> box Γ A' -> box Γ B'.
+Proof.
+  refine (fun F x
+          => (Ast.tApp F.1 [x.1];
+              _)).
+  eapply has_type_tApp.
+  { exact F.2. }
+  { exact x.2. }
+Defined.
+
+Notation "x ‘’ y" := (ttApp_1_nd x%wtt y%wtt) : well_typed_term_scope.
+
 Definition lob : X.
 Proof.
   refine ((fun (ℓ : □ L) => f (App ℓ (Conv (Quot ℓ))))
-            (Ast.tLambda (Ast.nNamed "ℓ") (‘□’ ‘’ ‘L’) (‘f’ ‘’ (Ast.tApp ‘App’ [Ast.tRel 0; ‘Conv’ ‘’ (‘Quot’ ‘’ Ast.tRel 0)]));
-             _)).
-  apply has_type_tLambda.
-  intro H.
-  eapply has_type_tApp; try exact _; [].
-  repeat apply has_type_tApp_split.
-  Timeout 5 eapply has_type_tApp.
+            (ttLambda_nd
+               (Ast.nNamed "ℓ") (‘□’ ‘’ ‘L’)
+               (‘‘f’’ ‘’ (((‘App’; _) ‘’ (Ast.tRel 0; _)) ‘’ (‘‘Conv’’ ‘’ (‘‘Quot’’ ‘’ (Ast.tRel 0; _)))))));
+  match goal with
+    | [ |- has_type _ (Ast.tRel _) _ ] => exact _
+    | _ => idtac
+  end.
+
+
+  { apply (has_type_weaken nil). unfold L'.
+    pose (cbv_beta_1 (cbv_beta_1 (‘L0’ ‘’ ⌜‘L0’ ⌝))).
+    Timeout 5 simpl in t.
+    Timeout 5 apply has_type_beta_1_type with (f := fun x => x).
+    Timeout 5 apply has_type_beta_1_type with (f := fun x => x); simpl.
+    Timeout 5 apply has_type_beta_1_type with (f := fun x => x); simpl.
+    Timeout 5 apply has_type_beta_1_type with (f := fun x => x); simpl.
+    apply
+  { apply (has_type_weaken nil); exact _. }
+  3:exact
+  Focus 3.
+  2:exact _.
+
+
+  { repeat apply has_type_tApp_split.
+    Timeout 5 eapply has_type_tApp.
   Focus 2.
   { eapply has_type_tApp.
     unfold Conv'.
