@@ -21,6 +21,20 @@ Local Open Scope preterm_scope.
 
 Notation "x ‘→’ y" := (Ast.tProd Ast.nAnon x%preterm y%preterm) (at level 99, right associativity, y at level 200) : preterm_scope.
 Notation "x ‘’ y" := (Ast.tApp x%preterm (cons y%preterm nil)) (at level 15, left associativity) : preterm_scope.
+Quote Definition arrow''0 := (Ast.tProd Ast.nAnon).
+Definition arrow'' x y
+  := Eval cbv beta iota delta [arrow''0 List.app] in
+      match arrow''0 as a
+            return match a with
+                     | Ast.tApp _ _ => Ast.term
+                     | _ => True
+                   end
+      with
+        | Ast.tApp f ls => Ast.tApp f (ls ++ [x; y])
+        | _ => I
+      end.
+Notation "x ‘‘→’’ y" := (arrow'' x y) (at level 99, right associativity, y at level 200) : preterm_scope.
+
 
 Definition Preterm := Ast.term.
 Quote Definition Preterm' := Ast.term.
@@ -117,9 +131,9 @@ Proof.
 Defined.
 
 Definition L0 (h : Preterm) : Preterm
-  := ‘□’ ‘’ (h ‘’ (quote h)) ‘→’ ‘X’.
+  := (‘□’ ‘’ (h ‘’ (quote h))) ‘→’ ‘X’.
 
-Quote Definition L0' := (fun h : Preterm => ‘□’ ‘’ (h ‘’ (quote h)) ‘→’ ‘X’).
+Quote Definition L0' := (fun h : Preterm => (‘□’ ‘’ (h ‘’ (quote h))) ‘→’ ‘X’).
 
 Notation "‘L0’" := L0'.
 
@@ -144,7 +158,7 @@ Defined.
 Notation "‘Quot’" := Quot'.
 
 Definition Quot'_has_type {Γ : Context}
-: has_type Γ ‘Quot’ (‘□’ ‘’ ‘L’ ‘→’ ‘□’ ‘’ (⌜ (‘□’ ‘’ ⌜ L ⌝) ⌝)).
+: has_type Γ ‘Quot’ ((‘□’ ‘’ ‘L’) ‘→’ (‘□’ ‘’ (⌜ (‘□’ ‘’ ⌜ L ⌝) ⌝))).
 Proof.
   apply (has_type_weaken nil).
   Timeout 5 apply has_type_beta_1_term with (f := fun x => x).
@@ -207,10 +221,17 @@ Defined.
 
 Notation "‘‘Conv’’" := (‘Conv’; Conv'_has_type).
 
-(*Definition Conv2
-: □ (‘□’ ‘’ ‘L’) -> □ (‘X’ ‘→’
-(from ‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝ ‘→’ ‘□’ ‘’ ⌜‘X’ ⌝
-     (‘□’ ‘’ ‘L’ ‘→’ ‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝ ‘→’ ‘□’ ‘’ ⌜‘X’ ⌝)*)
+Definition Conv2 : □ L -> □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’)
+  := fun x => x.
+
+Definition Conv2' {Γ}
+: box Γ (‘□’ ‘’ ‘L’) -> box Γ (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝ ‘‘→’’ ‘□’ ‘’ ⌜‘X’ ⌝).
+Proof.
+  intro box_box_L.
+  refine (box_box_L.1; _).
+  pose proof (box_box_L.2) as bbLT.
+  admit.
+Admitted.
 
 Definition ttLambda_nd {Γ : Context} {B' : Preterm}
 : Ast.name -> forall A' : Preterm, box (Γ ▻ A') B' -> box Γ (A' ‘→’ B').
@@ -240,7 +261,7 @@ Proof.
   refine ((fun (ℓ : □ L) => f (App ℓ (Conv (Quot ℓ))))
             (ttLambda_nd
                (Ast.nNamed "ℓ") (‘□’ ‘’ ‘L’)
-               (‘‘f’’ ‘’ (((‘App’; _) ‘’ (Ast.tRel 0; _)) ‘’ (‘‘Conv’’ ‘’ (‘‘Quot’’ ‘’ (Ast.tRel 0; _)))))));
+               (‘‘f’’ ‘’ (((‘App’; _) ‘’ (Conv2' (Ast.tRel 0; _))) ‘’ (‘‘Conv’’ ‘’ (‘‘Quot’’ ‘’ (Ast.tRel 0; _)))))));
   match goal with
     | [ |- has_type _ (Ast.tRel _) _ ] => exact _
     | _ => idtac
