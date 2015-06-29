@@ -233,6 +233,15 @@ Proof.
   admit.
 Admitted.
 
+Definition qApp' {Γ}
+           (A' := ‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝)
+           (B' := ‘□’ ‘’ ⌜‘X’ ⌝)
+: box Γ ((A' ‘‘→’’ B') ‘→’ A' ‘→’ B').
+Proof.
+  refine (‘App’ ‘’ (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝) ‘’ (‘□’ ‘’ ⌜‘X’ ⌝); _).
+  admit.
+Defined.
+
 Definition ttLambda_nd {Γ : Context} {B' : Preterm}
 : Ast.name -> forall A' : Preterm, box (Γ ▻ A') B' -> box Γ (A' ‘→’ B').
 Proof.
@@ -255,44 +264,20 @@ Proof.
 Defined.
 
 Notation "x ‘’ y" := (ttApp_1_nd x%wtt y%wtt) : well_typed_term_scope.
+Notation "‘‘App’’" := qApp'.
+
+Definition ttVar0 {Γ T} : box (Γ ▻ T) T.
+Proof.
+  refine (Ast.tRel 0; _).
+  exact _.
+Defined.
+
+Notation "‘‘VAR₀’’" := ttVar0.
 
 Definition lob : X.
 Proof.
   refine ((fun (ℓ : □ L) => f (App ℓ (Conv (Quot ℓ))))
             (ttLambda_nd
                (Ast.nNamed "ℓ") (‘□’ ‘’ ‘L’)
-               (‘‘f’’ ‘’ (((‘App’; _) ‘’ (Conv2' (Ast.tRel 0; _))) ‘’ (‘‘Conv’’ ‘’ (‘‘Quot’’ ‘’ (Ast.tRel 0; _)))))));
-  match goal with
-    | [ |- has_type _ (Ast.tRel _) _ ] => exact _
-    | _ => idtac
-  end.
-
-
-  { apply (has_type_weaken nil). unfold L'.
-    pose (cbv_beta_1 (cbv_beta_1 (‘L0’ ‘’ ⌜‘L0’ ⌝))).
-    Timeout 5 simpl in t.
-    Timeout 5 apply has_type_beta_1_type with (f := fun x => x).
-    Timeout 5 apply has_type_beta_1_type with (f := fun x => x); simpl.
-    Timeout 5 apply has_type_beta_1_type with (f := fun x => x); simpl.
-    Timeout 5 apply has_type_beta_1_type with (f := fun x => x); simpl.
-    apply
-  { apply (has_type_weaken nil); exact _. }
-  3:exact
-  Focus 3.
-  2:exact _.
-
-
-  { repeat apply has_type_tApp_split.
-    Timeout 5 eapply has_type_tApp.
-  Focus 2.
-  { eapply has_type_tApp.
-    unfold Conv'.
-    Timeout 5 apply has_type_tLambda.
-    intro H'.
-    exfalso; admit.
-    admit. }
-  Unfocus.
-  exfalso; admit.
-  Grab Existential Variables.
-  admit.
+               (‘‘f’’ ‘’ ((‘‘App’’ ‘’ (Conv2' ‘‘VAR₀’’)) ‘’ (‘‘Conv’’ ‘’ (‘‘Quot’’ ‘’ ‘‘VAR₀’’)))))).
 Defined.

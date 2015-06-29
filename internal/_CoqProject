@@ -1,4 +1,7 @@
--R . lob
+-R . Lob
+Notations.v
 lob.v
 quote_has_type.v
 quote_has_type.v
+LobsTheoremStatement.v
+LobsTheoremProof.v
