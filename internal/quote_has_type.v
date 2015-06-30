@@ -1,4 +1,3 @@
-(* -*- coq-prog-args: ("-emacs" "-top" "quote_has_type") -*- *)
 (* Runs on top of https://github.com/gmalecha/template-coq *)
 Require Import Template.Template.
 
@@ -10,7 +9,7 @@ Local Open Scope string_scope.
 Local Open Scope positive_scope.
 Local Open Scope list_scope.
 
-Require Export quote_term.
+Require Export Lob.quote_term.
 
 Definition Context := list Ast.term.
 Delimit Scope context_scope with ctx.
@@ -20,6 +19,11 @@ Definition context_extend (Γ : Context) (x : Ast.term) := cons x Γ.
 Notation "Γ ▻ x" := (context_extend Γ x) (at level 55, right associativity).
 
 Local Notation "x ‘→’ y" := (Ast.tProd Ast.nAnon x y) (at level 99, right associativity, y at level 200).
+
+Definition nat_eq_dec (x y : nat) : {x = y} + {x <> y}.
+Proof.
+  decide equality.
+Defined.
 
 Fixpoint cbv_beta_1_helper (term : Ast.term) (orig_name : Ast.name) (orig_type : Ast.term) (idx : nat) (subst_in : Ast.term)
 : Ast.term
@@ -31,7 +35,7 @@ Fixpoint cbv_beta_1_helper (term : Ast.term) (orig_name : Ast.name) (orig_type :
                 end) in
      match term with
        | Ast.tRel idx'
-         => if NPeano.Nat.eq_dec idx idx'
+         => if nat_eq_dec idx idx'
             then subst_in
             else term
        | Ast.tVar _ => term

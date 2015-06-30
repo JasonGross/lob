@@ -12,6 +12,9 @@ Local Open Scope positive_scope.
 Require Export quote_term.
 Require Export quote_has_type.
 
+Axiom proof_admitted : False.
+Ltac admit := case proof_admitted.
+
 Notation "( x ; y )" := (existT _ x y).
 Notation "x .1" := (projT1 x) (at level 3, format "x '.1'").
 Notation "x .2" := (projT2 x) (at level 3, format "x '.2'").

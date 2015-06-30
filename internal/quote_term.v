@@ -1,6 +1,8 @@
 (* Runs on top of https://github.com/gmalecha/template-coq *)
 Require Import Template.Template.
 
+Global Set Asymmetric Patterns.
+
 Require Import Coq.Strings.String.
 Require Import Coq.PArith.BinPos.
 Require Import Coq.Program.Program.

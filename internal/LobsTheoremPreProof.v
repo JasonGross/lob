@@ -3,6 +3,8 @@ Require Export Lob.Notations Lob.LobsTheoremStatement.
 
 (** The proof of the theorem *)
 
+Ltac do_shelve tac := tac; [ shelve | | ].
+
 Module Type LobExtendedContext <: LobContext.
   Axiom Preterm : Type.
   Axiom Context : Type.
@@ -292,7 +294,8 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
       Definition Conv : □ (‘□’ ‘’ ⌜ L ⌝) -> □ (‘□’ ‘’ ‘L’).
       Proof.
         unfold box, L, qL.
-        refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L').
+        do_shelve
+          ltac:(refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L')).
         { unfold L0, qL0; conv_rewrite.
           reflexivity. }
         { clear.
@@ -317,7 +320,8 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
       : box' Γ (‘□’ ‘’ ‘L’) -> box' Γ (‘□’ ‘’ (⌜‘□’ ‘’ ‘L’ ⌝ ‘‘→’’ ⌜ ‘X’ ⌝)).
       Proof.
         unfold qL.
-        refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L').
+        do_shelve
+          ltac:(refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L')).
         { unfold L0, qL0; conv_rewrite.
           reflexivity. }
         { clear.
