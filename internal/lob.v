@@ -20,7 +20,7 @@ Bind Scope preterm_scope with Ast.term.
 Local Open Scope preterm_scope.
 
 Axiom proof_admitted : False.
-Ltac admit := case proof_admitted.
+Ltac admit' := case proof_admitted.
 
 Notation "x ‘→’ y" := (Ast.tProd Ast.nAnon x%preterm y%preterm) (at level 99, right associativity, y at level 200) : preterm_scope.
 Notation "x ‘’ y" := (Ast.tApp x%preterm (cons y%preterm nil)) (at level 15, left associativity) : preterm_scope.
@@ -122,15 +122,15 @@ Definition Quot0 {T' : Preterm}
 : □ T' -> □ (‘□’ ‘’ ⌜ T' ⌝).
 Proof.
   intros box_T'.
-  refine (Ast.tApp ‘existT’ [‘Preterm’; _; quote box_T'.1; _]; _); shelve_unifiable.
+  refine (Ast.tApp ‘existT’ [‘Preterm’; _; quote box_T'.1; _]; _)(*; shelve_unifiable*).
   do 4 (apply has_type_beta_1_type with (f := fun x => x); simpl).
   eapply has_type_existT.
   { apply quote_term_has_type. }
   { do 1 (apply has_type_beta_1_type with (f := fun x => x); simpl).
     (** Need to somehow lift (quine?) typing derivation here *)
-    exfalso; admit.
+    exfalso; admit'.
     Grab Existential Variables.
-    admit. }
+    admit'. }
 Defined.
 
 Definition L0 (h : Preterm) : Preterm
@@ -166,7 +166,7 @@ Proof.
   apply (has_type_weaken nil).
   Timeout 5 apply has_type_beta_1_term with (f := fun x => x).
   Timeout 5 apply has_type_beta_1_type with (f := fun x => x).
-  admit.
+  admit'.
 Admitted.
 
 Notation "‘‘Quot’’" := (Quot'; Quot'_has_type).
@@ -197,7 +197,7 @@ Proof.
   unfold quote_term_step in h.
   simpl in h.
   apply has_type_beta_1_type with (f := T''); simpl.*)
-  admit.
+  admit'.
 Admitted.
 
 Definition Conv (box_box_L : □ (‘□’ ‘’ ⌜ L ⌝))
@@ -219,7 +219,7 @@ Definition Conv'_has_type {Γ : Context}
 : has_type Γ ‘Conv’ (‘□’ ‘’ ⌜‘□’ ‘’ ⌜L ⌝ ⌝ ‘→’ ‘□’ ‘’ ⌜ ‘□’ ‘’ ‘L’ ⌝).
 Proof.
   apply (has_type_weaken nil).
-  admit.
+  admit'.
 Defined.
 
 Notation "‘‘Conv’’" := (‘Conv’; Conv'_has_type).
@@ -233,7 +233,7 @@ Proof.
   intro box_box_L.
   refine (box_box_L.1; _).
   pose proof (box_box_L.2) as bbLT.
-  admit.
+  admit'.
 Admitted.
 
 Definition qApp' {Γ}
@@ -242,7 +242,7 @@ Definition qApp' {Γ}
 : box Γ ((A' ‘‘→’’ B') ‘→’ A' ‘→’ B').
 Proof.
   refine (‘App’ ‘’ (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝) ‘’ (‘□’ ‘’ ⌜‘X’ ⌝); _).
-  admit.
+  admit'.
 Defined.
 
 Definition ttLambda_nd {Γ : Context} {B' : Preterm}

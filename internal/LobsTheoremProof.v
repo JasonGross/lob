@@ -13,7 +13,7 @@ Require Export quote_term.
 Require Export quote_has_type.
 
 Axiom proof_admitted : False.
-Ltac admit := case proof_admitted.
+Ltac admit' := case proof_admitted.
 
 Notation "( x ; y )" := (existT _ x y).
 Notation "x .1" := (projT1 x) (at level 3, format "x '.1'").
@@ -243,7 +243,7 @@ Module LA <: PostL_Assumptions LC PP.
   Definition Quot : forall T, □ T -> □ (‘□’ ‘’ ⌜ T ⌝).
   Proof.
     intros T box_T'.
-    admit.
+    admit'.
     (*eapply box'_respectful.
     { symmetry.
       etransitivity.

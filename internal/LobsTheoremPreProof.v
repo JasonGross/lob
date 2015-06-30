@@ -3,7 +3,7 @@ Require Export Lob.Notations Lob.LobsTheoremStatement.
 
 (** The proof of the theorem *)
 
-Ltac do_shelve tac := tac; [ shelve | | ].
+Ltac do_shelve tac := tac(*; [ shelve | | ]*).
 
 Module Type LobExtendedContext <: LobContext.
   Axiom Preterm : Type.
