@@ -3,3 +3,8 @@
 *.v.d
 *~
 *.aux
+*.o
+*.cmi
+*.cmxs
+*.cmx
+*.exe.stackdump
