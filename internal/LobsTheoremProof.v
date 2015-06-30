@@ -1,18 +1,31 @@
 Require Import Coq.Setoids.Setoid Coq.Classes.Morphisms.
-Require Export Lob.Notations Lob.LobsTheoremStatement.
+Require Export Lob.Notations Lob.LobsTheoremStatement Lob.LobsTheoremPreProof.
 
-(** The proof of the theorem *)
+Require Import Template.Template.
 
-Module Type LobExtendedContext <: LobContext.
-  Axiom Preterm : Type.
-  Axiom Context : Type.
+Require Import Coq.Strings.String.
+Require Import Coq.Program.Program.
+Require Import Coq.PArith.BinPos.
+Local Open Scope string_scope.
+Local Open Scope positive_scope.
+
+Require Export quote_term.
+Require Export quote_has_type.
+
+Notation "( x ; y )" := (existT _ x y).
+Notation "x .1" := (projT1 x) (at level 3, format "x '.1'").
+Notation "x .2" := (projT2 x) (at level 3, format "x '.2'").
+
+Module LC <: LobExtendedContext.
+  Definition Preterm := Ast.term.
+  Definition Context : Type := Context.
 
   Delimit Scope context_scope with ctx.
   Bind Scope context_scope with Context.
 
-  Axiom empty_context : Context.
+  Definition empty_context : Context := ε.
   Notation ε := empty_context.
-  Axiom context_extend : Context -> Preterm -> Context.
+  Definition context_extend : Context -> Preterm -> Context := context_extend.
   Notation "Γ ▻ x" := (context_extend Γ x).
 
   Delimit Scope preterm_scope with preterm.
@@ -20,7 +33,8 @@ Module Type LobExtendedContext <: LobContext.
 
   Global Open Scope preterm_scope.
 
-  Axiom box' : Context -> Preterm -> Type.
+  Definition box' (Γ : Context) (T : Preterm) : Type
+  := { t : Preterm & has_type Γ t T }.
 
   Definition box : Preterm -> Type
     := box' ε.
@@ -32,126 +46,69 @@ Module Type LobExtendedContext <: LobContext.
   Notation "□ T" := (box T).
 
 
-  Axiom qbox : Preterm.
+  Definition qbox : Preterm.
+  Proof.
+    let term := (eval cbv delta in box) in
+    quote_term term (fun x => exact x).
+  Defined.
   Notation "‘□’" := qbox.
 
-  Axiom tProd : Preterm -> Preterm -> Preterm.
+  Definition tProd : Preterm -> Preterm -> Preterm
+    := Ast.tProd Ast.nAnon.
   Notation "x ‘→’ y" := (tProd x y) : preterm_scope.
 
-  Axiom tApp : Preterm -> Preterm -> Preterm.
+  Definition tApp : Preterm -> Preterm -> Preterm
+    := fun f x => Ast.tApp f [x].
   Notation "x ‘’ y" := (tApp x y) : preterm_scope.
 
-  Axiom quote : Preterm -> Preterm.
+  Definition quote : Preterm -> Preterm
+    := quote.
   Notation "⌜ x ⌝" := (quote x).
 
 
   Delimit Scope well_typed_term_scope with wtt.
   Bind Scope well_typed_term_scope with box'.
-End LobExtendedContext.
+End LC.
 
-Module Type PretermPrimitives (Export LC : LobExtendedContext).
-  Axiom tLambda : Preterm -> Preterm -> Preterm.
-  Axiom qtApp : Preterm.
+Module PP <: PretermPrimitives LC.
+  Export LC.
+  Definition tLambda : Preterm -> Preterm -> Preterm
+    := Ast.tLambda Ast.nAnon.
+  Definition qtApp : Preterm
+    := qtApp.
 
   Notation "‘App’" := qtApp : preterm_scope.
 
-  Axiom qtProd : Preterm -> Preterm -> Preterm.
+  Definition qtProd : Preterm -> Preterm -> Preterm
+    := fun A B => (qtProd ‘’ qnAnon ‘’ A ‘’ B)%preterm.
   Notation "x ‘‘→’’ y" := (qtProd x y) : preterm_scope.
 
-  Axiom ttVar0 : forall {Γ T}, box' (Γ ▻ T) T.
-  Notation "‘‘VAR₀’’" := ttVar0 : well_typed_term_scope.
-
-  Axiom tVar0 : Preterm.
+  Definition tVar0 : Preterm
+    := Ast.tRel 0.
   Notation "‘VAR₀’" := tVar0.
 
-End PretermPrimitives.
-
-Module Lob1 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
-
-  Module Type PretermPrimitives' := PretermPrimitives LC.
-
-  Module Type PreL (Export PP : PretermPrimitives').
-
-    Axiom App : forall {A' B' : Preterm},
-                  □ (A' ‘→’ B') -> □ A' -> □ B'.
-
-    Axiom wttLambda_nd : forall {Γ : Context} {B' : Preterm},
-                         forall A' : Preterm, box' (Γ ▻ A') B' -> box' Γ (A' ‘→’ B').
-
-    Axiom wttApp_1_nd : forall {Γ : Context} {A' B' : Preterm},
-                          box' Γ (A' ‘→’ B') -> box' Γ A' -> box' Γ B'.
-
-    Notation "x ‘’ y" := (wttApp_1_nd x%wtt y%wtt) : well_typed_term_scope.
-
-    Axiom box'_weaken : forall {Γ A}, box' ε A -> box' Γ A.
-
-    Notation "‘‘f’’" := (box'_weaken wtt_qf) : well_typed_term_scope.
-  End PreL.
-
-  Module Type L (PP : PretermPrimitives') (Export PL : PreL PP).
-    Axiom L : Preterm.
-    Axiom qL : Preterm.
-    Notation "‘L’" := qL.
-  End L.
-
-  Module Type PostL (PP : PretermPrimitives') (PL : PreL PP) (Export L' : L PP PL).
-    Axiom Conv : □ (‘□’ ‘’ ⌜ L ⌝) -> □ (‘□’ ‘’ ‘L’).
-
-    Axiom Conv2 : □ L -> □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’).
-    Axiom Conv2_inv : □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’) -> □ L.
-    Axiom qConv2 : forall {Γ},
-                     box' Γ (‘□’ ‘’ ‘L’) -> box' Γ (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝ ‘‘→’’ ‘□’ ‘’ ⌜‘X’ ⌝).
-
-    Axiom Quot : □ L -> □ (‘□’ ‘’ ⌜ L ⌝).
-
-    Axiom qbApp
-    : forall (A' := (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝)%preterm)
-             (B' := (‘□’ ‘’ ⌜‘X’ ⌝)%preterm),
-        □ ((A' ‘‘→’’ B') ‘→’ A' ‘→’ B').
-
-    Notation "‘‘App’’" := (box'_weaken qbApp) : well_typed_term_scope.
-
-    (*Axiom qConv
-  : □ (‘□’ ‘’ ⌜‘□’ ‘’ ⌜L ⌝ ⌝ ‘→’ ‘□’ ‘’ ⌜ ‘□’ ‘’ ‘L’ ⌝).
-
-  Notation "‘‘Conv’’" := (box'_weaken qConv) : well_typed_term_scope.*)
-
-    Axiom qQuote
-    : let A := (‘□’ ‘’ ‘L’)%preterm in
-      □ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
-
-    Notation "‘‘Quote’’" := (box'_weaken qQuote) : well_typed_term_scope.
-  End PostL.
-End Lob1.
-
-Module Type Lob1H (Export LC : LobExtendedContext) (Export LH : LobHypotheses LC).
-  Module Lob1' := Lob1 LC LH.
-  Declare Module Export PP : PretermPrimitives LC.
-  Declare Module Export PreL' : Lob1'.PreL PP.
-  Declare Module Export L' : Lob1'.L PP PreL'.
-  Declare Module Export PostL' : Lob1'.PostL PP PreL' L'.
-End Lob1H.
-
-Module Lob1' (LC : LobExtendedContext) (Import LH : LobHypotheses LC) (Import M : Lob1H LC LH)
-<: LobsTheorem LC LH.
-  Definition lob : X.
-    refine ((fun (ℓ : □ L) => f (App (Conv2 ℓ) (Conv (Quot ℓ))))
-              (Conv2_inv
-                 (wttLambda_nd
-                    (‘□’ ‘’ ‘L’)
-                    (‘‘f’’ ‘’ ((‘‘App’’ ‘’ (qConv2 ‘‘VAR₀’’)) ‘’ ((*‘‘Conv’’ ‘’*) (‘‘Quote’’ ‘’ ‘‘VAR₀’’))))))).
+  Definition ttVar0 {Γ T} : box' (Γ ▻ T) T.
+  Proof.
+    refine (tVar0; _).
+    exact _.
   Defined.
-End Lob1'.
+  Notation "‘‘VAR₀’’" := ttVar0 : well_typed_term_scope.
+End PP.
 
-Module Type PretermReflectionPrimitives (Export LC : LobExtendedContext).
-  Axiom qPreterm : Preterm.
+Module PRP <: PretermReflectionPrimitives LC.
+  Quote Definition qPreterm := Ast.term.
   Notation "‘Preterm’" := qPreterm : preterm_scope.
 
-  Axiom qquote : Preterm.
+  Definition qquote : LC.Preterm.
+  Proof.
+    let t := (eval cbv beta delta [qO qS qEmptyString qString qnAnon qAscii qnil qcons qmkdef qtInd qtFix qtCase qtUnknown qtRel qtConstruct qtEvar qtMeta qtVar qtApp qtConst qtSort qtCast qtProd inductive_quotable quote_ascii bool_quotable quote_bool (*quote_string quote_positive quote_nat*) ident_quotable quote_ident quote_name nat_quotable name_quotable quote quote_term sort_quotable cast_kind_quotable quote_sort qsSet qsProp qsType universe_quotable quote_inductive qmkInd] in quote_term) in
+    quote_term t (fun x => exact x).
+  Defined.
   Notation "‘quote’" := qquote : preterm_scope.
-End PretermReflectionPrimitives.
+End PRP.
 
-Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPrimitives LC).
+Module TR <: TypingRules LC PP.
+  Export LC PP.
   Axiom capture_avoiding_subst_0 : forall (in_term : Preterm)
                                           (new_value : Preterm),
                                      Preterm.
@@ -201,167 +158,128 @@ Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPri
   Axiom convertible__quote__app
   : forall Γ A B,
       convertible Γ (⌜ A ‘’ B ⌝) ((‘App’ ‘’ ⌜ A ⌝) ‘’ ⌜ B ⌝).
-End TypingRules.
+End TR.
 
-Module Type PretermReflectionTypingRules (Export LC : LobExtendedContext) (Export PP : PretermPrimitives LC) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP).
+Module PRTR <: PretermReflectionTypingRules LC PP PRP TR.
+  Export LC PP PRP TR.
   Axiom convertible__qquote__closed
   : forall Γ x,
       convertible Γ (‘quote’ [ 0 ↦ x ]) (‘quote’).
-End PretermReflectionTypingRules.
+
+  (*Axiom box_distr_qtProd_quote
+  : forall Γ A B,
+      convertible Γ (‘□’ ‘’ (A ‘‘→’’ ⌜ B ⌝)) ((‘□’ ‘’ A) ‘‘→’’ (‘□’ ‘’ ⌜ B ⌝)).*)
+
+  Axiom box_qtProd_dom_precompose
+  : forall {Γ} A B C,
+      (box' Γ (‘□’ ‘’ B) -> box' Γ (‘□’ ‘’ A))
+      -> box' Γ (‘□’ ‘’ (A ‘‘→’’ C))
+      -> box' Γ (‘□’ ‘’ (B ‘‘→’’ C)).
+
+  (** FIXME: This seems a bit fishy... *)
+  Axiom box_quote_app_quote
+  : forall Γ T,
+      box' Γ (‘□’
+               ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ‘quote’ ‘’ ⌜ T ⌝))))
+      -> box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝))).
+
+  Axiom box_quote_app_quote_inv
+  : forall Γ T,
+      box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝)))
+      -> box' Γ (‘□’
+                  ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ‘quote’ ‘’ ⌜ T ⌝)))).
+End PRTR.
 
 
+Module PreL' <: PreL LC PP.
+  Export LC PP.
 
-Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
-  Module Lob1' := Lob1 LC LH.
+  Definition App {A' B' : Preterm}
+  : □ (A' ‘→’ B') -> □ A' -> □ B'.
+  Proof.
+    intros box_A'_impl'_B' box_A'.
+    refine (box_A'_impl'_B'.1 ‘’ box_A'.1; _).
+    eapply has_type_tApp.
+    { exact (box_A'_impl'_B'.2). }
+    { exact (box_A'.2). }
+  Defined.
 
-  Module L (Export PP : PretermPrimitives LC) (Export PL : Lob1'.PreL PP) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP) (Export PRTR : PretermReflectionTypingRules LC PP PRP TR)
-  <: Lob1'.L PP PL.
+  Definition wttLambda_nd
+             {Γ : Context} {B' : Preterm}
+  : forall A' : Preterm, box' (Γ ▻ A') B' -> box' Γ (A' ‘→’ B').
+  Proof.
+    refine (fun A' body
+            => (Ast.tLambda Ast.nAnon A' body.1;
+                _)).
+    apply has_type_tLambda.
+    exact body.2.
+  Defined.
 
-    Definition L0 (h : Preterm) : Preterm
-      := ((‘□’ ‘’ (h ‘’ (quote h))) ‘→’ ‘X’)%preterm.
-
-    Definition qL0 : Preterm
-      := tLambda
-           ‘Preterm’
-           (((‘App’ ‘’ ⌜ ‘□’ ⌝)
-               ‘’ ((‘App’ ‘’ ‘VAR₀’ ‘’ (‘App’ ‘’ ‘quote’ ‘’ ‘VAR₀’))))
-              ‘‘→’’
-              ⌜ ‘X’ ⌝).
-
-    Notation "‘L0’" := qL0.
-
-    Definition L : Preterm
-      := L0 ‘L0’.
-
-    Definition qL : Preterm
-      := ‘L0’ ‘’ ⌜ ‘L0’ ⌝.
-
-    Notation "‘L’" := qL.
-  End L.
-
-  Module PostL (Export PP : PretermPrimitives LC) (Export PL : Lob1'.PreL PP) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP) (Export PRTR : PretermReflectionTypingRules LC PP PRP TR)
-  <: Lob1'.PostL.
-    Module L' := L PP PL PRP TR PRTR.
-    Include L'.
-
-    Definition Conv : □ (‘□’ ‘’ ⌜ L ⌝) -> □ (‘□’ ‘’ ‘L’).
-    Proof.
-      unfold box, L, qL.
-      apply box'_respectful.
-      apply convertible_tApp.
-      { reflexivity. }
-      { unfold L0, qL0.
-        symmetry.
-        etransitivity; [ solve [ apply convertible_beta_app_lambda ] | ].
-        rewrite convertible__capture_avoiding_subst_0__qtProd.
-        rewrite convertible__quote__qtProd.
-        apply qtProd_Proper_convertible; [ | solve [ apply convertible__quote__closed ] ].
-        repeat match goal with
-                 | [ |- convertible _ ?x ?x ] => reflexivity
-                 | [ |- convertible _ (?x ‘’ _) (?x ‘’ _) ]
-                   => apply tApp_Proper_convertible; [ reflexivity | ]
-                 | _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed
-               end.
-
-        apply tApp_Proper_convertible.
-        rewrite convertible__capture_avoiding_subst_0__tApp.
-        etransitivity; [ sov
-Axiom convertible__quote__box_app
-  : forall Γ x,
-      convertible Γ (⌜ ‘□’ ‘’ x ⌝) ((‘App’ ‘’ ⌜ ‘□’ ⌝) ‘’ ⌜ x ⌝).
-        admit. }
-    Defined.
-
-    Axiom Conv2 : □ L -> □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’).
-    Axiom Conv2_inv : □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’) -> □ L.
-    Axiom qConv2 : forall {Γ},
-                     box' Γ (‘□’ ‘’ ‘L’) -> box' Γ (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝ ‘‘→’’ ‘□’ ‘’ ⌜‘X’ ⌝).
-
-    Axiom Quot : □ L -> □ (‘□’ ‘’ ⌜ L ⌝).
-
-    Axiom qtApp
-    : forall (A' := (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝)%preterm)
-             (B' := (‘□’ ‘’ ⌜‘X’ ⌝)%preterm),
-        □ ((A' ‘‘→’’ B') ‘→’ A' ‘→’ B').
-
-    Notation "‘‘App’’" := (box'_weaken qtApp) : well_typed_term_scope.
-
-    (*Axiom qConv
-  : □ (‘□’ ‘’ ⌜‘□’ ‘’ ⌜L ⌝ ⌝ ‘→’ ‘□’ ‘’ ⌜ ‘□’ ‘’ ‘L’ ⌝).
-
-  Notation "‘‘Conv’’" := (box'_weaken qConv) : well_typed_term_scope.*)
-
-    Axiom qQuote
-    : let A := (‘□’ ‘’ ‘L’)%preterm in
-      □ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
-
-    Notation "‘‘Quote’’" := (box'_weaken qQuote) : well_typed_term_scope.
-
-  End PostL.
-
-
-Module Type Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
-  Axiom App : forall {A' B' : Preterm},
-                □ (A' ‘→’ B') -> □ A' -> □ B'.
-
-  Axiom L : Preterm.
-  Axiom qL : Preterm.
-  Notation "‘L’" := qL.
-
-  Axiom qtProd : Preterm -> Preterm -> Preterm.
-  Notation "x ‘‘→’’ y" := (qtProd x y) : preterm_scope.
-
-  Axiom Conv : □ (‘□’ ‘’ ⌜ L ⌝) -> □ (‘□’ ‘’ ‘L’).
-
-  Axiom Conv2 : □ L -> □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’).
-  Axiom Conv2_inv : □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’) -> □ L.
-  Axiom qConv2 : forall {Γ},
-                   box' Γ (‘□’ ‘’ ‘L’) -> box' Γ (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝ ‘‘→’’ ‘□’ ‘’ ⌜‘X’ ⌝).
-
-  Axiom Quot : □ L -> □ (‘□’ ‘’ ⌜ L ⌝).
-
-  Axiom wttLambda_nd : forall {Γ : Context} {B' : Preterm},
-                       forall A' : Preterm, box' (Γ ▻ A') B' -> box' Γ (A' ‘→’ B').
-
-  Axiom wttApp_1_nd : forall {Γ : Context} {A' B' : Preterm},
-                        box' Γ (A' ‘→’ B') -> box' Γ A' -> box' Γ B'.
+  Definition wttApp_1_nd {Γ : Context} {A' B' : Preterm}
+  : box' Γ (A' ‘→’ B') -> box' Γ A' -> box' Γ B'.
+  Proof.
+    refine (fun F x
+            => (Ast.tApp F.1 [x.1];
+                _)).
+    eapply has_type_tApp.
+    { exact F.2. }
+    { exact x.2. }
+  Defined.
 
   Notation "x ‘’ y" := (wttApp_1_nd x%wtt y%wtt) : well_typed_term_scope.
 
-  Axiom box'_weaken : forall {Γ A}, box' ε A -> box' Γ A.
+  Definition box'_weaken {Γ A} : box' ε A -> box' Γ A.
+  Proof.
+    refine (fun x => (x.1; _ x.2)).
+    apply (has_type_weaken nil).
+  Defined.
+End PreL'.
 
-  Notation "‘‘f’’" := (box'_weaken wtt_qf) : well_typed_term_scope.
+Module LA <: PostL_Assumptions LC PP.
+  Export TR LC PP PRP.
+  Definition Quot : forall T, □ T -> □ (‘□’ ‘’ ⌜ T ⌝).
+  Proof.
+    intros T box_T'.
+    admit.
+    (*eapply box'_respectful.
+    { symmetry.
+      etransitivity.
+      { apply convertible_beta_app_lambda.
+    apply
+    refine (Ast.tApp ‘existT’ [‘Preterm’; _; quote box_T'.1; _]; _).
+    unfold qbox.
+    eapply has_type_existT.
 
-  Axiom qtApp
-  : forall (A' := (‘□’ ‘’ ⌜‘□’ ‘’ ‘L’ ⌝)%preterm)
-           (B' := (‘□’ ‘’ ⌜‘X’ ⌝)%preterm),
-      □ ((A' ‘‘→’’ B') ‘→’ A' ‘→’ B').
+    do 4 (apply has_type_beta_1_type with (f := fun x => x); simpl).
+  eapply has_type_existT.
+  { apply quote_term_has_type. }
+  { do 1 (apply has_type_beta_1_type with (f := fun x => x); simpl).
+    (** Need to somehow lift (quine?) typing derivation here *)
+    exfalso; admit.
+    Grab Existential Variables.
+    admit. }
 
-  Notation "‘‘App’’" := (box'_weaken qtApp) : well_typed_term_scope.
+    let t := (eval cbv delta [Quot box box'] in @Quot) in
+    quote_term t (fun x => exact x).*)
+  Defined.
 
-  Axiom ttVar0 : forall {Γ T}, box' (Γ ▻ T) T.
-
-  Notation "‘‘VAR₀’’" := ttVar0.
-
-  Axiom tVar0 : Preterm.
-  Notation "‘VAR₀’" := tVar0.
 
   Axiom qQuote
-  : let A := (‘□’ ‘’ ‘L’)%preterm in
-    □ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
+  : forall T,
+      let A := (‘□’ ‘’ T)%preterm in
+      □ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
 
-  Notation "‘‘Quote’’" := (box'_weaken qQuote) : well_typed_term_scope.
-End Lob1.
+  Axiom qbApp
+   : forall A' B',
+       □ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
+End LA.
 
-Module Lob1' (LC : LobExtendedContext) (Import LH : LobHypotheses LC) (Import M : Lob1 LC LH)
-<: LobsTheorem LC LH.
-  Definition lob : X.
-    refine ((fun (ℓ : □ L) => f (App (Conv2 ℓ) (Conv (Quot ℓ))))
-              (Conv2_inv
-                 (wttLambda_nd
-                    (‘□’ ‘’ ‘L’)
-                    (‘‘f’’ ‘’ ((‘‘App’’ ‘’ (qConv2 ‘‘VAR₀’’)) ‘’ ((*‘‘Conv’’ ‘’*) (‘‘Quote’’ ‘’ ‘‘VAR₀’’))))))).
-  Defined.
-End Lob1'.
-*)
-End Lob2.
+Declare Module LH : LobHypotheses LC.
+
+Module Lob <: LobsTheorem LC LH.
+  Module Lob' := LobOfPreLob LC LH PP PreL' PRP TR PRTR LA.
+  Definition lob := Lob'.lob.
+  Print Assumptions lob.
+End Lob.
+
+Print Assumptions Lob.lob.
