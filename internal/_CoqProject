@@ -2,6 +2,7 @@
 Notations.v
 lob.v
 quote_term.v
+conversion.v
 quote_has_type.v
 LobsTheoremStatement.v
 LobsTheoremProof.v
