@@ -9,8 +9,9 @@ Require Import Coq.PArith.BinPos.
 Local Open Scope string_scope.
 Local Open Scope positive_scope.
 
-Require Export quote_term.
-Require Export quote_has_type.
+Require Export Lob.quote_term.
+(*Require Export Lob.quote_has_type.*)
+Require Export Lob.conversion.
 
 Axiom proof_admitted : False.
 Ltac admit' := case proof_admitted.
@@ -28,7 +29,8 @@ Module LC <: LobExtendedContext.
 
   Definition empty_context : Context := ε.
   Notation ε := empty_context.
-  Definition context_extend : Context -> Preterm -> Context := context_extend.
+  Definition context_extend : Context -> Preterm -> Context
+    := fun Γ T => context_extend Γ (Ast.nAnon, T).
   Notation "Γ ▻ x" := (context_extend Γ x).
 
   Delimit Scope preterm_scope with preterm.
@@ -93,7 +95,7 @@ Module PP <: PretermPrimitives LC.
   Definition ttVar0 {Γ T} : box' (Γ ▻ T) T.
   Proof.
     refine (tVar0; _).
-    exact _.
+    apply has_type_tRel_0.
   Defined.
   Notation "‘‘VAR₀’’" := ttVar0 : well_typed_term_scope.
 End PP.
@@ -112,15 +114,23 @@ End PRP.
 
 Module TR <: TypingRules LC PP.
   Export LC PP.
-  Axiom capture_avoiding_subst_0 : forall (in_term : Preterm)
-                                          (new_value : Preterm),
-                                     Preterm.
+  Definition capture_avoiding_subst_0 : forall (in_term : Preterm)
+                                               (new_value : Preterm),
+                                          Preterm
+    := fun in_term new_value
+       => subst_n_name in_term new_value (Some 0%nat) Ast.nAnon.
   Notation "x [ 0 ↦ y ]" := (capture_avoiding_subst_0 x y).
-  Axiom convertible : Context -> Preterm -> Preterm -> Prop.
-  Axiom box'_respectful : forall {Γ A B},
-                            convertible Γ A B
-                            -> box' Γ A
-                            -> box' Γ B.
+  Definition convertible : Context -> Preterm -> Preterm -> Prop
+    := convertible.
+  Definition box'_respectful : forall {Γ A B},
+                                 convertible Γ A B
+                                 -> box' Γ A
+                                 -> box' Γ B.
+  Proof.
+    intros Γ A B H [a Ha].
+    exists a.
+    eapply has_type_conv_subst; try eassumption.
+
   Axiom convertible_refl : forall {Γ}, Reflexive (convertible Γ).
   Axiom convertible_sym : forall {Γ}, Symmetric (convertible Γ).
   Axiom convertible_trans : forall {Γ}, Transitive (convertible Γ).
@@ -202,7 +212,7 @@ Module PreL' <: PreL LC PP.
   Proof.
     intros box_A'_impl'_B' box_A'.
     refine (box_A'_impl'_B'.1 ‘’ box_A'.1; _).
-    eapply has_type_tApp.
+    pose has_type_tApp.
     { exact (box_A'_impl'_B'.2). }
     { exact (box_A'.2). }
   Defined.

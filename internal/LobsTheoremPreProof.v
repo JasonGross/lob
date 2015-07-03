@@ -153,19 +153,63 @@ Module Type PretermReflectionPrimitives (Export LC : LobExtendedContext).
   Notation "‘quote’" := qquote : preterm_scope.
 End PretermReflectionPrimitives.
 
+Definition crelation (A : Type) := A -> A -> Type.
+Definition cflip {A B C : Type} (f : A -> B -> C) := fun x y => f y x.
+
+Class CReflexive {A} (R : crelation A) := creflexivity : forall x : A, R x x.
+Class CSymmetric {A} (R : crelation A) := csymmetry : forall x y : A, R x y -> R y x.
+Class CTransitive {A} (R : crelation A) := ctransitivity : forall x y z : A, R x y -> R y z -> R x z.
+Class CProper {A} (R : crelation A) (m : A) :=
+  proper_prf : R m m.
+
+Definition crespectful_hetero
+           (A B : Type)
+           (C : A -> Type) (D : B -> Type)
+           (R : A -> B -> Type)
+           (R' : forall (x : A) (y : B), C x -> D y -> Type) :
+  (forall x : A, C x) -> (forall x : B, D x) -> Type :=
+  fun f g => forall x y, R x y -> R' x y (f x) (g y).
+
+(** The non-dependent version is an instance where we forget dependencies. *)
+
+Definition crespectful {A B} (R : crelation A) (R' : crelation B) : crelation (A -> B) :=
+  Eval compute in @crespectful_hetero A A (fun _ => B) (fun _ => B) R (fun _ _ => R').
+
+Delimit Scope csignature_scope with csignature.
+
+Module Import CProperNotations.
+
+  Notation " R ++> R' " := (@crespectful _ _ (R%csignature) (R'%csignature))
+    (right associativity, at level 55) : csignature_scope.
+
+  Notation " R ==> R' " := (@crespectful _ _ (R%csignature) (R'%csignature))
+    (right associativity, at level 55) : csignature_scope.
+
+  Notation " R --> R' " := (@crespectful _ _ (cflip (R%csignature)) (R'%csignature))
+    (right associativity, at level 55) : csignature_scope.
+
+End CProperNotations.
+
+Arguments CProper {A}%type R%csignature m.
+Arguments crespectful {A B}%type (R R')%csignature _ _.
+
+
 Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPrimitives LC).
   Axiom capture_avoiding_subst_0 : forall (in_term : Preterm)
                                           (new_value : Preterm),
                                      Preterm.
   Notation "x [ 0 ↦ y ]" := (capture_avoiding_subst_0 x y).
-  Axiom convertible : Context -> Preterm -> Preterm -> Prop.
+  Axiom convertible : Context -> Preterm -> Preterm -> Type.
   Axiom box'_respectful : forall {Γ A B},
                             convertible Γ A B
                             -> box' Γ A
                             -> box' Γ B.
-  Axiom convertible_refl : forall {Γ}, Reflexive (convertible Γ).
-  Axiom convertible_sym : forall {Γ}, Symmetric (convertible Γ).
-  Axiom convertible_trans : forall {Γ}, Transitive (convertible Γ).
+  Axiom convertible_refl : forall {Γ}, CReflexive (convertible Γ).
+  Axiom convertible_sym : forall {Γ}, CSymmetric (convertible Γ).
+  Axiom convertible_trans : forall {Γ}, CTransitive (convertible Γ).
+  Global Existing Instance convertible_refl.
+  Global Existing Instance convertible_sym.
+  Global Existing Instance convertible_trans.
   Axiom convertible_tApp : forall {Γ A A' B B'},
                              convertible Γ A A'
                              -> convertible Γ B B'
@@ -185,11 +229,11 @@ Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPri
 
   Axiom qtProd_Proper_convertible
   : forall Γ,
-      Proper (convertible Γ ==> convertible Γ ==> convertible Γ) qtProd.
+      CProper (convertible Γ ==> convertible Γ ==> convertible Γ) qtProd.
   Existing Instance qtProd_Proper_convertible.
   Axiom tApp_Proper_convertible
   : forall Γ,
-      Proper (convertible Γ ==> convertible Γ ==> convertible Γ) tApp.
+      CProper (convertible Γ ==> convertible Γ ==> convertible Γ) tApp.
   Existing Instance tApp_Proper_convertible.
   Axiom convertible__quote__qtProd
   : forall Γ A B,
@@ -288,6 +332,13 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
                       => apply tApp_Proper_convertible; [ reflexivity | ]
                     | [ |- convertible _ (_ ‘‘→’’ _) (_ ‘‘→’’ _) ]
                       => apply qtProd_Proper_convertible
+                    | [ |- convertible ?Γ ?lhs ?rhs ]
+                      => is_evar rhs;
+                        match lhs with
+                          | appcontext G[tLambda ?A ?f ‘’ ?a]
+                            => let G' := context G[(f) [0 ↦ a]] in
+                               eapply (@ctransitivity _ _ _ _ G' _); [ solve [ conv_rewrite ] | ]
+                        end
                     | _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda
                   end.
 
@@ -297,6 +348,41 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
         do_shelve
           ltac:(refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L')).
         { unfold L0, qL0; conv_rewrite.
+          pose convertible__quote__app.
+          match goal with
+                    | [ |- convertible ?Γ ?lhs ?rhs ]
+                      => is_evar rhs;
+                        match lhs with
+                          | appcontext G[tLambda ?A ?f ‘’ ?a]
+                            => let G' := context G[(f) [0 ↦ a]] in
+                               eapply (@ctransitivity _ _ _ _ G' _); [ solve [ conv_rewrite ] | ]
+                        end
+end.
+
+  match goal with
+        | [ |- convertible ?Γ ?lhs ?rhs ]
+                      => is_evar rhs;
+                        match lhs with
+                          | appcontext G[tLambda ?A ?f ‘’ ?a]
+                            => let G' := context G[(f) [0 ↦ a]] in
+                               eapply (@ctransitivity _ _ _ _ G' _); [ | ]
+                        end
+
+end.
+Focus 2.
+
+
+          match goal with
+            | [ |- convertible ?Γ ?lhs ?rhs ]
+              => is_evar rhs;
+                match lhs with
+                  | appcontext G[tLambda ?A ?f ‘’ ?a]
+                    => let G' := context G[(f) [0 ↦ a]] in
+                       eapply (@ctransitivity _ _ _ _ G' _)
+                end
+          end.
+exact _.
+          pose convertible__capture_avoiding_subst_0__tApp.
           reflexivity. }
         { clear.
           unfold L0, qL0.

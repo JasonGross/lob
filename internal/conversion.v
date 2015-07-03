@@ -123,71 +123,62 @@ Fixpoint context_subst_n (in_context : Context) (subst_term : Ast.term) (var_n :
               (n, subst_n_name T subst_term var_n name)
      end.
 
-(** Quoting the rules from the appendix of the HoTT book *)
+(** Quoting the rules from the appendix of the HoTT book, modified for an untyped conversion algorithm *)
 
-Inductive convertible : Context -> Ast.term -> Ast.term -> Ast.term -> Type :=
+Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
 (**
 <<
-  Γ ⊢ a : A
 --------------
-Γ ⊢ a ≡ a :> A
+Γ ⊢ a ≡ a
 >> *)
-| conv_refl : forall Γ a A, has_type Γ a A -> convertible Γ a a A
+| conv_refl : forall Γ a, convertible Γ a a
 (**
 <<
-Γ ⊢ a ≡ b :> A
+Γ ⊢ a ≡ b
 --------------
-Γ ⊢ b ≡ a :> A
+Γ ⊢ b ≡ a
 >> *)
-| conv_sym : forall Γ A a b, convertible Γ a b A -> convertible Γ b a A
+| conv_sym : forall Γ a b, convertible Γ a b -> convertible Γ b a
 (**
 <<
-Γ ⊢ a ≡ b :> A    Γ ⊢ b ≡ c :> A
----------------------------------
-         Γ ⊢ a ≡ c :> A
+Γ ⊢ a ≡ b    Γ ⊢ b ≡ c
+----------------------
+       Γ ⊢ a ≡ c
 >> *)
-| conv_trans : forall Γ A a b c, convertible Γ a b A -> convertible Γ b c A -> convertible Γ b c A
+| conv_trans : forall Γ a b c, convertible Γ a b -> convertible Γ b c -> convertible Γ b c
 (**
 <<
-Γ ⊢ a ≡ b :> A    Γ ⊢ A ≡ B :> Uᵢ
----------------------------------
-         Γ ⊢ a ≡ b :> B
->> *)
-| conv_transfer_type : forall Γ A B a b Ui, convertible Γ a b A -> convertible Γ A B (Ast.tSort Ui) -> convertible Γ a b B
-(**
-<<
-Γ ⊢ A ≡ A' :> Uᵢ    Γ, x : A ⊢ B ≡ B' :> Uᵢ     Γ, x : A ⊢ b ≡ b' :> B
----------------------------------------------------------------------- Π-intro-eq
-              Γ ⊢ λ x.b ≡ λ x.b' :> Π_(x : A) B
+Γ ⊢ A ≡ A'    Γ, x : A ⊢ b ≡ b'
+-------------------------------- Π-intro-eq
+       Γ ⊢ λ x.b ≡ λ x.b'
 >> *)
 | conv_pi_intro_eq
-  : forall Γ x A A' B B' b b' Ui,
-      convertible Γ A A' (Ast.tSort Ui)
-      -> convertible (Γ ▻ (x, A)) B B' (Ast.tSort Ui)
-      -> convertible (Γ ▻ (x, A)) b b' B
-      -> convertible Γ (Ast.tLambda x A b) (Ast.tLambda x A b') (Ast.tProd x A B)
-| conv_tApp_empty1 : forall Γ f k T,
-                       convertible Γ f k T
-                       -> convertible Γ (Ast.tApp f []) k T
-| conv_tApp_empty2 : forall Γ f k T,
-                       convertible Γ (Ast.tApp f []) k T
-                       -> convertible Γ f k T
-| conv_tApp_cons1 : forall Γ f x xs k T,
-                       convertible Γ (Ast.tApp (Ast.tApp f [x]) xs) k T
-                       -> convertible Γ (Ast.tApp f (x::xs)) k T
-| conv_tApp_cons2 : forall Γ f x xs k T,
-                      convertible Γ (Ast.tApp f (x::xs)) k T
-                      -> convertible Γ (Ast.tApp (Ast.tApp f [x]) xs) k T
+  : forall Γ x A A' B B' b b',
+      convertible Γ A A'
+      -> convertible (Γ ▻ (x, A)) B B'
+      -> convertible (Γ ▻ (x, A)) b b'
+      -> convertible Γ (Ast.tLambda x A b) (Ast.tLambda x A b')
+| conv_tApp_empty1 : forall Γ f k,
+                       convertible Γ f k
+                       -> convertible Γ (Ast.tApp f []) k
+| conv_tApp_empty2 : forall Γ f k,
+                       convertible Γ (Ast.tApp f []) k
+                       -> convertible Γ f k
+| conv_tApp_cons1 : forall Γ f x xs k,
+                       convertible Γ (Ast.tApp (Ast.tApp f [x]) xs) k
+                       -> convertible Γ (Ast.tApp f (x::xs)) k
+| conv_tApp_cons2 : forall Γ f x xs k,
+                      convertible Γ (Ast.tApp f (x::xs)) k
+                      -> convertible Γ (Ast.tApp (Ast.tApp f [x]) xs) k
 (**
 <<
-Γ, x : A ⊢ b : B     Γ ⊢ a : A
----------------------------------------- Π-comp
-Γ ⊢ (λ (x : A). b)(a) ≡ b[a/x] :> B[a/x]
+------------------------------- Π-comp
+Γ ⊢ (λ (x : A). b)(a) ≡ b[a/x]
 >> *)
 | conv_beta : forall Γ x A b B a,
                 has_type (Γ ▻ (x, A)) b B
                 -> has_type Γ a A
-                -> convertible Γ (Ast.tApp (Ast.tLambda x A b) [a]) (subst_n_name b a (Some 0%nat) x) (subst_n_name B a (Some 0%nat) x)
+                -> convertible Γ (Ast.tApp (Ast.tLambda x A b) [a]) (subst_n_name b a (Some 0%nat) x)
 (**
 <<
 Γ ⊢ f : Π_(x : A) B
@@ -196,10 +187,10 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Ast.term -> Type :=
 >> *)
 | conv_fun_eta_rel : forall Γ x f A B,
                        has_type Γ f (Ast.tProd x A B)
-                       -> convertible Γ f (Ast.tLambda x A (Ast.tApp f [Ast.tRel 0])) (Ast.tProd x A B)
+                       -> convertible Γ f (Ast.tLambda x A (Ast.tApp f [Ast.tRel 0]))
 | conv_fun_eta_var : forall Γ x f A B,
                        has_type Γ f (Ast.tProd (Ast.nNamed x) A B)
-                       -> convertible Γ f (Ast.tLambda (Ast.nNamed x) A (Ast.tApp f [Ast.tVar x])) (Ast.tProd (Ast.nNamed x) A B)
+                       -> convertible Γ f (Ast.tLambda (Ast.nNamed x) A (Ast.tApp f [Ast.tVar x]))
 with has_type : Context -> Ast.term -> Ast.term -> Type :=
 (**
 <<
@@ -207,21 +198,20 @@ with has_type : Context -> Ast.term -> Ast.term -> Type :=
 -------------------------------- Vble
 x₁ : A₁, ..., xₙ : Aₙ ⊢ xᵢ : Aᵢ
 >> *)
-| has_type_tRel_0 : forall T Γ n univ,
-                      has_type Γ T (Ast.tSort univ)
-                      -> has_type (Γ ▻ (n, T)) (Ast.tRel 0) T
+| has_type_tRel_0 : forall T Γ n,
+                      has_type (Γ ▻ (n, T)) (Ast.tRel 0) T
 | has_type_tRel_S : forall T T' Γ n,
                       has_type Γ (Ast.tRel n) T
                       -> has_type (Γ ▻ T') (Ast.tRel (S n)) T
 (**
 <<
-Γ ⊢ a : A     Γ ⊢ A ≡ B :> Uᵢ
+Γ ⊢ a : A     Γ ⊢ A ≡ B
 -----------------------------
         Γ ⊢ a : B
 >> *)
 | has_type_conv_subst
-: forall Γ A a B Ui,
-    has_type Γ a A -> convertible Γ A B (Ast.tSort Ui)
+: forall Γ A a B,
+    has_type Γ a A -> convertible Γ A B
     -> has_type Γ a B
 (**
 <<
@@ -324,12 +314,11 @@ Admitted.*)
 
 HoTT book says provable by induction.
 *)
-Lemma subst_2 {Γ x a A Δ B b c}
-: has_type Γ a A -> convertible (Γ ▻ (x, A) ▻▻ Δ) b c B
+Lemma subst_2 {Γ x a A Δ b c}
+: has_type Γ a A -> convertible (Γ ▻ (x, A) ▻▻ Δ) b c
   -> convertible (Γ ▻▻ context_subst_n Δ a (Some (List.length Γ)) x)%list
                  (subst_n_name b a (Some (List.length Γ)) x)
-                 (subst_n_name c a (Some (List.length Γ)) x)
-                 (subst_n_name B a (Some (List.length Γ)) x).
+                 (subst_n_name c a (Some (List.length Γ)) x).
 Proof.
   intros ht1 conv1.
 Admitted.
