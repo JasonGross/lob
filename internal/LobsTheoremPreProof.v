@@ -1,9 +1,9 @@
-Require Import Coq.Setoids.Setoid Coq.Classes.Morphisms.
+Require Import Coq.Setoids.Setoid Coq.Classes.CMorphisms.
 Require Export Lob.Notations Lob.LobsTheoremStatement.
 
 (** The proof of the theorem *)
 
-Ltac do_shelve tac := tac(*; [ shelve | | ]*).
+Ltac do_shelve tac := tac; [ shelve | | ].
 
 Module Type LobExtendedContext <: LobContext.
   Axiom Preterm : Type.
@@ -158,7 +158,7 @@ Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPri
                                           (new_value : Preterm),
                                      Preterm.
   Notation "x [ 0 ↦ y ]" := (capture_avoiding_subst_0 x y).
-  Axiom convertible : Context -> Preterm -> Preterm -> Prop.
+  Axiom convertible : Context -> Preterm -> Preterm -> Type.
   Axiom box'_respectful : forall {Γ A B},
                             convertible Γ A B
                             -> box' Γ A
@@ -281,6 +281,8 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
 
     Module M <: Lob1'.PostL PP PL L'.
 
+      Hint Rewrite convertible__qtApp__closed convertible__capture_avoiding_subst_0__tApp convertible__quote__closed convertible__quote__app convertible__capture_avoiding_subst_0__tVar0 convertible__qquote__closed convertible__capture_avoiding_subst_0__qtProd convertible__quote__qtProd convertible_beta_app_lambda : convdb.
+
       Local Ltac conv_rewrite
         := repeat match goal with
                     | [ |- convertible _ ?x ?x ] => reflexivity
@@ -288,8 +290,11 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
                       => apply tApp_Proper_convertible; [ reflexivity | ]
                     | [ |- convertible _ (_ ‘‘→’’ _) (_ ‘‘→’’ _) ]
                       => apply qtProd_Proper_convertible
-                    | _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda
+                    | _ => progress rewrite_strat repeat (topdown repeat (hints convdb))
+                    (*| _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda*)
                   end.
+
+
 
       Definition Conv : □ (‘□’ ‘’ ⌜ L ⌝) -> □ (‘□’ ‘’ ‘L’).
       Proof.

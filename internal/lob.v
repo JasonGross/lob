@@ -22,6 +22,8 @@ Local Open Scope preterm_scope.
 Axiom proof_admitted : False.
 Ltac admit' := case proof_admitted.
 
+Ltac do_shelve_unifiable tac := tac; shelve_unifiable.
+
 Notation "x ‘→’ y" := (Ast.tProd Ast.nAnon x%preterm y%preterm) (at level 99, right associativity, y at level 200) : preterm_scope.
 Notation "x ‘’ y" := (Ast.tApp x%preterm (cons y%preterm nil)) (at level 15, left associativity) : preterm_scope.
 Quote Definition arrow''0 := (Ast.tProd Ast.nAnon).
@@ -122,7 +124,7 @@ Definition Quot0 {T' : Preterm}
 : □ T' -> □ (‘□’ ‘’ ⌜ T' ⌝).
 Proof.
   intros box_T'.
-  refine (Ast.tApp ‘existT’ [‘Preterm’; _; quote box_T'.1; _]; _)(*; shelve_unifiable*).
+  do_shelve_unifiable ltac:(refine (Ast.tApp ‘existT’ [‘Preterm’; _; quote box_T'.1; _]; _)).
   do 4 (apply has_type_beta_1_type with (f := fun x => x); simpl).
   eapply has_type_existT.
   { apply quote_term_has_type. }
