@@ -27,12 +27,18 @@ Module Type LobContext.
 
   Axiom quote : Preterm -> Preterm.
   Notation "⌜ x ⌝" := (quote x).
+
+  Axiom is_closed : Preterm -> Type.
+
+  Existing Class is_closed.
 End LobContext.
 
 Module Type LobHypotheses (Export LC : LobContext).
   Axiom X : Type.
   Axiom qX : Preterm.
   Notation "‘X’" := qX : preterm_scope.
+  Axiom qX_closed : is_closed ‘X’.
+  Global Existing Instance qX_closed.
 
   Axiom f : □ ‘X’ -> X.
   Axiom wtt_qf : □ ((‘□’ ‘’ ⌜ ‘X’ ⌝) ‘→’ ‘X’).

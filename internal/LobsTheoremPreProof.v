@@ -49,6 +49,21 @@ Module Type LobExtendedContext <: LobContext.
 
   Delimit Scope well_typed_term_scope with wtt.
   Bind Scope well_typed_term_scope with box'.
+
+  Axiom is_closed : Preterm -> Type.
+  Existing Class is_closed.
+
+  Axiom box_is_closed : is_closed ‘□’.
+  Existing Instance box_is_closed.
+
+  Axiom tApp_is_closed : forall A' B', is_closed A' -> is_closed B' -> is_closed (A' ‘’ B').
+  Existing Instance tApp_is_closed.
+
+  Axiom tProd_is_closed : forall A' B', is_closed A' -> is_closed B' -> is_closed (A' ‘→’ B').
+  Existing Instance tProd_is_closed.
+
+  Axiom quote_is_closed : forall A', is_closed (quote A').
+  Existing Instance quote_is_closed.
 End LobExtendedContext.
 
 Module Type PretermPrimitives (Export LC : LobExtendedContext).
@@ -73,7 +88,7 @@ Module Type PreL (LC : LobExtendedContext) (Export PP : PretermPrimitives LC).
   Axiom wttLambda_nd : forall {Γ : Context} {B' : Preterm},
                        forall A' : Preterm, box' (Γ ▻ A') B' -> box' Γ (A' ‘→’ B').
 
-  Axiom wttApp_1_nd : forall {Γ : Context} {A' B' : Preterm},
+  Axiom wttApp_1_nd : forall {Γ : Context} {A' B' : Preterm} {H : is_closed B'},
                         box' Γ (A' ‘→’ B') -> box' Γ A' -> box' Γ B'.
 
   Notation "x ‘’ y" := (wttApp_1_nd x%wtt y%wtt) : well_typed_term_scope.
@@ -142,7 +157,8 @@ Module Lob1' (LC : LobExtendedContext) (Import LH : LobHypotheses LC) (Import M 
               (Conv2_inv
                  (wttLambda_nd
                     (‘□’ ‘’ ‘L’)
-                    (‘‘f’’ ‘’ ((‘‘App’’ ‘’ (qConv2 ‘‘VAR₀’’)) ‘’ ((*‘‘Conv’’ ‘’*) (‘‘Quote’’ ‘’ ‘‘VAR₀’’))))))).
+                    (‘‘f’’ ‘’ ((‘‘App’’ ‘’ (qConv2 ‘‘VAR₀’’)) ‘’ ((*‘‘Conv’’ ‘’*) (‘‘Quote’’ ‘’ ‘‘VAR₀’’)))))));
+    try exact _.
   Defined.
 End Lob1'.
 
@@ -246,6 +262,10 @@ Module Type PostL_Assumptions (LC : LobExtendedContext) (Export PP : PretermPrim
   Axiom qbApp
    : forall A' B',
        □ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
+
+  Axiom App : forall {A' B'} {H : is_closed B'},
+                □ (A' ‘→’ B') -> □ A' -> □ B'.
+
 End PostL_Assumptions.
 
 Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
@@ -291,6 +311,8 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
                       => apply tApp_Proper_convertible; [ reflexivity | ]
                     | [ |- convertible _ (_ ‘‘→’’ _) (_ ‘‘→’’ _) ]
                       => apply qtProd_Proper_convertible
+                    | [ |- convertible _ (_ ‘→’ ?x) _ ]
+                      => apply tProd_Proper_convertible; [ | reflexivity ]
                     | _ => progress rewrite_strat repeat (topdown repeat (hints convdb))
                     (*| _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda*)
                   end.
@@ -369,51 +391,8 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
 
       Definition App : let A' := ‘□’ ‘’ ‘L’ in
                        let B' := ‘X’ in
-                       □ (A' ‘→’ B') -> □ A' -> □ B'.
-      Proof.
-        unfold qL.
-        do_shelve
-          ltac:(refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L')).
-        { unfold L0, qL0.
-          Set Typeclasses Debug.
-          pose (_ : Proper (_ ==> convertible ε ==> _) tApp).
-          try pose (_ : Proper (convertible ε ==> _ ==> _) tProd).
-          Timeout 5 pose (_ : Proper (_ ==> eq ==> _ ==> flip arrow) (convertible)).
-          pose (_ : @subrelation Preterm (@eq Preterm) (@eq Preterm)).
-          pose (_ : Equivalence (@eq Preterm)).
-          Set Printing All.
-          Timeout 5 try timeout 1 rewrite convertible_beta_app_lambda.
-
-          rewrite_strat topdown hints convdb.
-          Timeout 5 match goal with
-                    | [ |- convertible _ ?x ?x ] => reflexivity
-                    | [ |- convertible _ (?x ‘’ _) (?x ‘’ _) ]
-                      => apply tApp_Proper_convertible; [ reflexivity | ]
-                    | [ |- convertible _ (_ ‘‘→’’ _) (_ ‘‘→’’ _) ]
-                      => apply qtProd_Proper_convertible
-                    | _ => progress rewrite_strat repeat (topdown repeat (hints convdb))
-                    (*| _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda*)
-                  end.
-          conv_rewrite.
-          reflexivity. }
-        { clear.
-          unfold L0, qL0.
-          intro box_L.
-          eapply box'_respectful.
-          { conv_rewrite.
-            reflexivity. }
-          { revert box_L.
-            match goal with
-              | [ |- context[quote (quote ?X)] ] => generalize X; intro T
-            end.
-            apply box_qtProd_dom_precompose.
-            apply box_quote_app_quote_inv. } }
-
-simpl.
-unfold qL.
-unfold qL0.
-
-
+                       □ (A' ‘→’ B') -> □ A' -> □ B'
+        := @LA.App _ _ LH.qX_closed.
     End M.
   End PostL.
 End Lob2.

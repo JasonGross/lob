@@ -65,7 +65,7 @@ Fixpoint subst_n_name (in_term : Ast.term) (subst_term : Ast.term) (var_n : opti
                               | _, _ => name
                             end in
             Ast.tProd name'
-                      (subst_n_name term0' subst_term (option_map S var_n) new_name)
+                      (subst_n_name term0' subst_term var_n new_name)
                       (subst_n_name term1' subst_term (option_map S var_n) new_name)
        | Ast.tLambda name' term0' term1'
          => let new_name := match name, name' with
@@ -76,7 +76,7 @@ Fixpoint subst_n_name (in_term : Ast.term) (subst_term : Ast.term) (var_n : opti
                               | _, _ => name
                             end in
             Ast.tLambda name'
-                        (subst_n_name term0' subst_term (option_map S var_n) new_name)
+                        (subst_n_name term0' subst_term var_n new_name)
                         (subst_n_name term1' subst_term (option_map S var_n) new_name)
        | Ast.tLetIn name' term0' term1' term2'
          => let new_name := match name, name' with
@@ -87,8 +87,8 @@ Fixpoint subst_n_name (in_term : Ast.term) (subst_term : Ast.term) (var_n : opti
                               | _, _ => name
                             end in
             Ast.tLetIn name'
-                       (subst_n_name term0' subst_term (option_map S var_n) new_name)
-                       (subst_n_name term1' subst_term (option_map S var_n) new_name)
+                       (subst_n_name term0' subst_term var_n new_name)
+                       (subst_n_name term1' subst_term var_n new_name)
                        (subst_n_name term2' subst_term (option_map S var_n) new_name)
        | Ast.tApp f args
          => Ast.tApp (subst_n_name f subst_term var_n name)
@@ -194,6 +194,10 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
                            convertible Γ f f'
                            -> convertible Γ x x'
                            -> convertible Γ (Ast.tApp f [x]) (Ast.tApp f' [x'])
+| conv_tProd_respectful : forall Γ A A' B B' x,
+                            convertible Γ A A'
+                            -> convertible (Γ ▻ (x, A)) B B'
+                            -> convertible Γ (Ast.tProd x A B) (Ast.tProd x A' B')
 with has_type : Context -> Ast.term -> Ast.term -> Type :=
 (**
 <<

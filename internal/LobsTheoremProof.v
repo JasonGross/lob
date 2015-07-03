@@ -20,6 +20,140 @@ Notation "( x ; y )" := (existT _ x y).
 Notation "x .1" := (projT1 x) (at level 3, format "x '.1'").
 Notation "x .2" := (projT2 x) (at level 3, format "x '.2'").
 
+Tactic Notation "unique" "pose" "proof" constr(defn) :=
+  let T := type of defn in
+  match goal with
+    | [ H : T |- _ ] => fail 1
+    | _ => pose proof defn
+  end.
+
+(** Test if a tactic succeeds, but always roll-back the results *)
+Tactic Notation "test" tactic3(tac) :=
+  try (first [ tac | fail 2 tac "does not succeed" ]; fail 0 tac "succeeds"; [](* test for [t] solved all goals *)).
+
+(** [not tac] is equivalent to [fail tac "succeeds"] if [tac] succeeds, and is equivalent to [idtac] if [tac] fails *)
+Tactic Notation "not" tactic3(tac) := try ((test tac); fail 1 tac "succeeds").
+
+
+Section quote_subst_eq.
+  Create HintDb t_quote_db discriminated.
+
+  Local Ltac t_quote0 tac :=
+    repeat match goal with
+             | _ => progress simpl
+             | _ => progress intros
+             | _ => reflexivity
+             | [ |- Ast.tApp _ _ = Ast.tApp _ _ ] => apply f_equal2; [ solve [ tac ] | ]
+             | [ |- Ast.tApp _ _ = Ast.tApp _ _ ] => apply f_equal2; [ | solve [ tac ] ]
+             | [ |- cons _ _ = cons _ _ ] => apply f_equal2
+             (*| _ => apply tApp_Proper_convertible; [ solve [ tac ] | ]
+             | _ => apply tApp_Proper_convertible; [ | solve [ tac ] ]
+             | [ |- convertible _ (Ast.tApp _ (_::_::_)%list) _ ] => apply conv_tApp_cons1
+             | [ |- convertible _ _ (Ast.tApp _ (_::_::_)%list) ] => symmetry; apply conv_tApp_cons1; symmetry*)
+             | _ => progress change conversion.convertible with convertible
+           end.
+  Local Ltac t_quote :=
+    repeat match goal with
+             | _ => progress t_quote0 t_quote
+             | _ => solve [ eauto with nocore t_quote_db ]
+           end.
+
+  Definition eq__quote_nat__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_nat A) x n n') (quote_nat A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_nat__closed_helper : t_quote_db.
+
+  Definition eq__quote_bool__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_bool A) x n n') (quote_bool A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_bool__closed_helper : t_quote_db.
+
+  Definition eq__quote_ascii__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_ascii A) x n n') (quote_ascii A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_ascii__closed_helper : t_quote_db.
+
+  Definition eq__quote_ident__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_ident A) x n n') (quote_ident A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_ident__closed_helper : t_quote_db.
+
+  Definition eq__quote_positive__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_positive A) x n n') (quote_positive A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_positive__closed_helper : t_quote_db.
+
+  Definition eq__quote_sort__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_sort A) x n n') (quote_sort A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_sort__closed_helper : t_quote_db.
+
+  Definition eq__quote_cast_kind__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_cast_kind A) x n n') (quote_cast_kind A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_cast_kind__closed_helper : t_quote_db.
+
+  Definition eq__quote_name__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_name A) x n n') (quote_name A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_name__closed_helper : t_quote_db.
+
+  Definition eq__quote_inductive__closed_helper {A x}
+  : forall n n', eq (subst_n_name (quote_inductive A) x n n') (quote_inductive A).
+  Proof. induction A; t_quote. Qed.
+
+  Hint Resolve eq__quote_inductive__closed_helper : t_quote_db.
+
+  Section sub_helpers.
+    Context (eq__quote_term__closed_helper : forall (A x : Ast.term)
+                                                    (n : option nat)
+                                                    (n' : Ast.name),
+                                               eq
+                                                 (subst_n_name
+                                                    (quote_term A) x n n')
+                                                 (quote_term A)).
+
+    Fixpoint eq__quote_term_helper__closed_helper ls x
+    : forall n n', eq (subst_n_name (quote_term_helper quote_term ls) x n n') (quote_term_helper quote_term ls).
+    Proof.
+      destruct ls as [|y ys]; simpl; try reflexivity; [].
+      intros n n'.
+      t_quote.
+    Defined.
+
+    Fixpoint eq__quote_term_helper_def__closed_helper ls x
+    : forall n n', eq (subst_n_name (quote_term_helper_def quote_term ls) x n n') (quote_term_helper_def quote_term ls).
+    Proof.
+      destruct ls as [|[] ys]; simpl; try reflexivity; [].
+      intros n n'.
+      t_quote.
+    Defined.
+  End sub_helpers.
+
+  Fixpoint eq__quote_term__closed_helper A x {struct A}
+  : forall n n', eq (subst_n_name (quote_term A) x n n') (quote_term A).
+  Proof.
+    intros n n'; destruct A; simpl;
+    repeat match goal with
+             | [ ls : list Ast.term |- _ ]
+               => unique pose proof (eq__quote_term_helper__closed_helper eq__quote_term__closed_helper ls x n n')
+             | [ ls : Ast.mfixpoint Ast.term |- _ ]
+               => unique pose proof (eq__quote_term_helper_def__closed_helper eq__quote_term__closed_helper ls x n n')
+             | [ A : Ast.term |- _ ]
+               => not constr_eq A x; unique pose proof (eq__quote_term__closed_helper A x n n')
+           end;
+    try solve [ t_quote ].
+  Defined.
+End quote_subst_eq.
+
 Module LC <: LobExtendedContext.
   Definition Preterm := Ast.term.
   Definition Context : Type := Context.
@@ -73,6 +207,41 @@ Module LC <: LobExtendedContext.
 
   Delimit Scope well_typed_term_scope with wtt.
   Bind Scope well_typed_term_scope with box'.
+
+  Definition is_closed (x : Preterm) : Type
+    := forall k n n', subst_n_name x k n n' = x.
+
+  Existing Class is_closed.
+
+  Global Instance box_is_closed : is_closed ‘□’.
+  Proof.
+    unfold qbox.
+    hnf.
+    intros k n n'.
+    destruct n; reflexivity.
+  Qed.
+
+  Global Instance tApp_is_closed : forall A' B', is_closed A' -> is_closed B' -> is_closed (A' ‘’ B').
+  Proof.
+    intros A' B' H0 H1 k n n'.
+    specialize (H0 k).
+    specialize (H1 k).
+    simpl; rewrite H0, H1; reflexivity.
+  Qed.
+
+  Global Instance tProd_is_closed : forall A' B', is_closed A' -> is_closed B' -> is_closed (A' ‘→’ B').
+  Proof.
+    intros A' B' H0 H1 k n n'.
+    specialize (H0 k).
+    specialize (H1 k).
+    simpl.
+    rewrite H0, H1; reflexivity.
+  Qed.
+
+  Global Instance quote_is_closed : forall A', is_closed (quote A').
+  Proof.
+    repeat intro; apply eq__quote_term__closed_helper.
+  Qed.
 End LC.
 
 Module PRP <: PretermReflectionPrimitives LC.
@@ -111,21 +280,6 @@ Module PP <: PretermPrimitives LC.
   Defined.
   Notation "‘‘VAR₀’’" := ttVar0 : well_typed_term_scope.
 End PP.
-
-Tactic Notation "unique" "pose" "proof" constr(defn) :=
-  let T := type of defn in
-  match goal with
-    | [ H : T |- _ ] => fail 1
-    | _ => pose proof defn
-  end.
-
-(** Test if a tactic succeeds, but always roll-back the results *)
-Tactic Notation "test" tactic3(tac) :=
-  try (first [ tac | fail 2 tac "does not succeed" ]; fail 0 tac "succeeds"; [](* test for [t] solved all goals *)).
-
-(** [not tac] is equivalent to [fail tac "succeeds"] if [tac] succeeds, and is equivalent to [idtac] if [tac] fails *)
-Tactic Notation "not" tactic3(tac) := try ((test tac); fail 1 tac "succeeds").
-
 
 Module TR <: TypingRules LC PP.
   Export LC PP.
@@ -190,6 +344,13 @@ Module TR <: TypingRules LC PP.
     apply tApp_Proper_convertible; [ | assumption ].
     apply tApp_Proper_convertible; [ reflexivity | assumption ].
   Defined.
+  Global Instance tProd_Proper_convertible
+  : forall Γ,
+      Proper (convertible Γ ==> eq ==> convertible Γ) tProd.
+  Proof.
+    repeat intro.
+    apply conv_tProd_respectful; [ assumption | subst; reflexivity ].
+  Defined.
   Definition convertible__quote__qtProd
   : forall Γ A B,
       convertible Γ (⌜ A ‘→’ B ⌝) (⌜ A ⌝ ‘‘→’’ ⌜ B ⌝).
@@ -210,126 +371,13 @@ Module TR <: TypingRules LC PP.
     reflexivity.
   Defined.
 
-  Create HintDb t_quote_db discriminated.
-
-  Local Ltac t_quote0 tac :=
-    repeat match goal with
-             | _ => progress simpl
-             | _ => progress intros
-             | _ => reflexivity
-             | _ => apply tApp_Proper_convertible; [ solve [ tac ] | ]
-             | _ => apply tApp_Proper_convertible; [ | solve [ tac ] ]
-             | [ |- convertible _ (Ast.tApp _ (_::_::_)%list) _ ] => apply conv_tApp_cons1
-             | [ |- convertible _ _ (Ast.tApp _ (_::_::_)%list) ] => symmetry; apply conv_tApp_cons1; symmetry
-             | _ => progress change conversion.convertible with convertible
-           end.
-  Local Ltac t_quote :=
-    repeat match goal with
-             | _ => progress t_quote0 t_quote
-             | _ => solve [ eauto with nocore t_quote_db ]
-           end.
-
-  Definition convertible__quote_nat__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_nat A) x n n') (quote_nat A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_nat__closed_helper : t_quote_db.
-
-  Definition convertible__quote_bool__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_bool A) x n n') (quote_bool A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_bool__closed_helper : t_quote_db.
-
-  Definition convertible__quote_ascii__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_ascii A) x n n') (quote_ascii A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_ascii__closed_helper : t_quote_db.
-
-  Definition convertible__quote_ident__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_ident A) x n n') (quote_ident A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_ident__closed_helper : t_quote_db.
-
-  Definition convertible__quote_positive__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_positive A) x n n') (quote_positive A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_positive__closed_helper : t_quote_db.
-
-  Definition convertible__quote_sort__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_sort A) x n n') (quote_sort A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_sort__closed_helper : t_quote_db.
-
-  Definition convertible__quote_cast_kind__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_cast_kind A) x n n') (quote_cast_kind A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_cast_kind__closed_helper : t_quote_db.
-
-  Definition convertible__quote_name__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_name A) x n n') (quote_name A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_name__closed_helper : t_quote_db.
-
-  Definition convertible__quote_inductive__closed_helper {Γ A x}
-  : forall n n', convertible Γ (subst_n_name (quote_inductive A) x n n') (quote_inductive A).
-  Proof. induction A; t_quote. Qed.
-
-  Hint Resolve convertible__quote_inductive__closed_helper : t_quote_db.
-
-  Section sub_helpers.
-    Context (convertible__quote_term__closed_helper : forall (Γ : Context)
-                                                             (A x : Ast.term)
-                                                             (n : option nat)
-                                                             (n' : Ast.name),
-                                                        convertible Γ
-                                                                    (subst_n_name
-                                                                       (quote_term A) x n n')
-                                                                    (quote_term A)).
-
-    Fixpoint convertible__quote_term_helper__closed_helper Γ ls x
-    : forall n n', convertible Γ (subst_n_name (quote_term_helper quote_term ls) x n n') (quote_term_helper quote_term ls).
-    Proof.
-      destruct ls as [|y ys]; simpl; try reflexivity; [].
-      intros n n'.
-      t_quote.
-    Defined.
-
-    Fixpoint convertible__quote_term_helper_def__closed_helper Γ ls x
-    : forall n n', convertible Γ (subst_n_name (quote_term_helper_def quote_term ls) x n n') (quote_term_helper_def quote_term ls).
-    Proof.
-      destruct ls as [|[] ys]; simpl; try reflexivity; [].
-      intros n n'.
-      t_quote.
-    Defined.
-  End sub_helpers.
-
-  Fixpoint convertible__quote_term__closed_helper Γ A x {struct A}
-  : forall n n', convertible Γ (subst_n_name (quote_term A) x n n') (quote_term A).
-  Proof.
-    intros n n'; destruct A; simpl;
-    repeat match goal with
-             | [ Γ : Context, ls : list Ast.term |- _ ]
-               => unique pose proof (convertible__quote_term_helper__closed_helper convertible__quote_term__closed_helper Γ ls x n n')
-             | [ Γ : Context, ls : Ast.mfixpoint Ast.term |- _ ]
-               => unique pose proof (convertible__quote_term_helper_def__closed_helper convertible__quote_term__closed_helper Γ ls x n n')
-             | [ Γ : Context, A : Ast.term |- _ ]
-               => not constr_eq A x; unique pose proof (convertible__quote_term__closed_helper Γ A x n n')
-           end;
-    try solve [ t_quote ].
-  Defined.
-
   Definition convertible__quote__closed
   : forall Γ A x,
       convertible Γ ((quote A) [ 0 ↦ x ]) (quote A).
   Proof.
-    intros; apply convertible__quote_term__closed_helper.
+    intros; simpl.
+    unfold capture_avoiding_subst_0.
+    rewrite eq__quote_term__closed_helper; reflexivity.
   Defined.
 
   Hint Resolve convertible__quote__closed : t_quote_db.
@@ -347,7 +395,8 @@ Module TR <: TypingRules LC PP.
     simpl.
     etransitivity; [ apply conv_beta | ].
     simpl.
-    t_quote.
+    unfold capture_avoiding_subst_0.
+    rewrite eq__quote_term__closed_helper; reflexivity.
   Defined.
 
 End TR.
@@ -386,16 +435,6 @@ End PRTR.
 Module PreL' <: PreL LC PP.
   Export LC PP.
 
-  Definition App {A' B' : Preterm}
-  : □ (A' ‘→’ B') -> □ A' -> □ B'.
-  Proof.
-    intros box_A'_impl'_B' box_A'.
-    refine (box_A'_impl'_B'.1 ‘’ box_A'.1; _).
-    pose has_type_tApp.
-    { exact (box_A'_impl'_B'.2). }
-    { exact (box_A'.2). }
-  Defined.
-
   Definition wttLambda_nd
              {Γ : Context} {B' : Preterm}
   : forall A' : Preterm, box' (Γ ▻ A') B' -> box' Γ (A' ‘→’ B').
@@ -407,13 +446,16 @@ Module PreL' <: PreL LC PP.
     exact body.2.
   Defined.
 
-  Definition wttApp_1_nd {Γ : Context} {A' B' : Preterm}
+  Definition wttApp_1_nd {Γ : Context} {A' B' : Preterm} {H : is_closed B'}
   : box' Γ (A' ‘→’ B') -> box' Γ A' -> box' Γ B'.
   Proof.
     refine (fun F x
             => (Ast.tApp F.1 [x.1];
                 _)).
-    eapply has_type_tApp.
+    pose proof (has_type_tApp Γ F.1 Ast.nAnon A' B' x.1) as H'.
+    hnf in H.
+    rewrite H in H'.
+    apply H'.
     { exact F.2. }
     { exact x.2. }
   Defined.
@@ -423,7 +465,7 @@ Module PreL' <: PreL LC PP.
   Definition box'_weaken {Γ A} : box' ε A -> box' Γ A.
   Proof.
     refine (fun x => (x.1; _ x.2)).
-    apply (has_type_weaken nil).
+    admit'; apply (has_type_weaken nil).
   Defined.
 End PreL'.
 
@@ -464,6 +506,9 @@ Module LA <: PostL_Assumptions LC PP.
   Axiom qbApp
    : forall A' B',
        □ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
+
+  Axiom App : forall {A' B'} {H : is_closed B'},
+                □ (A' ‘→’ B') -> □ A' -> □ B'.
 End LA.
 
 Declare Module LH : LobHypotheses LC.
