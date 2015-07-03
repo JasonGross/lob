@@ -9,8 +9,8 @@ Require Import Coq.PArith.BinPos.
 Local Open Scope string_scope.
 Local Open Scope positive_scope.
 
-Require Export quote_term.
-Require Export quote_has_type.
+Require Export Lob.quote_term.
+Require Export Lob.quote_has_type.
 
 Axiom proof_admitted : False.
 Ltac admit' := case proof_admitted.
