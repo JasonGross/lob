@@ -1,4 +1,4 @@
-Require Import Coq.Setoids.Setoid Coq.Classes.Morphisms.
+Require Import Coq.Setoids.Setoid Coq.Classes.CMorphisms.
 Require Export Lob.Notations Lob.LobsTheoremStatement Lob.LobsTheoremPreProof.
 
 Require Import Template.Template.
@@ -116,7 +116,7 @@ Module TR <: TypingRules LC PP.
                                           (new_value : Preterm),
                                      Preterm.
   Notation "x [ 0 ↦ y ]" := (capture_avoiding_subst_0 x y).
-  Axiom convertible : Context -> Preterm -> Preterm -> Prop.
+  Axiom convertible : Context -> Preterm -> Preterm -> Type.
   Axiom box'_respectful : forall {Γ A B},
                             convertible Γ A B
                             -> box' Γ A
