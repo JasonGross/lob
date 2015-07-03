@@ -146,7 +146,7 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
 ----------------------
        Γ ⊢ a ≡ c
 >> *)
-| conv_trans : forall Γ a b c, convertible Γ a b -> convertible Γ b c -> convertible Γ b c
+| conv_trans : forall Γ a b c, convertible Γ a b -> convertible Γ b c -> convertible Γ a c
 (**
 <<
 Γ ⊢ A ≡ A'    Γ, x : A ⊢ b ≡ b'
