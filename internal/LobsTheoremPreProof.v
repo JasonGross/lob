@@ -70,9 +70,6 @@ End PretermPrimitives.
 
 Module Type PreL (LC : LobExtendedContext) (Export PP : PretermPrimitives LC).
 
-  Axiom App : forall {A' B' : Preterm},
-                □ (A' ‘→’ B') -> □ A' -> □ B'.
-
   Axiom wttLambda_nd : forall {Γ : Context} {B' : Preterm},
                        forall A' : Preterm, box' (Γ ▻ A') B' -> box' Γ (A' ‘→’ B').
 
@@ -95,6 +92,10 @@ Module Lob1 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
   End L.
 
   Module Type PostL (PP : PretermPrimitives') (PL : PreL LC PP) (Export L' : L PP PL).
+    Axiom App : let A' := ‘□’ ‘’ ‘L’ in
+                let B' := ‘X’ in
+                □ (A' ‘→’ B') -> □ A' -> □ B'.
+
     Axiom Conv : □ (‘□’ ‘’ ⌜ L ⌝) -> □ (‘□’ ‘’ ‘L’).
 
     Axiom Conv2 : □ L -> □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’).
@@ -166,10 +167,6 @@ Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPri
   Axiom convertible_refl : forall {Γ}, Reflexive (convertible Γ).
   Axiom convertible_sym : forall {Γ}, Symmetric (convertible Γ).
   Axiom convertible_trans : forall {Γ}, Transitive (convertible Γ).
-  Axiom convertible_tApp : forall {Γ A A' B B'},
-                             convertible Γ A A'
-                             -> convertible Γ B B'
-                             -> convertible Γ (tApp A B) (tApp A' B').
   Axiom convertible_beta_app_lambda
   : forall Γ A f a,
       convertible Γ (tApp (tLambda A f) a) (capture_avoiding_subst_0 f a).
@@ -183,6 +180,10 @@ Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPri
   : forall Γ x,
       convertible Γ (‘VAR₀’ [ 0 ↦ x ]) x.
 
+  Axiom tProd_Proper_convertible
+  : forall Γ,
+      Proper (convertible Γ ==> eq ==> convertible Γ) tProd.
+  Existing Instance tProd_Proper_convertible.
   Axiom qtProd_Proper_convertible
   : forall Γ,
       Proper (convertible Γ ==> convertible Γ ==> convertible Γ) qtProd.
@@ -365,6 +366,54 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
         := LA.qQuote _.
 
       Notation "‘‘Quote’’" := (box'_weaken qQuote) : well_typed_term_scope.
+
+      Definition App : let A' := ‘□’ ‘’ ‘L’ in
+                       let B' := ‘X’ in
+                       □ (A' ‘→’ B') -> □ A' -> □ B'.
+      Proof.
+        unfold qL.
+        do_shelve
+          ltac:(refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L')).
+        { unfold L0, qL0.
+          Set Typeclasses Debug.
+          pose (_ : Proper (_ ==> convertible ε ==> _) tApp).
+          try pose (_ : Proper (convertible ε ==> _ ==> _) tProd).
+          Timeout 5 pose (_ : Proper (_ ==> eq ==> _ ==> flip arrow) (convertible)).
+          pose (_ : @subrelation Preterm (@eq Preterm) (@eq Preterm)).
+          pose (_ : Equivalence (@eq Preterm)).
+          Set Printing All.
+          Timeout 5 try timeout 1 rewrite convertible_beta_app_lambda.
+
+          rewrite_strat topdown hints convdb.
+          Timeout 5 match goal with
+                    | [ |- convertible _ ?x ?x ] => reflexivity
+                    | [ |- convertible _ (?x ‘’ _) (?x ‘’ _) ]
+                      => apply tApp_Proper_convertible; [ reflexivity | ]
+                    | [ |- convertible _ (_ ‘‘→’’ _) (_ ‘‘→’’ _) ]
+                      => apply qtProd_Proper_convertible
+                    | _ => progress rewrite_strat repeat (topdown repeat (hints convdb))
+                    (*| _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda*)
+                  end.
+          conv_rewrite.
+          reflexivity. }
+        { clear.
+          unfold L0, qL0.
+          intro box_L.
+          eapply box'_respectful.
+          { conv_rewrite.
+            reflexivity. }
+          { revert box_L.
+            match goal with
+              | [ |- context[quote (quote ?X)] ] => generalize X; intro T
+            end.
+            apply box_qtProd_dom_precompose.
+            apply box_quote_app_quote_inv. } }
+
+simpl.
+unfold qL.
+unfold qL0.
+
+
     End M.
   End PostL.
 End Lob2.

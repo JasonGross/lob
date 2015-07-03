@@ -176,10 +176,8 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
 ------------------------------- Π-comp
 Γ ⊢ (λ (x : A). b)(a) ≡ b[a/x]
 >> *)
-| conv_beta : forall Γ x A b B a,
-                has_type (Γ ▻ (x, A)) b B
-                -> has_type Γ a A
-                -> convertible Γ (Ast.tApp (Ast.tLambda x A b) [a]) (subst_n_name b a (Some 0%nat) x)
+| conv_beta : forall Γ x A b a,
+                convertible Γ (Ast.tApp (Ast.tLambda x A b) [a]) (subst_n_name b a (Some 0%nat) x)
 (**
 <<
 Γ ⊢ f : Π_(x : A) B
@@ -192,6 +190,10 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
 | conv_fun_eta_var : forall Γ x f A B,
                        has_type Γ f (Ast.tProd (Ast.nNamed x) A B)
                        -> convertible Γ f (Ast.tLambda (Ast.nNamed x) A (Ast.tApp f [Ast.tVar x]))
+| conv_tApp_respectful : forall Γ f f' x x',
+                           convertible Γ f f'
+                           -> convertible Γ x x'
+                           -> convertible Γ (Ast.tApp f [x]) (Ast.tApp f' [x'])
 with has_type : Context -> Ast.term -> Ast.term -> Type :=
 (**
 <<
