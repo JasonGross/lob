@@ -154,6 +154,117 @@ Section quote_subst_eq.
   Defined.
 End quote_subst_eq.
 
+Section quote_has_type.
+  Local Ltac t_quote0 tac :=
+    repeat match goal with
+             | _ => progress simpl
+             | _ => progress intros
+             | _ => reflexivity
+             | [ |- has_type ?Γ (Ast.tApp ?f [?a]) ?B ]
+               => eapply (fun A => @has_type_tApp Γ f Ast.nAnon A B a)
+             | [ |- has_type ?Γ (Ast.tApp ?f [?a]) ?B ]
+               => refine (@has_type_tApp Γ f Ast.nAnon _ _ a _ _); shelve_unifiable
+             | [ |- has_type ?Γ (Ast.tApp _ (_::_::_)%list) _ ]
+               => apply has_type_tApp_split
+             | _ => exact _
+           end.
+  Local Ltac t_quote :=
+    repeat match goal with
+             | _ => progress t_quote0 t_quote
+             | _ => solve [ eauto with nocore ]
+           end.
+
+
+  Global Instance has_type__quote_nat A
+  : forall Γ, has_type Γ (quote_nat A) nat'.
+  Proof. induction A; t_quote. Qed.
+
+  Global Instance has_type__quote_bool A
+  : forall Γ, has_type Γ (quote_bool A) bool'.
+  Proof. induction A; t_quote. Qed.
+
+  Global Instance has_type__quote_ascii A
+  : forall Γ, has_type Γ (quote_ascii A) ascii'.
+  Proof. induction A; t_quote. Qed.
+
+  Global Instance has_type__quote_ident A
+  : forall Γ, has_type Γ (quote_ident A) ident'.
+  Proof. induction A; t_quote. Qed.
+
+  Global Instance has_type__quote_positive A
+  : forall Γ, has_type Γ (quote_positive A) positive'.
+  Proof. induction A; t_quote. Qed.
+
+  Global Instance has_type__quote_sort A
+  : forall Γ, has_type Γ (quote_sort A) sort'.
+  Proof. induction A; t_quote. Qed.
+
+  Global Instance has_type__quote_cast_kind A
+  : forall Γ, has_type Γ (quote_cast_kind A) cast_kind'.
+  Proof. induction A; t_quote. Qed.
+
+  Global Instance has_type__quote_name A
+  : forall Γ, has_type Γ (quote_name A) name'.
+  Proof. induction A; t_quote. Qed.
+
+  Global Instance has_type__quote_inductive A
+  : forall Γ, has_type Γ (quote_inductive A) inductive'.
+  Proof. induction A; t_quote. Qed.
+
+  Local Ltac t_has_type :=
+    repeat
+      match goal with
+        | [ |- has_type ?Γ (Ast.tApp ?f [?a]) ?B ]
+          => refine (@has_type_tApp Γ f Ast.nAnon _ _ a _ _); shelve_unifiable
+        | _ => progress simpl
+        | _ => exact _
+        | _ => apply has_type_tApp_split
+        | [ |- has_type _ (quote_term _) (subst_n_name ?e _ _ _) ]
+          => unify e term'
+        | [ |- has_type ?Γ (Ast.tApp ?f [?a]) ?B ]
+          => let A := fresh in
+             let B' := fresh in
+             evar (A : Ast.term);
+               evar (B' : Ast.term);
+               let H := fresh in
+               pose proof (@has_type_tApp Γ f Ast.nAnon A B' a) as H;
+                 subst A B';
+                 refine (_ (H _ _)); shelve_unifiable; clear H;
+                 [ | t_has_type | ]; shelve_unifiable;
+                 [ simpl; exact (fun x => x) | ]
+      end.
+
+  Section sub_helpers.
+    Context (has_type__quote_term : forall (A : Ast.term),
+                                      forall Γ, has_type Γ (quote_term A) term').
+
+    Fixpoint has_type__quote_term_helper ls
+    : forall Γ, has_type Γ (quote_term_helper quote_term ls) (Ast.tApp list' [term']).
+    Proof.
+      destruct ls as [|y ys]; simpl;
+      intro;
+      t_has_type.
+    Defined.
+
+    Fixpoint has_type__quote_term_helper_def ls
+    : forall Γ, has_type Γ (quote_term_helper_def quote_term ls) (Ast.tApp list' [Ast.tApp def' [term']]).
+    Proof.
+      destruct ls as [|[] ys]; simpl; intro; t_has_type.
+    Defined.
+  End sub_helpers.
+
+  Fixpoint has_type__quote_term A {struct A}
+  : forall Γ, has_type Γ (quote_term A) term'.
+  Proof.
+    destruct A; t_quote;
+    [ apply has_type__quote_term_helper; assumption
+    |
+    | apply has_type__quote_term_helper; assumption
+    | apply has_type__quote_term_helper_def; assumption ].
+    t_quote.
+  Qed.
+End quote_has_type.
+
 Module LC <: LobExtendedContext.
   Definition Preterm := Ast.term.
   Definition Context : Type := Context.
@@ -248,6 +359,12 @@ Module PRP <: PretermReflectionPrimitives LC.
   Definition qPreterm := term'.
   Notation "‘Preterm’" := qPreterm : preterm_scope.
 
+  Global Instance has_type__quote {Γ A} : has_type Γ (quote A) qPreterm
+    := has_type__quote_term _ _.
+  Definition wttquote {Γ} A : LC.box' Γ _
+    := (quote A; has_type__quote).
+  Notation "‘⌜ A ⌝’" := (wttquote A) : well_typed_term_scope.
+
   Definition qquote : LC.Preterm.
   Proof.
     let t := (eval cbv beta delta [qO qS qEmptyString qString qnAnon qAscii qnil qcons qmkdef qtInd qtFix qtCase qtUnknown qtRel qtConstruct qtEvar qtMeta qtVar qtApp qtConst qtSort qtCast qtProd inductive_quotable quote_ascii bool_quotable quote_bool (*quote_string quote_positive quote_nat*) ident_quotable quote_ident quote_name nat_quotable name_quotable quote quote_term sort_quotable cast_kind_quotable quote_sort qsSet qsProp qsType universe_quotable quote_inductive qmkInd] in quote_term) in
@@ -289,8 +406,17 @@ Module TR <: TypingRules LC PP.
     := fun in_term new_value
        => subst_n_name in_term new_value (Some 0%nat) Ast.nAnon.
   Notation "x [ 0 ↦ y ]" := (capture_avoiding_subst_0 x y).
+  Global Arguments capture_avoiding_subst_0 !_ / _.
   Definition convertible : Context -> Preterm -> Preterm -> Type
     := convertible.
+
+  Definition eq__subst__quote
+  : forall A x, capture_avoiding_subst_0 (quote A) x = quote A.
+  Proof.
+    intros; unfold quote, capture_avoiding_subst_0.
+    rewrite eq__quote_term__closed_helper; reflexivity.
+  Defined.
+
   Definition box'_respectful : forall {Γ A B},
                                  convertible Γ A B
                                  -> box' Γ A
@@ -375,9 +501,8 @@ Module TR <: TypingRules LC PP.
   : forall Γ A x,
       convertible Γ ((quote A) [ 0 ↦ x ]) (quote A).
   Proof.
-    intros; simpl.
-    unfold capture_avoiding_subst_0.
-    rewrite eq__quote_term__closed_helper; reflexivity.
+    intros; rewrite eq__subst__quote.
+    reflexivity.
   Defined.
 
   Hint Resolve convertible__quote__closed : t_quote_db.
@@ -401,37 +526,6 @@ Module TR <: TypingRules LC PP.
 
 End TR.
 
-Module PRTR <: PretermReflectionTypingRules LC PP PRP TR.
-  Export LC PP PRP TR.
-  Axiom convertible__qquote__closed
-  : forall Γ x,
-      convertible Γ (‘quote’ [ 0 ↦ x ]) (‘quote’).
-
-  (*Axiom box_distr_qtProd_quote
-  : forall Γ A B,
-      convertible Γ (‘□’ ‘’ (A ‘‘→’’ ⌜ B ⌝)) ((‘□’ ‘’ A) ‘‘→’’ (‘□’ ‘’ ⌜ B ⌝)).*)
-
-  Axiom box_qtProd_dom_precompose
-  : forall {Γ} A B C,
-      (box' Γ (‘□’ ‘’ B) -> box' Γ (‘□’ ‘’ A))
-      -> box' Γ (‘□’ ‘’ (A ‘‘→’’ C))
-      -> box' Γ (‘□’ ‘’ (B ‘‘→’’ C)).
-
-  (** FIXME: This seems a bit fishy... *)
-  Axiom box_quote_app_quote
-  : forall Γ T,
-      box' Γ (‘□’
-               ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ‘quote’ ‘’ ⌜ T ⌝))))
-      -> box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝))).
-
-  Axiom box_quote_app_quote_inv
-  : forall Γ T,
-      box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝)))
-      -> box' Γ (‘□’
-                  ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ‘quote’ ‘’ ⌜ T ⌝)))).
-End PRTR.
-
-
 Module PreL' <: PreL LC PP.
   Export LC PP.
 
@@ -446,75 +540,324 @@ Module PreL' <: PreL LC PP.
     exact body.2.
   Defined.
 
-  Definition wttApp_1_nd {Γ : Context} {A' B' : Preterm} {H : is_closed B'}
-  : box' Γ (A' ‘→’ B') -> box' Γ A' -> box' Γ B'.
+  Definition wttApp_1 {Γ : Context} {A' B' : Preterm}
+  : box' Γ (A' ‘→’ B')
+    -> forall x : box' Γ A',
+         box' Γ (subst_n_name B' x.1 (Some 0%nat) Ast.nAnon).
   Proof.
     refine (fun F x
             => (Ast.tApp F.1 [x.1];
                 _)).
-    pose proof (has_type_tApp Γ F.1 Ast.nAnon A' B' x.1) as H'.
-    hnf in H.
-    rewrite H in H'.
-    apply H'.
+    eapply has_type_tApp.
     { exact F.2. }
     { exact x.2. }
   Defined.
 
-  Notation "x ‘’ y" := (wttApp_1_nd x%wtt y%wtt) : well_typed_term_scope.
-
-  Definition box'_weaken {Γ A} : box' ε A -> box' Γ A.
+  Definition wttApp_1_nd {Γ : Context} {A' B' : Preterm} {H : is_closed B'}
+  : box' Γ (A' ‘→’ B') -> box' Γ A' -> box' Γ B'.
   Proof.
-    refine (fun x => (x.1; _ x.2)).
-    admit'; apply (has_type_weaken nil).
+    intros F x.
+    pose proof (wttApp_1 F x) as H'.
+    exists H'.1.
+    destruct H' as [Fx H']; simpl.
+    hnf in H.
+    rewrite H in H'.
+    apply H'.
   Defined.
+
+  Notation "x ‘’ y" := (wttApp_1_nd x%wtt y%wtt) : well_typed_term_scope.
 End PreL'.
 
-Module LA <: PostL_Assumptions LC PP.
+Module Type DoublyQuotedThings.
   Export TR LC PP PRP.
+  Axiom qbox_Ui : Ast.sort.
+  Axiom has_type_qbox
+  : has_type ε ‘□’ (term' ‘→’ Ast.tSort qbox_Ui).
+  Global Existing Instance has_type_qbox.
+
+  Axiom box_qtProd_dom_precompose
+  : forall {Γ} A B C,
+      (box' Γ (‘□’ ‘’ B) -> box' Γ (‘□’ ‘’ A))
+      -> box' Γ (‘□’ ‘’ (A ‘‘→’’ C))
+      -> box' Γ (‘□’ ‘’ (B ‘‘→’’ C)).
+
+  (** FIXME: This seems a bit fishy... *)
+  Axiom box_quote_app_quote
+  : forall Γ T,
+      box' Γ (‘□’
+               ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ⌜ T ⌝))))
+      -> box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝))).
+
+  Axiom box_quote_app_quote_inv
+  : forall Γ T,
+      box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝)))
+      -> box' Γ (‘□’
+                  ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ⌜ T ⌝)))).
+
+  Axiom Quot : forall T, □ T -> □ (‘□’ ‘’ ⌜ T ⌝).
+
+  Section context.
+    Context (qX qL0 : Preterm).
+    Let Γ := (ε ▻ (‘□’
+                    ‘’ (tLambda ‘Preterm’
+                                (‘App’ ‘’ ⌜ ‘□’ ⌝
+                                  ‘’ (‘App’ ‘’ ‘VAR₀’ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ‘VAR₀’))
+                                  ‘‘→’’ ⌜ qX ⌝) ‘’ ⌜ qL0 ⌝))).
+
+    Axiom qQuote
+    : forall T,
+        let A := (‘□’ ‘’ T)%preterm in
+        box' Γ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
+
+    Axiom qbApp
+    : forall A' B',
+        box' Γ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
+  End context.
+End DoublyQuotedThings.
+
+Module PRTR (DQT : DoublyQuotedThings) <: PretermReflectionTypingRules LC PP PRP TR.
+  Export LC PP PRP TR.
+  Include DQT.
+  Definition convertible__qquote__closed
+  : forall Γ x,
+      convertible Γ (‘quote’ [ 0 ↦ x ]) (‘quote’).
+  Proof.
+    reflexivity.
+  Defined.
+End PRTR.
+
+Local Ltac t_has_type :=
+  repeat
+    repeat
+    match goal with
+      | _ => exact _
+      | [ |- has_type _ (Ast.tLambda (Ast.nNamed _) _ _) _ ]
+        => apply has_type_tLambda_unname
+      | [ |- has_type ?Γ (Ast.tApp ?f [?a]) ?B ]
+        => refine (@has_type_tApp Γ f Ast.nAnon _ _ a _ _); shelve_unifiable
+      | [ |- has_type ?Γ (Ast.tLambda ?x ?A ?b) ?B ]
+        => refine (has_type_tLambda _ _ _ _ _ _); shelve_unifiable
+      | [ |- has_type ?Γ (Ast.tProd ?x ?A ?B) ?T ]
+        => refine (has_type_tProd _ _ _ _ _ _); shelve_unifiable
+      | [ |- has_type _ (quote_term _) (subst_n_name ?e _ _ _) ]
+        => unify e term'
+      | [ |- has_type ?Γ (Ast.tApp ?f [?a]) ?B ]
+        => let A := fresh in
+           let B' := fresh in
+           evar (A : Ast.term);
+             evar (B' : Ast.term);
+             let H := fresh in
+             pose proof (@has_type_tApp Γ f Ast.nAnon A B' a) as H;
+               subst A B';
+               refine (_ (H _ _)); shelve_unifiable; clear H;
+               [ | t_has_type | ]; shelve_unifiable;
+               [ simpl; exact (fun x => x) | ]
+      | _ => exact _
+      | [ |- has_type ?Γ (Ast.tApp ?f [?a]) ?B ]
+        => not is_evar B; eapply has_type_conv_subst; shelve_unifiable
+      | _ => progress simpl
+      | [ |- has_type _ (Ast.tApp _ (_::_::_)%list) _ ]
+        => apply has_type_tApp_split
+      | [ |- conversion.convertible _ (Ast.tProd _ _ _) (Ast.tProd _ _ _) ]
+        => apply conv_tProd_respectful
+      | [ |- conversion.convertible _ ?x (subst_n_name ?e _ _ _) ]
+        => is_evar e; not has_evar x; unify x e; simpl; reflexivity
+      | [ |- conversion.convertible _ (subst_n_name ?e _ _ _) ?x ]
+        => is_evar e; not has_evar x; unify x e; simpl; reflexivity
+      | [ |- conversion.convertible _ ?x ?y ]
+        => not has_evar x; not has_evar y; reflexivity
+      | [ |- conversion.convertible _ ?x ?y ]
+        => not has_evar x; is_evar y; reflexivity
+      | [ |- conversion.convertible _ ?x (subst_n_name ?e _ _ _) ]
+        => is_evar e; unify x e; simpl; reflexivity
+      | [ |- conversion.convertible _ (subst_n_name ?e _ _ _) ?x ]
+        => is_evar e; unify x e; simpl; reflexivity
+      | _ => progress unfold LC.tProd
+      | [ |- conversion.convertible _ (Ast.tSort match ?e with _ => _ end) (Ast.tSort ?v) ]
+        => is_evar e; unify e v; reflexivity
+    end.
+
+
+
+Module LA (DQT : DoublyQuotedThings) <: PostL_Assumptions LC PP PRP TR.
+  Export TR LC PP PRP.
+  Include DQT.
+
+  Section context.
+    Context (qX qL0 : Preterm).
+    Let Γ := (ε ▻ (‘□’
+                    ‘’ (tLambda ‘Preterm’
+                                (‘App’ ‘’ ⌜ ‘□’ ⌝
+                                  ‘’ (‘App’ ‘’ ‘VAR₀’ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ‘VAR₀’))
+                                  ‘‘→’’ ⌜ qX ⌝) ‘’ ⌜ qL0 ⌝))).
+
+    Definition box'_weaken
+    : forall {A}, box' ε A -> box' Γ A.
+    Proof.
+      simpl; intros A bA.
+      refine (bA.1; _).
+      refine ((fun Ui H => @wkg_1_nil nil Ast.nAnon _ _ _ Ui H bA.2) _ _); shelve_unifiable.
+      unfold qtProd, qtApp, tApp, tLambda.
+      t_has_type.
+    Qed.
+  End context.
+
+  Definition App : forall {A' B'} {H : is_closed B'},
+                     □ (A' ‘→’ B') -> □ A' -> □ B'.
+  Proof.
+    intros A' B' H AtoB A.
+    refine (AtoB.1 ‘’ A.1;
+            _ (has_type_tApp ε AtoB.1 Ast.nAnon A' B' A.1 AtoB.2 A.2)).
+    clear -H; abstract (hnf in H; rewrite H; intro; assumption).
+  Defined.
+End LA.
+
+Module DQT <: DoublyQuotedThings.
+  Export TR LC PP PRP PreL'.
+  Definition qbox_Ui' : Ast.universe := 1.
+  Definition qbox_Ui := Ast.sType qbox_Ui'.
+
+  Global Instance has_type_qPreterm {Γ}
+  : has_type Γ ‘Preterm’ (Ast.tSort Ast.sSet)
+    := _.
+  Definition wttPreterm {Γ} : box' Γ (Ast.tSort Ast.sSet)
+    := (‘Preterm’; has_type_qPreterm).
+  Notation "‘‘Preterm’’" := wttPreterm : well_typed_term_scope.
+
+  Global Instance has_type_qbox
+  : has_type ε ‘□’ (term' ‘→’ Ast.tSort qbox_Ui).
+  Proof.
+    unfold qbox, qbox_Ui.
+    repeat t_has_type; shelve_unifiable.
+    admit'.
+  Qed.
+
+  Axiom box_qtProd_dom_precompose
+  : forall {Γ} A B C,
+      (box' Γ (‘□’ ‘’ B) -> box' Γ (‘□’ ‘’ A))
+      -> box' Γ (‘□’ ‘’ (A ‘‘→’’ C))
+      -> box' Γ (‘□’ ‘’ (B ‘‘→’’ C)).
+
+  (** FIXME: This seems a bit fishy... *)
+  Axiom box_quote_app_quote
+  : forall Γ T,
+      box' Γ (‘□’
+               ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ⌜ T ⌝))))
+      -> box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝))).
+
+  Axiom box_quote_app_quote_inv
+  : forall Γ T,
+      box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝)))
+      -> box' Γ (‘□’
+                  ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ⌜ T ⌝)))).
+
+  Quote Definition has_type' := has_type nil.
+  Axiom has_type_has_type' : forall {Γ}, has_type Γ has_type' (‘Preterm’ ‘→’ ‘Preterm’ ‘→’ Ast.tSort (Ast.sType 3)).
+  Existing Instance has_type_has_type'.
+  Definition wtthas_type {Γ} : box' Γ _
+    := (has_type'; has_type_has_type').
+  Notation "‘‘has_type’’" := wtthas_type : well_typed_term_scope.
+
+  Definition wttexistT {Γ U1 U2} : box' Γ _
+    := (‘existT’; has_type_qexistT _ U1 U2).
+  Notation "‘‘existT’’" := wttexistT : well_typed_term_scope.
+
+  Local Ltac set_evars :=
+    repeat match goal with
+             | [ |- appcontext[?E] ] => is_evar E; let e := fresh in set (e := E)
+           end.
+
+  Local Ltac subst_body :=
+    repeat match goal with
+             | [ H := _ |- _ ] => subst H
+           end.
+
+  Local Ltac conv_rewrite
+    := set_evars;
+      repeat match goal with
+               | [ |- convertible _ ?x ?x ] => reflexivity
+               | [ |- convertible _ (?x ‘’ _) (?x ‘’ _) ]
+                 => apply tApp_Proper_convertible; [ reflexivity | ]
+               | [ |- convertible _ (_ ‘‘→’’ _) (_ ‘‘→’’ _) ]
+                 => apply qtProd_Proper_convertible
+               | [ |- convertible _ (_ ‘→’ ?x) _ ]
+                 => apply tProd_Proper_convertible; [ | reflexivity ]
+               | _ => progress rewrite_strat repeat (topdown repeat (hints convdb))
+             (*| _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda*)
+             end;
+      subst_body.
+
+
+  Local Notation "x ‘’ y" := (wttApp_1 x%wtt y%wtt) : well_typed_term_scope.
+
   Definition Quot : forall T, □ T -> □ (‘□’ ‘’ ⌜ T ⌝).
   Proof.
-    intros T box_T'.
-    admit'.
-    (*eapply box'_respectful.
-    { symmetry.
-      etransitivity.
-      { apply convertible_beta_app_lambda.
-    apply
-    refine (Ast.tApp ‘existT’ [‘Preterm’; _; quote box_T'.1; _]; _).
+    intros T bT.
     unfold qbox.
-    eapply has_type_existT.
+    eapply box'_respectful; cycle 1.
+    Timeout 5 refine (‘‘existT’’ ‘’ ‘‘Preterm’’ ‘’ (wttLambda_nd _ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’)) ‘’ ‘⌜ bT.1 ⌝’ ‘’ (_ bT.2))%wtt; shelve_unifiable;
+    simpl.
+    2:simpl; fold tApp.
+    Focus 2.
+    match goal with
+      | [ |- context G[Ast.tApp ?f [?x]] ]
+        => let G' := context G[tApp f x] in
+           change G'
+    end.
+    match goal wit
 
-    do 4 (apply has_type_beta_1_type with (f := fun x => x); simpl).
-  eapply has_type_existT.
-  { apply quote_term_has_type. }
-  { do 1 (apply has_type_beta_1_type with (f := fun x => x); simpl).
-    (** Need to somehow lift (quine?) typing derivation here *)
-    exfalso; admit.
-    Grab Existential Variables.
-    admit. }
+    unfold convertible.
+    Timeout 5 rewrite conv_beta.
 
-    let t := (eval cbv delta [Quot box box'] in @Quot) in
-    quote_term t (fun x => exact x).*)
-  Defined.
+    Hint Extern 1 (is_closed ?x)
+    => (not has_evar x; hnf; simpl;
+        try (intros ? [?|] ?; simpl; unfold quote; rewrite ?eq__quote_term__closed_helper; reflexivity)) : typeclass_instances.
+    pose (fun Γ => wttLambda_nd (Γ := Γ) _ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’))%wtt.
+ ‘’ (wttLambda_nd _ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’))
+      shelve_unifiable;
+      try match goal with
+            | [ |- is_closed ?x ]
+              => not has_evar x; hnf; simpl;
+                 try (intros ? [?|] ?; simpl; unfold quote; rewrite ?eq__quote_term__closed_helper; reflexivity)
+          end.
+    Focus 4.
+    { intros ? [?|]; simpl.
+      intros; unfold quote; rewrite eq__quote_term__closed_helper.
+    unfold tApp.
+    repeat match goal with
+             | _ => intro
+             | [ |- ?f _ = ?f _ ] => apply f_equal
+             | [ |- ?f _ _ = ?f _ _ ] => apply f_equal2
+           end.
+    6:hnf; reflexivity.
+(wttLambda_nd ‘Preterm’ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’)) ‘’ ‘⌜ bT.1 ⌝’ ‘’ _(*(_ bT.2)*))%wtt.
+            _).
 
+  Section context.
+    Context (qX qL0 : Preterm).
+    Let Γ := (ε ▻ (‘□’
+                    ‘’ (tLambda ‘Preterm’
+                                (‘App’ ‘’ ⌜ ‘□’ ⌝
+                                  ‘’ (‘App’ ‘’ ‘VAR₀’ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ‘VAR₀’))
+                                  ‘‘→’’ ⌜ qX ⌝) ‘’ ⌜ qL0 ⌝))).
 
-  Axiom qQuote
-  : forall T,
-      let A := (‘□’ ‘’ T)%preterm in
-      □ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
+    Axiom qQuote
+    : forall T,
+        let A := (‘□’ ‘’ T)%preterm in
+        box' Γ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
 
-  Axiom qbApp
-   : forall A' B',
-       □ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
-
-  Axiom App : forall {A' B'} {H : is_closed B'},
-                □ (A' ‘→’ B') -> □ A' -> □ B'.
-End LA.
+    Axiom qbApp
+    : forall A' B',
+        box' Γ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
+  End context.
+End DQT.
 
 Declare Module LH : LobHypotheses LC.
 
 Module Lob <: LobsTheorem LC LH.
-  Module Lob' := LobOfPreLob LC LH PP PreL' PRP TR PRTR LA.
+  Module PRTR' := PRTR DQT.
+  Module LA' := LA DQT.
+  Module Lob' := LobOfPreLob LC LH PP PreL' PRP TR PRTR' LA'.
   Definition lob := Lob'.lob.
   Print Assumptions lob.
 End Lob.

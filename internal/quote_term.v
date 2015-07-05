@@ -57,6 +57,7 @@ Quote Definition sigT' := sigT.
 Notation "‘sigT’" := sigT'.
 Quote Definition existT' := existT.
 Notation "‘existT’" := existT'.
+Quote Definition prod' := prod.
 
 Quote Definition nat' := nat.
 Quote Definition qO := O.

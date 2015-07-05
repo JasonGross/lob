@@ -93,7 +93,7 @@ Module Type PreL (LC : LobExtendedContext) (Export PP : PretermPrimitives LC).
 
   Notation "x ‘’ y" := (wttApp_1_nd x%wtt y%wtt) : well_typed_term_scope.
 
-  Axiom box'_weaken : forall {Γ A}, box' ε A -> box' Γ A.
+  (*Axiom box'_weaken : forall {Γ A}, box' ε A -> box' Γ A.*)
 End PreL.
 
 Module Lob1 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
@@ -115,17 +115,18 @@ Module Lob1 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
 
     Axiom Conv2 : □ L -> □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’).
     Axiom Conv2_inv : □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’) -> □ L.
-    Axiom qConv2 : forall {Γ},
-                     box' Γ (‘□’ ‘’ ‘L’) -> box' Γ (‘□’ ‘’ (⌜ (‘□’ ‘’ ‘L’) ⌝ ‘‘→’’ ⌜ ‘X’ ⌝)).
+    Axiom qConv2 : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
+                   box' Γ (‘□’ ‘’ ‘L’) -> box' Γ (‘□’ ‘’ (⌜ (‘□’ ‘’ ‘L’) ⌝ ‘‘→’’ ⌜ ‘X’ ⌝)).
 
     Axiom Quot : □ L -> □ (‘□’ ‘’ ⌜ L ⌝).
 
     Axiom qbApp
-    : forall (A' := (⌜ ‘□’ ‘’ ‘L’ ⌝)%preterm)
+    : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
+      forall (A' := (⌜ ‘□’ ‘’ ‘L’ ⌝)%preterm)
              (B' := (⌜ ‘X’ ⌝)%preterm),
-        □ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ ‘□’ ‘’ A' ‘→’ ‘□’ ‘’ B').
+        box' Γ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ ‘□’ ‘’ A' ‘→’ ‘□’ ‘’ B').
 
-    Notation "‘‘App’’" := (box'_weaken qbApp) : well_typed_term_scope.
+    Notation "‘‘App’’" := ((*box'_weaken*) qbApp) : well_typed_term_scope.
 
     (*Axiom qConv
   : □ (‘□’ ‘’ ⌜‘□’ ‘’ ⌜L ⌝ ⌝ ‘→’ ‘□’ ‘’ ⌜ ‘□’ ‘’ ‘L’ ⌝).
@@ -133,10 +134,14 @@ Module Lob1 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
   Notation "‘‘Conv’’" := (box'_weaken qConv) : well_typed_term_scope.*)
 
     Axiom qQuote
-    : let A := (‘□’ ‘’ ‘L’)%preterm in
-      □ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
+    : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
+      let A := (‘□’ ‘’ ‘L’)%preterm in
+      box' Γ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
 
-    Notation "‘‘Quote’’" := (box'_weaken qQuote) : well_typed_term_scope.
+    Notation "‘‘Quote’’" := ((*box'_weaken*) qQuote) : well_typed_term_scope.
+
+    Axiom box'_weaken : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
+                        forall {A}, box' ε A -> box' Γ A.
   End PostL.
 End Lob1.
 
@@ -241,27 +246,39 @@ Module Type PretermReflectionTypingRules (Export LC : LobExtendedContext) (Expor
   Axiom box_quote_app_quote
   : forall Γ T,
       box' Γ (‘□’
-               ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ‘quote’ ‘’ ⌜ T ⌝))))
+               ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ⌜ T ⌝))))
       -> box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝))).
 
   Axiom box_quote_app_quote_inv
   : forall Γ T,
       box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝)))
       -> box' Γ (‘□’
-                  ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ‘quote’ ‘’ ⌜ T ⌝)))).
+                  ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ⌜ T ⌝)))).
 End PretermReflectionTypingRules.
 
-Module Type PostL_Assumptions (LC : LobExtendedContext) (Export PP : PretermPrimitives LC).
+Module Type PostL_Assumptions (LC : LobExtendedContext) (Export PP : PretermPrimitives LC) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP).
   Axiom Quot : forall T, □ T -> □ (‘□’ ‘’ ⌜ T ⌝).
 
-  Axiom qQuote
-  : forall T,
-      let A := (‘□’ ‘’ T)%preterm in
-      □ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
+  Section context.
+    Context (qX qL0 : Preterm).
+    Let Γ := (ε ▻ (‘□’
+                    ‘’ (tLambda ‘Preterm’
+                                (‘App’ ‘’ ⌜ ‘□’ ⌝
+                                  ‘’ (‘App’ ‘’ ‘VAR₀’ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ‘VAR₀’))
+                                  ‘‘→’’ ⌜ qX ⌝) ‘’ ⌜ qL0 ⌝))).
 
-  Axiom qbApp
-   : forall A' B',
-       □ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
+    Axiom qQuote
+    : forall T,
+        let A := (‘□’ ‘’ T)%preterm in
+        box' Γ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
+
+    Axiom qbApp
+    : forall A' B',
+        box' Γ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
+
+    Axiom box'_weaken
+    : forall {A}, box' ε A -> box' Γ A.
+  End context.
 
   Axiom App : forall {A' B'} {H : is_closed B'},
                 □ (A' ‘→’ B') -> □ A' -> □ B'.
@@ -281,7 +298,7 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
       := tLambda
            ‘Preterm’
            (((‘App’ ‘’ ⌜ ‘□’ ⌝)
-               ‘’ ((‘App’ ‘’ ‘VAR₀’ ‘’ (‘App’ ‘’ ‘quote’ ‘’ ‘VAR₀’))))
+               ‘’ ((‘App’ ‘’ ‘VAR₀’ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ‘VAR₀’))))
               ‘‘→’’
               ⌜ ‘X’ ⌝).
 
@@ -296,7 +313,7 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
     Notation "‘L’" := qL.
   End L.
 
-  Module PostL (Export PP : PretermPrimitives LC) (Export PL : PreL LC PP) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP) (Export PRTR : PretermReflectionTypingRules LC PP PRP TR) (LA : PostL_Assumptions LC PP).
+  Module PostL (Export PP : PretermPrimitives LC) (Export PL : PreL LC PP) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP) (Export PRTR : PretermReflectionTypingRules LC PP PRP TR) (LA : PostL_Assumptions LC PP PRP TR).
     Module L' := L PP PL PRP TR PRTR.
     Include L'.
 
@@ -304,18 +321,30 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
 
       Hint Rewrite convertible__qtApp__closed convertible__capture_avoiding_subst_0__tApp convertible__quote__closed convertible__quote__app convertible__capture_avoiding_subst_0__tVar0 convertible__qquote__closed convertible__capture_avoiding_subst_0__qtProd convertible__quote__qtProd convertible_beta_app_lambda : convdb.
 
+      Local Ltac set_evars :=
+        repeat match goal with
+                 | [ |- appcontext[?E] ] => is_evar E; let e := fresh in set (e := E)
+               end.
+
+      Local Ltac subst_body :=
+        repeat match goal with
+                 | [ H := _ |- _ ] => subst H
+               end.
+
       Local Ltac conv_rewrite
-        := repeat match goal with
-                    | [ |- convertible _ ?x ?x ] => reflexivity
-                    | [ |- convertible _ (?x ‘’ _) (?x ‘’ _) ]
-                      => apply tApp_Proper_convertible; [ reflexivity | ]
-                    | [ |- convertible _ (_ ‘‘→’’ _) (_ ‘‘→’’ _) ]
-                      => apply qtProd_Proper_convertible
-                    | [ |- convertible _ (_ ‘→’ ?x) _ ]
-                      => apply tProd_Proper_convertible; [ | reflexivity ]
-                    | _ => progress rewrite_strat repeat (topdown repeat (hints convdb))
-                    (*| _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda*)
-                  end.
+        := set_evars;
+          repeat match goal with
+                   | [ |- convertible _ ?x ?x ] => reflexivity
+                   | [ |- convertible _ (?x ‘’ _) (?x ‘’ _) ]
+                     => apply tApp_Proper_convertible; [ reflexivity | ]
+                   | [ |- convertible _ (_ ‘‘→’’ _) (_ ‘‘→’’ _) ]
+                     => apply qtProd_Proper_convertible
+                   | [ |- convertible _ (_ ‘→’ ?x) _ ]
+                     => apply tProd_Proper_convertible; [ | reflexivity ]
+                   | _ => progress rewrite_strat repeat (topdown repeat (hints convdb))
+                 (*| _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda*)
+                 end;
+          subst_body.
 
 
 
@@ -344,7 +373,7 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
         := fun x => x.
       Definition Conv2_inv : □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’) -> □ L
         := fun x => x.
-      Definition qConv2 {Γ}
+      Definition qConv2 (Γ := (ε ▻ ‘□’ ‘’ ‘L’))
       : box' Γ (‘□’ ‘’ ‘L’) -> box' Γ (‘□’ ‘’ (⌜‘□’ ‘’ ‘L’ ⌝ ‘‘→’’ ⌜ ‘X’ ⌝)).
       Proof.
         unfold qL.
@@ -374,25 +403,41 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
       Definition Quot : □ L -> □ (‘□’ ‘’ ⌜ L ⌝)
         := LA.Quot _.
 
-      Definition qbApp
-      : forall (A' := (⌜‘□’ ‘’ ‘L’ ⌝)%preterm)
-               (B' := (⌜‘X’ ⌝)%preterm),
-          □ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B'))
-        := LA.qbApp _ _.
+      Global Instance convertible_Proper_flip_arrow {Γ}
+      : Proper (convertible Γ ==> convertible Γ ==> flip arrow) (convertible Γ).
+      Proof.
+        intros ?? H ?? H' H''.
+        rewrite H, H''.
+        rewrite <- H'.
+        reflexivity.
+      Qed.
 
-      Notation "‘‘App’’" := (box'_weaken qbApp) : well_typed_term_scope.
+      Definition qbApp
+      : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
+        forall (A' := (⌜‘□’ ‘’ ‘L’ ⌝)%preterm)
+               (B' := (⌜‘X’ ⌝)%preterm),
+          box' Γ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B'))
+        := LA.qbApp _ _ _ _.
+
+      Notation "‘‘App’’" := ((*box'_weaken*) qbApp) : well_typed_term_scope.
 
       Definition qQuote
-      : let A := (‘□’ ‘’ ‘L’)%preterm in
-        □ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝)))
-        := LA.qQuote _.
+      : let Γ := ε ▻ ‘□’ ‘’ ‘L’ in
+        let A := (‘□’ ‘’ ‘L’)%preterm in
+        box' Γ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝)))
+        := LA.qQuote _ _ _.
 
-      Notation "‘‘Quote’’" := (box'_weaken qQuote) : well_typed_term_scope.
+      Notation "‘‘Quote’’" := ((*box'_weaken*) qQuote) : well_typed_term_scope.
 
-      Definition App : let A' := ‘□’ ‘’ ‘L’ in
-                       let B' := ‘X’ in
-                       □ (A' ‘→’ B') -> □ A' -> □ B'
-        := @LA.App _ _ LH.qX_closed.
+      Definition App : (let A' := ‘□’ ‘’ ‘L’ in
+                        let B' := ‘X’ in
+                        □ (A' ‘→’ B') -> □ A' -> □ B')
+        := (@LA.App _ _ LH.qX_closed).
+
+      Definition box'_weaken : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
+                               forall {A}, box' ε A -> box' Γ A
+        := @LA.box'_weaken _ _.
+
     End M.
   End PostL.
 End Lob2.
@@ -404,7 +449,7 @@ Module Type Lob2H (Export LC : LobExtendedContext) (Export LH : LobHypotheses LC
   Declare Module Export PRP : PretermReflectionPrimitives LC.
   Declare Module Export TR : TypingRules LC PP.
   Declare Module Export PRTR : PretermReflectionTypingRules LC PP PRP TR.
-  Declare Module Export LA : PostL_Assumptions LC PP.
+  Declare Module Export LA : PostL_Assumptions LC PP PRP TR.
 End Lob2H.
 
 Module Lob2'0 (LC : LobExtendedContext) (LH : LobHypotheses LC) (M : Lob2H LC LH)
@@ -430,7 +475,7 @@ Module LobOfPreLob
        (Export PRP : PretermReflectionPrimitives LC)
        (Export TR : TypingRules LC PP)
        (Export PRTR : PretermReflectionTypingRules LC PP PRP TR)
-       (Export LA : PostL_Assumptions LC PP)
+       (Export LA : PostL_Assumptions LC PP PRP TR)
 <: LobsTheorem LC LH.
   Module M'0 <: Lob2H LC LH.
     Module Lob2' := Lob2 LC LH.
