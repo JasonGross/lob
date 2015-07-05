@@ -787,7 +787,6 @@ Module DQT <: DoublyQuotedThings.
              end;
       subst_body.
 
-
   Local Notation "x ‘’ y" := (wttApp_1 x%wtt y%wtt) : well_typed_term_scope.
 
   Definition Quot : forall T, □ T -> □ (‘□’ ‘’ ⌜ T ⌝).
@@ -795,43 +794,91 @@ Module DQT <: DoublyQuotedThings.
     intros T bT.
     unfold qbox.
     eapply box'_respectful; cycle 1.
-    Timeout 5 refine (‘‘existT’’ ‘’ ‘‘Preterm’’ ‘’ (wttLambda_nd _ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’)) ‘’ ‘⌜ bT.1 ⌝’ ‘’ (_ bT.2))%wtt; shelve_unifiable;
-    simpl.
-    2:simpl; fold tApp.
-    Focus 2.
-    match goal with
-      | [ |- context G[Ast.tApp ?f [?x]] ]
-        => let G' := context G[tApp f x] in
-           change G'
-    end.
-    match goal wit
+    2:unfold tApp.
+    2:let RHS := match goal with |- ?R ?x ?y => constr:y end in
+      match RHS with
+        | context G[Ast.tApp (Ast.tLambda ?x ?A ?b) [?a]]
+          => let G' := context G[subst_n_name b a (Some 0%nat) x] in
+             refine (@transitivity _ _ _ _ G' _ _ _); simpl
+      end;
+        repeat match goal with
+                 | [ |- ?R (Ast.tApp _ _) (Ast.tApp _ _) ]
+                   => apply tApp_Proper
+                 | [ |- ?R _ (Ast.tApp (Ast.tLambda _ _ _) _) ]
+                   => etransitivity; [ | symmetry; apply conv_beta ]
+                 | [ |- ?R (Ast.tLambda ?n ?A _) (Ast.tLambda ?n ?A _) ]
+                   => apply tLambda_Proper1
+                 | [ |- ?R ?x ?x ] => reflexivity
+                 | [ |- (_ * _)%type ] => split
+                 | [ |- True ] => constructor
+                 | _ => progress simpl
+               end.
+    Timeout 5 refine (‘‘existT’’ ‘’ ‘‘Preterm’’ ‘’ (wttLambda_nd _ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’)) ‘’ ‘⌜ bT.1 ⌝’ ‘’ (_ bT.2))%wtt; shelve_unifiable.
+    2:repeat match goal with
+               | [ |- ?R (Ast.tApp _ [_]) (Ast.tApp _ [_]) ]
+                 => apply tApp_Proper
+               | [ |- ?R (Ast.tApp _ nil) (Ast.tApp _ nil) ]
+                 => apply tApp_Proper
+               | [ |- ?R (Ast.tApp _ [_;_]) (Ast.tApp _ [_;_]) ]
+                 => apply tApp_Proper
+               | [ |- ?R (Ast.tApp _ [_;_;_]) (Ast.tApp _ [_;_;_]) ]
+                 => apply tApp_Proper
+               | [ |- ?R _ (Ast.tApp (Ast.tLambda _ _ _) _) ]
+                 => etransitivity; [ | symmetry; apply conv_beta ]
+               | [ |- ?R (Ast.tApp (Ast.tApp _ _) _) _ ]
+                 => apply conv_tApp_cons2
+               | [ |- ?R _ (Ast.tApp (Ast.tApp _ _) _) ]
+                 => symmetry; apply conv_tApp_cons2; symmetry
+               | [ |- ?R (Ast.tLambda ?n ?A _) (Ast.tLambda ?n ?A _) ]
+                 => apply tLambda_Proper1
+               | [ |- ?R _ (Ast.tLambda (Ast.nNamed _) _ _) ]
+                 => etransitivity; [ | symmetry; apply conv_tLambda_unname ]
+               | [ |- ?R ?x ?x ] => reflexivity
+               | [ |- (_ * _)%type ] => split
+               | [ |- True ] => constructor
+               | _ => progress simpl
+               | _ => progress unfold quote_term.quote, term_quotable
+               | _ => rewrite eq__quote_term__closed_helper
+             end.
+    { simpl.
+      intro ht.
+      eapply box'_respectful.
+      { let RHS := match goal with |- ?R ?x ?y => constr:y end in
+        match RHS with
+          | context G[Ast.tApp (Ast.tLambda ?x ?A ?b) [?a]]
+            => let G' := context G[subst_n_name b a (Some 0%nat) x] in
+               refine (@transitivity _ _ _ _ G' _ _ _); simpl
+        end;
+          repeat match goal with
+                   | [ |- ?R _ (Ast.tApp (Ast.tLambda _ _ _) _) ]
+                     => etransitivity; [ | symmetry; apply conv_beta ]
+                   | [ |- ?R (Ast.tApp (Ast.tLambda _ _ _) _) _ ]
+                     => etransitivity; [ apply conv_beta | ]
+                   | [ |- ?R (Ast.tLambda ?n ?A _) (Ast.tLambda ?n ?A _) ]
+                     => apply tLambda_Proper1
+                   | [ |- ?R (Ast.tApp _ [_]) (Ast.tApp _ [_]) ]
+                     => apply tApp_Proper
+                   | [ |- ?R (Ast.tApp _ nil) (Ast.tApp _ nil) ]
+                     => apply tApp_Proper
+                   | [ |- ?R (Ast.tApp _ [_;_]) (Ast.tApp _ [_;_]) ]
+                     => apply tApp_Proper
+                   | [ |- ?R (Ast.tApp _ [_;_;_]) (Ast.tApp _ [_;_;_]) ]
+                     => apply tApp_Proper
+                   | [ |- ?R (Ast.tApp (Ast.tApp _ _) _) _ ]
+                     => apply conv_tApp_cons2
+                   | [ |- ?R _ (Ast.tApp (Ast.tApp _ _) _) ]
+                     => symmetry; apply conv_tApp_cons2; symmetry
+                   | [ |- ?R ?x ?x ] => reflexivity
+                   | [ |- (_ * _)%type ] => split
+                   | [ |- True ] => constructor
+                   | _ => progress simpl
+                   | _ => progress unfold quote_term.quote, term_quotable
+                   | _ => rewrite eq__quote_term__closed_helper
+                 end;
+          reflexivity. }
+      admit.
+  Admitted.
 
-    unfold convertible.
-    Timeout 5 rewrite conv_beta.
-
-    Hint Extern 1 (is_closed ?x)
-    => (not has_evar x; hnf; simpl;
-        try (intros ? [?|] ?; simpl; unfold quote; rewrite ?eq__quote_term__closed_helper; reflexivity)) : typeclass_instances.
-    pose (fun Γ => wttLambda_nd (Γ := Γ) _ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’))%wtt.
- ‘’ (wttLambda_nd _ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’))
-      shelve_unifiable;
-      try match goal with
-            | [ |- is_closed ?x ]
-              => not has_evar x; hnf; simpl;
-                 try (intros ? [?|] ?; simpl; unfold quote; rewrite ?eq__quote_term__closed_helper; reflexivity)
-          end.
-    Focus 4.
-    { intros ? [?|]; simpl.
-      intros; unfold quote; rewrite eq__quote_term__closed_helper.
-    unfold tApp.
-    repeat match goal with
-             | _ => intro
-             | [ |- ?f _ = ?f _ ] => apply f_equal
-             | [ |- ?f _ _ = ?f _ _ ] => apply f_equal2
-           end.
-    6:hnf; reflexivity.
-(wttLambda_nd ‘Preterm’ (‘‘has_type’’ ‘’ ‘‘VAR₀’’ ‘’ ‘⌜ T ⌝’)) ‘’ ‘⌜ bT.1 ⌝’ ‘’ _(*(_ bT.2)*))%wtt.
-            _).
 
   Section context.
     Context (qX qL0 : Preterm).

@@ -1,4 +1,5 @@
 (* Runs on top of https://github.com/gmalecha/template-coq *)
+Require Import Coq.Setoids.Setoid Coq.Classes.CMorphisms.
 Require Import Template.Template.
 
 Set Asymmetric Patterns.
@@ -168,11 +169,10 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
        Γ ⊢ λ x.b ≡ λ x.b'
 >> *)
 | conv_pi_intro_eq
-  : forall Γ x A A' B B' b b',
+  : forall Γ x A A' b b',
       convertible Γ A A'
-      -> convertible (Γ ▻ (x, A)) B B'
       -> convertible (Γ ▻ (x, A)) b b'
-      -> convertible Γ (Ast.tLambda x A b) (Ast.tLambda x A b')
+      -> convertible Γ (Ast.tLambda x A b) (Ast.tLambda x A' b')
 | conv_tApp_empty1 : forall Γ f k,
                        convertible Γ f k
                        -> convertible Γ (Ast.tApp f []) k
@@ -212,6 +212,10 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
                             convertible Γ A A'
                             -> convertible (Γ ▻ (x, A)) B B'
                             -> convertible Γ (Ast.tProd x A B) (Ast.tProd x A' B')
+| conv_tLambda_unname : forall Γ n A b,
+                          convertible Γ
+                                      (Ast.tLambda (Ast.nNamed n) A b)
+                                      (Ast.tLambda Ast.nAnon A (subst_n_name b (Ast.tRel 0) None (Ast.nNamed n)))
 with has_type : Context -> Ast.term -> Ast.term -> Type :=
 (**
 <<
@@ -480,3 +484,116 @@ Definition is_a_type Γ (T : Ast.term)
 Lemma is_a_type_good {Γ t T} : has_type Γ t T -> is_a_type Γ T.
 Proof.
 Admitted.
+
+Global Instance convertible_Reflexive {Γ} : Reflexive (convertible Γ) := conv_refl _.
+Global Instance convertible_Symmetric {Γ} : Symmetric (convertible Γ) := conv_sym _.
+Global Instance convertible_Transitive {Γ} : Transitive (convertible Γ) := conv_trans _.
+
+Definition nat_eq_dec (x y : nat) : {x = y} + {x <> y}.
+Proof.
+  revert y; induction x.
+  { intros [|?]; [ left; reflexivity | right ].
+    abstract auto with arith. }
+  { intros [|y]; [ right | ].
+    { abstract auto with arith. }
+    { destruct (IHx y); [ left | right ].
+      { apply f_equal; assumption. }
+      { abstract eauto with arith. } } }
+Defined.
+
+Arguments nat_eq_dec !_ !_ / .
+
+Global Instance tApp_Proper_singleton {Γ}
+: Proper ((convertible Γ)
+            ==> (fun ls1 ls2
+                 => match ls1, ls2 with
+                      | nil, nil => True
+                      | nil, _ => False
+                      | _, nil => False
+                      | x::xs, y::ys
+                        => (convertible Γ x y * (xs = ys))%type
+                    end)
+            ==> convertible Γ) Ast.tApp.
+Proof.
+  intros x y H [|t ls] [|t' ls'] [].
+  { apply conv_tApp_empty1; symmetry.
+    apply conv_tApp_empty1; symmetry.
+    assumption. }
+  { intros H' ?; subst.
+    revert x y H t t' H'; induction ls'.
+    { intros; apply conv_tApp_respectful; assumption. }
+    { intros x y H t t' H'.
+      apply conv_tApp_cons1; symmetry.
+      apply conv_tApp_cons1; symmetry.
+      apply IHls'; [ | reflexivity ].
+      apply conv_tApp_respectful; assumption. } }
+Qed.
+
+Global Instance tApp_Proper {Γ}
+: Proper ((convertible Γ)
+            ==> (fun ls1 ls2
+                 => List.fold_right
+                      prod
+                      (if nat_eq_dec (List.length ls1) (List.length ls2)
+                       then True
+                       else False)
+                      (List.map
+                         (fun ab => convertible Γ (fst ab) (snd ab))
+                         (List.combine ls1 ls2)))
+            ==> convertible Γ) Ast.tApp.
+Proof.
+  intros x y H ls.
+  revert x y H; induction ls; simpl.
+  { intros x y H [|??] [].
+    apply tApp_Proper_singleton; trivial. }
+  { intros x y H [|y' y's] []; simpl.
+    intros H0 H1.
+    specialize (fun x y H => IHls x y H y's).
+    edestruct nat_eq_dec; unfold eq_rec_r, eq_rec, eq_rect, eq_sym in *; simpl in *.
+    { specialize (fun x y H => IHls x y H H1).
+      apply conv_tApp_cons1; symmetry.
+      apply conv_tApp_cons1; symmetry.
+      apply IHls.
+      apply tApp_Proper_singleton; trivial; split; trivial. }
+    { exfalso; revert H1; clear.
+      match goal with
+        | [ |- List.fold_right prod False ?ls -> _ ] => generalize ls
+      end.
+      clear; intro ls.
+      induction ls; simpl; intuition. } }
+Qed.
+
+Global Instance tApp_Proper_eq {Γ}
+: Proper (convertible Γ ==> eq ==> convertible Γ) Ast.tApp.
+Proof.
+  repeat intro; subst; apply tApp_Proper_singleton; trivial.
+  edestruct (_ : list Ast.term); repeat constructor.
+Qed.
+
+Global Instance tLambda_Proper1 {Γ n A}
+: Proper (convertible (Γ ▻ (n, A)) ==> convertible Γ) (Ast.tLambda n A).
+Proof.
+  intros x y H.
+  eapply conv_pi_intro_eq; trivial; constructor.
+Qed.
+
+Global Instance tLambda_Proper2 {Γ n}
+: Proper (convertible Γ ==> eq ==> convertible Γ) (Ast.tLambda n).
+Proof.
+  intros x y H ???; subst.
+  eapply conv_pi_intro_eq; trivial; constructor.
+Qed.
+
+Global Instance tProd_Proper1 {Γ n A}
+: Proper (convertible (Γ ▻ (n, A)) ==> convertible Γ) (Ast.tProd n A).
+Proof.
+  intros x y H.
+  eapply conv_tProd_respectful; trivial; constructor.
+Qed.
+
+Global Instance tProd_Proper2 {Γ n}
+: Proper (convertible Γ ==> eq ==> convertible Γ) (Ast.tProd n).
+Proof.
+  intros x y H ???; subst.
+  eapply conv_tProd_respectful; trivial; constructor.
+Qed.
