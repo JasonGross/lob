@@ -14,11 +14,16 @@ Local Open Scope list_scope.
 Require Export Lob.quote_term.
 Require Import Lob.Notations.
 
-Definition Context := list (Ast.name * Ast.term).
+Notation AstType := Ast.term (only parsing).
+Inductive ContextElement :=
+| CConstr (name : Ast.name) (type : AstType) (body : Ast.term)
+| CType (name : Ast.ident) (bodies : list (AstType * Ast.ident * Ast.inductive_body))
+| CBinder (name : Ast.name) (type : AstType).
+Definition Context := list ContextElement.
 Delimit Scope context_scope with ctx.
 Bind Scope context_scope with Context.
-Notation ε := (@nil (Ast.name * Ast.term) : Context).
-Definition context_extend (Γ : Context) (nx : Ast.name * Ast.term) := cons nx Γ.
+Notation ε := (@nil ContextElement : Context).
+Definition context_extend (Γ : Context) (nx : ContextElement) := cons nx Γ.
 Definition context_app (Γ Γ' : Context) := List.app Γ' Γ.
 Notation "Γ ▻ x" := (context_extend Γ x).
 Notation "Γ ▻▻ Γ'" := (context_app Γ Γ').
@@ -122,22 +127,234 @@ Fixpoint subst_n_name (in_term : Ast.term) (subst_term : Ast.term) (var_n : opti
        | Ast.tUnknown _ => in_term
      end.
 
-Fixpoint context_subst_n (in_context : Context) (subst_term : Ast.term) (var_n : option nat) (name : Ast.name) {struct in_context} : Context
-  := match in_context with
-       | nil => nil
-       | cons (n, T) Ts
-         => let name' := match n, name with
-                           | Ast.nNamed n', Ast.nNamed name'
-                             => if string_dec n' name'
-                                then Ast.nAnon
-                                else name
-                           | Ast.nAnon, _ => name
-                           | _, Ast.nAnon => name
-                         end in
-            context_extend
-              (context_subst_n Ts subst_term (option_map S var_n) name')
-              (n, subst_n_name T subst_term var_n name)
+(*Definition subst_one_sType1_def
+           (subst_one_sType1 : Ast.term -> option Ast.term)
+           (in_term : Ast.def Ast.term)
+: option (Ast.def Ast.term)
+  := match in_term with
+       | {| Ast.dname := dname ; Ast.dtype := dtype ; Ast.dbody := dbody ; Ast.rarg := rarg |}
+         => let dtype' := subst_one_sType1 dtype in
+            let dbody' := subst_one_sType1 dbody in
+            match dtype', dbody' with
+              | Some dtype'', _ => Some {| Ast.dname := dname;
+                                           Ast.dtype := dtype'';
+                                           Ast.dbody := dbody;
+                                           Ast.rarg := rarg |}
+              | None, Some dbody'' => Some {| Ast.dname := dname;
+                                              Ast.dtype := dtype;
+                                              Ast.dbody := dbody'';
+                                              Ast.rarg := rarg |}
+              | None, None => None
+            end
      end.
+
+Definition option_fold {A} (f : A -> option A) (ls : list A)
+  := match List.fold_right
+             (fun x acc
+              => match acc, f x with
+                   | inl acc', _ => inl (x::acc')
+                   | inr acc', Some x' => inl (x'::acc')
+                   | inr acc', None => inr (x::acc')
+                 end)
+             (inr [])
+             ls
+     with
+       | inl ls' => Some ls'
+       | inr _ => None
+     end.
+
+Fixpoint subst_one_sType1 (in_term : Ast.term) (subst_term : Ast.term) {struct in_term} : option Ast.term
+  := match in_term with
+       | Ast.tRel _ => None
+       | Ast.tVar _ => None
+       | Ast.tMeta _ => None
+       | Ast.tEvar _ => None
+       | Ast.tSort (Ast.sType 1) => Some subst_term
+       | Ast.tSort _ => None
+       | Ast.tCast term0' kind term1'
+         => match subst_one_sType1 term0' subst_term, subst_one_sType1 term1' subst_term with
+              | Some term0'', _ => Some (Ast.tCast term0'' kind term1')
+              | None, Some term1'' => Some (Ast.tCast term0' kind term1'')
+              | None, None => None
+            end
+       | Ast.tProd name' term0' term1'
+         => match subst_one_sType1 term0' subst_term, subst_one_sType1 term1' subst_term with
+              | Some term0'', _ => Some (Ast.tProd name' term0'' term1')
+              | None, Some term1'' => Some (Ast.tProd name' term0' term1'')
+              | None, None => None
+            end
+       | Ast.tLambda name' term0' term1'
+         => match subst_one_sType1 term0' subst_term, subst_one_sType1 term1' subst_term with
+              | Some term0'', _ => Some (Ast.tLambda name' term0'' term1')
+              | None, Some term1'' => Some (Ast.tLambda name' term0' term1'')
+              | None, None => None
+            end
+       | Ast.tLetIn name' term0' term1' term2'
+         => match subst_one_sType1 term0' subst_term, subst_one_sType1 term1' subst_term, subst_one_sType1 term2' subst_term with
+              | Some term0'', _, _ => Some (Ast.tLetIn name' term0'' term1' term2')
+              | None, Some term1'', _ => Some (Ast.tLetIn name' term0' term1'' term2')
+              | None, None, Some term2'' => Some (Ast.tLetIn name' term0' term1' term2'')
+              | None, None, None => None
+            end
+       | Ast.tApp f args
+         => match subst_one_sType1 f subst_term, option_fold (fun term' => subst_one_sType1 term' subst_term) args with
+              | Some f', _ => Some (Ast.tApp f' args)
+              | None, Some args' => Some (Ast.tApp f args')
+              | None, None => None
+            end
+       | Ast.tConst _ => None
+       | Ast.tInd _ => in_term
+       | Ast.tConstruct _ _ => in_term
+       | Ast.tCase n term0' term1' branches
+         => match subst_one_sType1 term0' subst_term, subst_one_sType1 term1' subst_term with
+              | Some f' => Some (Ast.tApp f' args)
+              | None => match List.fold_right
+                                (fun term acc
+                                 => match acc, subst_one_sType1 term subst_term with
+                                      | inl acc', _ => inl (term::acc')
+                                      | inr acc', Some term' => inl (term'::acc')
+                                      | inr acc', None => inr (term::acc')
+                                    end)
+                                (inr [])
+                                branches
+                        with
+                          | inl branches' => Some (Ast.tCase  f branches')
+                          | inr _ => None
+                        end
+Ast.tCase n
+                      (subst_n_name term0' subst_term var_n name)
+                      (subst_n_name term1' subst_term var_n name)
+                      (List.map (fun term' => subst_n_name term' subst_term var_n name) branches)
+       | Ast.tFix term0' n
+         => Ast.tFix (List.map (subst_n_name_def (fun term' var_n => subst_n_name term' subst_term var_n name) var_n) term0')
+                     n
+       | Ast.tUnknown _ => in_term
+     end.*)
+
+Fixpoint context_subst_n (in_context : Context) (subst_term : Ast.term) (var_n : option nat) (name : Ast.name) {struct in_context} : Context
+  := let new_name n := match name with
+                         | Ast.nNamed name'
+                           => if string_dec n name'
+                              then Ast.nAnon
+                              else name
+                         | Ast.nAnon => name
+                       end in
+     match in_context with
+       | nil => nil
+       | cons T0 Ts
+         => context_extend
+              (context_subst_n Ts subst_term (option_map S var_n) (match T0 with
+                                                                     | CConstr (Ast.nNamed n) _ _ => new_name n
+                                                                     | CType n _ => new_name n
+                                                                     | CBinder (Ast.nNamed n) _ => new_name n
+                                                                     | _ => name
+                                                                   end))
+              (match T0 with
+                 | CBinder n T => CBinder n (subst_n_name T subst_term var_n name)
+                 | CType _ _ => T0
+                 | CConstr n T body => CConstr n (subst_n_name T subst_term var_n name) (subst_n_name body subst_term var_n name)
+               end)
+     end.
+
+Definition bump_rel_from_def
+           (bump_rel : Ast.term -> option nat -> Ast.term)
+           (var_n : option nat)
+           (in_term : Ast.def Ast.term)
+: Ast.def Ast.term
+  := match in_term with
+       | {| Ast.dname := dname ; Ast.dtype := dtype ; Ast.dbody := dbody ; Ast.rarg := rarg |}
+         => {| Ast.dname := dname;
+               Ast.dtype := bump_rel dtype var_n;
+               Ast.dbody := bump_rel dbody (option_map S var_n);
+               Ast.rarg := rarg |}
+     end.
+
+Local Notation term_if_n n := (match n return Type with Ast.nNamed _ => Ast.term | Ast.nAnon => unit end) (only parsing).
+
+Fixpoint bump_rel_from (in_term : Ast.term) (var_n : option nat) (name : Ast.name) (new_value : term_if_n name) {struct in_term} : Ast.term
+  := match in_term with
+       | Ast.tRel v => match var_n with
+                         | Some var_n'
+                           => match Compare_dec.lt_dec v var_n' with
+                                | left _ => in_term
+                                | right _ => Ast.tRel (S v)
+                              end
+                         | None => in_term
+                       end
+       | Ast.tVar name0 => match name return term_if_n name -> _ with
+                             | Ast.nNamed name1
+                               => fun new_value =>
+                                    if String.string_dec name0 name1
+                                    then new_value
+                                    else in_term
+                             | Ast.nAnon => fun _ => in_term
+                           end new_value
+       | Ast.tMeta _ => in_term
+       | Ast.tEvar _ => in_term
+       | Ast.tSort _ => in_term
+       | Ast.tCast term0' kind term1'
+         => Ast.tCast (bump_rel_from term0' var_n name new_value)
+                      kind
+                      (bump_rel_from term1' var_n name new_value)
+       | Ast.tProd name' term0' term1'
+         => let new_name := match name, name' return { n : _ & term_if_n n } with
+                              | Ast.nNamed n0, Ast.nNamed n1
+                                => if String.string_dec n0 n1
+                                   then (Ast.nAnon; tt)
+                                   else (name; new_value)
+                              | _, _ => (name; new_value)
+                            end in
+            Ast.tProd name'
+                      (bump_rel_from term0' var_n new_name.1 new_name.2)
+                      (bump_rel_from term1' (option_map S var_n) new_name.1 new_name.2)
+       | Ast.tLambda name' term0' term1'
+         => let new_name := match name, name' return { n : _ & term_if_n n } with
+                              | Ast.nNamed n0, Ast.nNamed n1
+                                => if String.string_dec n0 n1
+                                   then (Ast.nAnon; tt)
+                                   else (name; new_value)
+                              | _, _ => (name; new_value)
+                            end in
+            Ast.tLambda name'
+                        (bump_rel_from term0' var_n new_name.1 new_name.2)
+                        (bump_rel_from term1' (option_map S var_n) new_name.1 new_name.2)
+       | Ast.tLetIn name' term0' term1' term2'
+         => let new_name := match name, name' return { n : _ & term_if_n n } with
+                              | Ast.nNamed n0, Ast.nNamed n1
+                                => if String.string_dec n0 n1
+                                   then (Ast.nAnon; tt)
+                                   else (name; new_value)
+                              | _, _ => (name; new_value)
+                            end in
+            Ast.tLetIn name'
+                       (bump_rel_from term0' var_n new_name.1 new_name.2)
+                       (bump_rel_from term1' var_n new_name.1 new_name.2)
+                       (bump_rel_from term2' (option_map S var_n) new_name.1 new_name.2)
+       | Ast.tApp f args
+         => Ast.tApp (bump_rel_from f var_n name new_value)
+                     (List.map (fun term' => bump_rel_from term' var_n name new_value) args)
+       | Ast.tConst _ => in_term
+       | Ast.tInd _ => in_term
+       | Ast.tConstruct _ _ => in_term
+       | Ast.tCase n term0' term1' branches
+         => Ast.tCase n
+                      (bump_rel_from term0' var_n name new_value)
+                      (bump_rel_from term1' var_n name new_value)
+                      (List.map (fun term' => bump_rel_from term' var_n name new_value) branches)
+       | Ast.tFix term0' n
+         => Ast.tFix (List.map (bump_rel_from_def (fun term' var_n => bump_rel_from term' var_n name new_value) var_n) term0')
+                     n
+       | Ast.tUnknown _ => in_term
+     end.
+
+Fixpoint down_from (n : nat)
+  := match n with
+       | O => []
+       | S n' => n'::down_from n'
+     end.
+
+Definition up_to n
+  := List.rev (down_from n).
 
 (** Quoting the rules from the appendix of the HoTT book, modified for an untyped conversion algorithm *)
 
@@ -171,7 +388,7 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
 | conv_pi_intro_eq
   : forall Γ x A A' b b',
       convertible Γ A A'
-      -> convertible (Γ ▻ (x, A)) b b'
+      -> convertible (Γ ▻ CBinder x A) b b'
       -> convertible Γ (Ast.tLambda x A b) (Ast.tLambda x A' b')
 | conv_tApp_empty1 : forall Γ f k,
                        convertible Γ f k
@@ -192,6 +409,8 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
 >> *)
 | conv_beta : forall Γ x A b a,
                 convertible Γ (Ast.tApp (Ast.tLambda x A b) [a]) (subst_n_name b a (Some 0%nat) x)
+| conv_delta : forall Γ x A body,
+                 convertible (Γ ▻ CConstr (Ast.nNamed x) A body) (Ast.tConst x) body
 (**
 <<
 Γ ⊢ f : Π_(x : A) B
@@ -210,12 +429,16 @@ Inductive convertible : Context -> Ast.term -> Ast.term -> Type :=
                            -> convertible Γ (Ast.tApp f [x]) (Ast.tApp f' [x'])
 | conv_tProd_respectful : forall Γ A A' B B' x,
                             convertible Γ A A'
-                            -> convertible (Γ ▻ (x, A)) B B'
+                            -> convertible (Γ ▻ CBinder x A) B B'
                             -> convertible Γ (Ast.tProd x A B) (Ast.tProd x A' B')
 | conv_tLambda_unname : forall Γ n A b,
                           convertible Γ
                                       (Ast.tLambda (Ast.nNamed n) A b)
                                       (Ast.tLambda Ast.nAnon A (subst_n_name b (Ast.tRel 0) None (Ast.nNamed n)))
+| conv_tProd_unname : forall Γ n A b,
+                        convertible Γ
+                                    (Ast.tProd (Ast.nNamed n) A b)
+                                    (Ast.tProd Ast.nAnon A (subst_n_name b (Ast.tRel 0) None (Ast.nNamed n)))
 with has_type : Context -> Ast.term -> Ast.term -> Type :=
 (**
 <<
@@ -224,7 +447,7 @@ with has_type : Context -> Ast.term -> Ast.term -> Type :=
 x₁ : A₁, ..., xₙ : Aₙ ⊢ xᵢ : Aᵢ
 >> *)
 | has_type_tRel_0 : forall T Γ n,
-                      has_type (Γ ▻ (n, T)) (Ast.tRel 0) T
+                      has_type (Γ ▻ CBinder n T) (Ast.tRel 0) T
 | has_type_tRel_S : forall T T' Γ n,
                       has_type Γ (Ast.tRel n) T
                       -> has_type (Γ ▻ T') (Ast.tRel (S n)) T
@@ -272,7 +495,7 @@ FIXME: This isn't what the numbers stand for!
 | has_type_tProd
   : forall Γ A x Ui B,
       has_type Γ A (Ast.tSort Ui)
-      -> has_type (Γ ▻ (x, A)) B (Ast.tSort Ui)
+      -> has_type (Γ ▻ CBinder x A) B (Ast.tSort Ui)
       -> has_type Γ (Ast.tProd x A B) (Ast.tSort Ui)
 (**
 <<
@@ -282,7 +505,7 @@ FIXME: This isn't what the numbers stand for!
 >> *)
 | has_type_tLambda
   : forall Γ x A B b,
-      has_type (Γ ▻ (x, A)) b B
+      has_type (Γ ▻ CBinder x A) b B
       -> has_type Γ (Ast.tLambda x A b) (Ast.tProd x A B)
 (**
 <<
@@ -295,6 +518,160 @@ FIXME: This isn't what the numbers stand for!
       has_type Γ f (Ast.tProd x A B)
       -> has_type Γ a A
       -> has_type Γ (Ast.tApp f [a]) (subst_n_name B a (Some 0%nat) x)
+| has_type_tInd : forall Γ name bodies n T,
+                    option_map fst (option_map fst (List.nth_error bodies n)) = Some T
+                    -> has_type (Γ ▻ CType name bodies) (Ast.tInd (Ast.mkInd name n)) T
+(*
+Inductive a := x : a * b * c -> a
+with b := y : a * b * c -> b
+with c := z : a * b * c -> c.
+Quote Recursively Definition d := a.
+Print d.
+Print List.fold_right. *)
+| has_type_tConstruct : forall Γ name bodies n_ind n_ctor T,
+                          option_map (fun x
+                                      => option_map
+                                           (fun T0
+                                            => List.fold_right
+                                                 (fun n_ind' T' => subst_n_name T' (Ast.tInd (Ast.mkInd name n_ind')) (Some 0%nat) Ast.nAnon)
+                                                 (snd (fst T0))
+                                                 (up_to (List.length bodies)))
+                                           (List.nth_error (Ast.ctors (snd x)) n_ctor))
+                                     (List.nth_error bodies n_ind) = Some (Some T)
+                          -> has_type (Γ ▻ CType name bodies)
+                                      (Ast.tConstruct (Ast.mkInd name n_ind) n_ctor)
+                                      T
+| has_type_tConst_constr : forall Γ n T v,
+                             has_type (Γ ▻ CConstr (Ast.nNamed n) T v) (Ast.tConst n) T
+| has_type_tConst_binder : forall Γ n T,
+                             has_type (Γ ▻ CBinder (Ast.nNamed n) T) (Ast.tConst n) T
+| has_type_tLambda_unname : forall Γ n A b B,
+                              has_type Γ (Ast.tLambda Ast.nAnon A (subst_n_name b (Ast.tRel 0) None (Ast.nNamed n))) B
+                              -> has_type Γ (Ast.tLambda (Ast.nNamed n) A b) B.
+
+Definition has_type_tConstruct1 Γ name body n_ctor T
+: option_map (fun T' => subst_n_name (snd (fst T')) (Ast.tInd (Ast.mkInd name 0)) (Some 0%nat) Ast.nAnon)
+             (List.nth_error (Ast.ctors (snd body)) n_ctor) = Some T
+  -> has_type (Γ ▻ CType name [body])
+              (Ast.tConstruct (Ast.mkInd name 0) n_ctor)
+              T
+  := fun H => has_type_tConstruct Γ name [body] 0 n_ctor T (f_equal Some H).
+
+Definition has_type_tInd1 Γ name body T
+: fst (fst body) = T
+  -> has_type (Γ ▻ CType name [body])
+              (Ast.tInd (Ast.mkInd name 0))
+              T
+  := fun H => has_type_tInd Γ name [body] 0 T (f_equal Some H).
+
+Fixpoint zip {A B} (ls1 : list A) (ls2 : list B)
+  := match ls1, ls2 with
+       | nil, _ => nil
+       | x::xs, y::ys => (x, y)::zip xs ys
+       | _, nil => nil
+     end.
+Fixpoint zip12 {A B C} (ls1 : list A) (ls2 : list (B * C))
+  := match ls1, ls2 with
+       | nil, _ => nil
+       | x::xs, y::ys => (x, fst y, snd y)::zip12 xs ys
+       | _, nil => nil
+     end.
+
+Fixpoint context_element_of_program_ind' (P : Ast.program) (ty : list Ast.term)
+  := match P with
+       | Ast.PType name bodies (Ast.PIn _) => Some (CType name (zip12 ty bodies))
+       | Ast.PType _ _ P' => context_element_of_program_ind' P' ty
+       | Ast.PIn _ => None
+       | Ast.PConstr _ _ P' => context_element_of_program_ind' P' ty
+       | Ast.PAxiom _ _ P' => context_element_of_program_ind' P' ty
+     end.
+
+Fixpoint context_element_of_program_axiom' (P : Ast.program)
+  := match P with
+       | Ast.PAxiom name type (Ast.PIn _) => Some (CBinder (Ast.nNamed name) type)
+       | Ast.PType _ _ P' => context_element_of_program_axiom' P'
+       | Ast.PIn _ => None
+       | Ast.PConstr _ _ P' => context_element_of_program_axiom' P'
+       | Ast.PAxiom _ _ P' => context_element_of_program_axiom' P'
+     end.
+
+Fixpoint context_element_of_program_constr' (P : Ast.program) (ty : Ast.term)
+  := match P with
+       | Ast.PConstr name body (Ast.PIn _) => Some (CConstr (Ast.nNamed name) ty body)
+       | Ast.PType _ _ P' => context_element_of_program_constr' P' ty
+       | Ast.PIn _ => None
+       | Ast.PConstr _ _ P' => context_element_of_program_constr' P' ty
+       | Ast.PAxiom _ _ P' => context_element_of_program_constr' P' ty
+     end.
+
+Definition unoption {A} (x : option A)
+  := match x return match x with
+                      | Some _ => A
+                      | None => unit
+                    end
+     with
+       | Some x' => x'
+       | None => tt
+     end.
+
+Definition get_ind P ty :=
+  Eval cbv beta iota zeta delta [unoption context_element_of_program_ind' zip12 fst snd] in
+    unoption (context_element_of_program_ind' P ty).
+Definition get_constr P ty :=
+  Eval cbv beta iota zeta delta [unoption context_element_of_program_constr' zip12 fst snd] in
+    unoption (context_element_of_program_constr' P ty).
+Definition get_axiom P :=
+  Eval cbv beta iota zeta delta [unoption context_element_of_program_axiom' zip12 fst snd] in
+    unoption (context_element_of_program_axiom' P).
+
+Declare Reduction eval_prog := hnf.
+
+(* FIXME: Universes*)
+Quote Recursively Definition qsigT_ind := @sigT.
+Definition sigT_ctx (U1 := Ast.sType 1) (U2 := Ast.sType 1) : ContextElement := Eval eval_prog in get_ind qsigT_ind [Ast.tSort U1 ‘→’ (Ast.tRel 0 ‘→’ Ast.tSort U2) ‘→’ Ast.tSort (umax U1 U2)].
+Quote Recursively Definition qlist_ind := @list.
+Definition list_ctx (U := Ast.sType 1) : ContextElement := Eval eval_prog in get_ind qlist_ind [Ast.tSort U ‘→’ Ast.tSort U].
+Quote Recursively Definition qnat_ind := @nat.
+Definition nat_ctx : ContextElement := Eval eval_prog in get_ind qnat_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qunit_ind := @unit.
+Definition unit_ctx : ContextElement := Eval eval_prog in get_ind qunit_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qsum_ind := @sum.
+Definition sum_ctx : ContextElement := Eval eval_prog in get_ind qsum_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qprod_ind := @prod.
+Definition prod_ctx : ContextElement := Eval eval_prog in get_ind qprod_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qpositive_ind := @positive.
+Definition positive_ctx : ContextElement := Eval eval_prog in get_ind qpositive_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qbool_ind := @bool.
+Definition bool_ctx : ContextElement := Eval eval_prog in get_ind qbool_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qascii_ind := @Ascii.ascii.
+Definition ascii_ctx : ContextElement := Eval eval_prog in get_ind qascii_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qstring_ind := @string.
+Definition string_ctx : ContextElement := Eval eval_prog in get_ind qstring_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition quniverse_constr := @Ast.universe.
+Definition universe_ctx : ContextElement := Eval eval_prog in get_constr quniverse_constr (Ast.tSort (Ast.sType 1)).
+Quote Recursively Definition qident_constr := @Ast.ident.
+Definition ident_ctx : ContextElement := Eval eval_prog in get_constr qident_constr (Ast.tSort (Ast.sType 1)).
+Quote Recursively Definition qsort_ind := @Ast.sort.
+Definition sort_ctx : ContextElement := Eval eval_prog in get_ind qsort_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qname_ind := @Ast.name.
+Definition name_ctx : ContextElement := Eval eval_prog in get_ind qname_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qcast_kind_ind := @Ast.cast_kind.
+Definition cast_kind_ctx : ContextElement := Eval eval_prog in get_ind qcast_kind_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qinductive_ind := @Ast.inductive.
+Definition inductive_ctx : ContextElement := Eval eval_prog in get_ind qinductive_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qdef_ind := @Ast.def.
+Definition def_ctx : ContextElement := Eval eval_prog in get_ind qdef_ind [Ast.tSort (Ast.sType 1) ‘→’ Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qmfixpoint_constr := @Ast.mfixpoint.
+Definition mfixpoint_ctx : ContextElement := Eval eval_prog in get_constr qmfixpoint_constr (Ast.tSort (Ast.sType 1)).
+Quote Recursively Definition qterm_ind := @Ast.term.
+Definition term_ctx : ContextElement := Eval eval_prog in get_ind qterm_ind [Ast.tSort (Ast.sType 1)].
+Quote Recursively Definition qinductive_body_ind := @Ast.inductive_body.
+Definition inductive_body_ctx : ContextElement := Eval eval_prog in get_ind qinductive_body_ind [Ast.tSort (Ast.sType 1)].
+(* echo ... | grep -o '^Definition [^ ]*' | sed s'/Definition //g' | tr '\n' ';' | sed s'/;/; /g' *)
+Definition DefaultContext : Context
+  := [sigT_ctx; list_ctx; nat_ctx; unit_ctx; sum_ctx; prod_ctx; positive_ctx; bool_ctx; ascii_ctx; string_ctx; universe_ctx; ident_ctx; sort_ctx; name_ctx; cast_kind_ctx; inductive_ctx; def_ctx; mfixpoint_ctx; term_ctx; inductive_body_ctx].
+(*
+
 (** FIXME: umax is not the Coq-representation of things *)
 | has_type_qsigT
 : forall Γ U1 U2,
@@ -361,20 +738,23 @@ FIXME: This isn't what the numbers stand for!
 | has_type_qtFix : forall Γ, has_type Γ qtFix (mfixpoint' term' ‘→’ nat' ‘→’ term')
 | has_type_qtUnknown : forall Γ, has_type Γ qtUnknown (string' ‘→’ term')
 | has_type_qmkdef : forall Γ T, has_type Γ qmkdef (name' ‘→’ T ‘→’ T ‘→’ nat' ‘→’ Ast.tApp def' [T])
-| has_type_tLambda_unname : forall Γ n A b B,
-                              has_type Γ (Ast.tLambda Ast.nAnon A (subst_n_name b (Ast.tRel 0) None (Ast.nNamed n))) B
-                              -> has_type Γ (Ast.tLambda (Ast.nNamed n) A b) B.
+*)
 
 Existing Class has_type.
 Existing Instances
          has_type_tApp
-         has_type_qO has_type_qS
+         has_type_tConst_constr
+         has_type_tConst_binder
+         has_type_tInd
+         has_type_tConstruct
+         has_type_tConstruct1
+         (*has_type_qO has_type_qS
          has_type_qsigT
-         has_type_qlist
-         has_type_prod' has_type_name'
-         has_type_qexistT
-         has_type_qtRel has_type_qtVar has_type_qtMeta has_type_qtEvar has_type_qtSort has_type_qtCast has_type_qtProd has_type_qtLambda has_type_qtLetIn has_type_qtApp has_type_qtConst has_type_qtInd has_type_qtConstruct has_type_qtCase has_type_qtFix has_type_qtUnknown
-         has_type_qtrue has_type_qfalse
+         has_type_qlist*)
+         (*has_type_prod' has_type_name'*)
+         (*has_type_qexistT*)
+         (*has_type_qtRel has_type_qtVar has_type_qtMeta has_type_qtEvar has_type_qtSort has_type_qtCast has_type_qtProd has_type_qtLambda has_type_qtLetIn has_type_qtApp has_type_qtConst has_type_qtInd has_type_qtConstruct has_type_qtCase has_type_qtFix has_type_qtUnknown*)
+         (*has_type_qtrue has_type_qfalse
          has_type_qAscii
          has_type_qEmptyString has_type_qString
          has_type_qxI has_type_qxO has_type_qxH
@@ -383,9 +763,40 @@ Existing Instances
          has_type_qnAnon has_type_qnNamed
          has_type_qVmCast has_type_qNativeCast has_type_qCast has_type_qRevertCast
          has_type_qmkInd has_type_qmkdef
-         has_type_term' has_type_def'
+         has_type_term' has_type_def'*)
          has_type_tRel_S has_type_tRel_0
          has_type_tLambda_unname.
+
+Fixpoint ContextLookupCType (Γ : Context) name
+  := match Γ with
+       | nil => None
+       | (CType name' bodies)::Γ'
+         => if string_dec name' name
+            then Some (CType name' bodies)
+            else ContextLookupCType Γ' name
+       | _::Γ' => ContextLookupCType Γ' name
+     end.
+
+Fixpoint ContextLookupCConstr (Γ : Context) name
+  := match Γ with
+       | nil => None
+       | (CConstr (Ast.nNamed name') ty body)::Γ'
+         => if string_dec name' name
+            then Some (CConstr (Ast.nNamed name') ty body)
+            else ContextLookupCConstr Γ' name
+       | _::Γ' => ContextLookupCConstr Γ' name
+     end.
+
+Fixpoint ContextLookupCBinder (Γ : Context) name
+  := match Γ with
+       | nil => None
+       | (CBinder (Ast.nNamed name') ty)::Γ'
+         => if string_dec name' name
+            then Some (0%nat, CBinder (Ast.nNamed name') ty)
+            else option_map (fun k => (S (fst k), snd k)) (ContextLookupCBinder Γ' name)
+       | _::Γ' => option_map (fun k => (S (fst k), snd k)) (ContextLookupCBinder Γ' name)
+     end.
+
 
 Global Instance has_type_tApp_split {Γ} f x x' xs T
 : has_type Γ (Ast.tApp (Ast.tApp f [x]) (x'::xs)) T
@@ -411,7 +822,7 @@ Definition Let_Context_inf_In (ctx : Context_inf) {T} (f : Context_inf -> T)
 HoTT book says provable by induction.
 *)
 Lemma subst_1 {Γ a x A Δ B b}
-: has_type Γ a A -> has_type (Γ ▻ (x, A) ▻▻ Δ) b B
+: has_type Γ a A -> has_type (Γ ▻ CBinder x A ▻▻ Δ) b B
   -> has_type (Γ ▻▻ context_subst_n Δ a (Some (List.length Γ)) x)%list
               (subst_n_name b a (Some (List.length Γ)) x)
               (subst_n_name B a (Some (List.length Γ)) x).
@@ -428,20 +839,23 @@ Admitted.
 
 HoTT book says provable by induction.  But we actually need to bump [Rel], eeeeew.  But not if Γ is empty.
 *)
-(*Lemma wkg_1 {Γ x A Δ B b Ui}
+Lemma wkg_1 {Γ A Δ B b Ui}
 : has_type Γ A (Ast.tSort Ui) -> has_type (Γ ▻▻ Δ) b B
-  -> has_type (Γ ▻ (x, A) ▻▻ Δ) b B.
+  -> has_type (Γ ▻ CBinder Ast.nAnon A ▻▻ Δ)
+              (@bump_rel_from b (Some (List.length Δ)) Ast.nAnon tt)
+              (@bump_rel_from B (Some (List.length Δ)) Ast.nAnon tt).
 Proof.
-Admitted.*)
-Lemma wkg_1_nil (Γ := ε) {Δ x A B b Ui}
+Admitted.
+
+Lemma wkg_1_nil (Γ := ε) {Δ A B b Ui}
 : has_type Γ A (Ast.tSort Ui) -> has_type (Γ ▻▻ Δ) b B
-  -> has_type (Γ ▻ (x, A) ▻▻ Δ) b B.
+  -> has_type (Γ ▻ CBinder Ast.nAnon A ▻▻ Δ) b B.
 Proof.
   subst Γ; simpl.
   unfold context_app, context_extend; simpl.
   rewrite !List.app_nil_r.
   intros H0 H1.
-  revert A x Ui H0.
+  revert A Ui H0.
   induction H1; try solve [ intros; econstructor; eauto ].
   all:admit.
 Admitted.
@@ -456,7 +870,7 @@ Admitted.
 HoTT book says provable by induction.
 *)
 Lemma subst_2 {Γ x a A Δ b c}
-: has_type Γ a A -> convertible (Γ ▻ (x, A) ▻▻ Δ) b c
+: has_type Γ a A -> convertible (Γ ▻ CBinder x A ▻▻ Δ) b c
   -> convertible (Γ ▻▻ context_subst_n Δ a (Some (List.length Γ)) x)%list
                  (subst_n_name b a (Some (List.length Γ)) x)
                  (subst_n_name c a (Some (List.length Γ)) x).
@@ -473,11 +887,13 @@ Admitted.
 
 HoTT book says provable by induction.  But we actually need to bump [Rel], eeeewww
 *)
-(*Lemma wkg_2 {Γ A Δ B b c Ui}
-: has_type Γ A (Ast.tSort Ui) -> convertible (Γ ▻▻ Δ) b c B
-  -> convertible (Γ ▻ A ▻▻ Δ) b c B.
+Lemma wkg_2 {Γ A Δ b c Ui}
+: has_type Γ A (Ast.tSort Ui) -> convertible (Γ ▻▻ Δ) b c
+  -> convertible (Γ ▻ CBinder Ast.nAnon A ▻▻ Δ)
+                 (@bump_rel_from b (Some (List.length Δ)) Ast.nAnon tt)
+                 (@bump_rel_from c (Some (List.length Δ)) Ast.nAnon tt).
 Proof.
-Admitted.*)
+Admitted.
 
 Definition is_a_type Γ (T : Ast.term)
   := { Ui : _ & has_type Γ T (Ast.tSort Ui) }.
@@ -485,9 +901,172 @@ Lemma is_a_type_good {Γ t T} : has_type Γ t T -> is_a_type Γ T.
 Proof.
 Admitted.
 
+Definition is_rel_free (term : Ast.term)
+  := forall k n, subst_n_name term k n Ast.nAnon = term.
+
+Definition is_rel_free' (term : Ast.term)
+  := forall n, bump_rel_from term n Ast.nAnon tt = term.
+
+Definition is_rel_free_def_iff
+           sn br
+           (is_rel_free_iff : forall term n, sn term n = term <-> br term n = term)
+           (term : Ast.def Ast.term)
+: (forall n, subst_n_name_def sn n term = term)
+  <-> (forall n, bump_rel_from_def br n term = term).
+Proof.
+  unfold subst_n_name_def, bump_rel_from_def.
+  pose proof (fun term n => proj1 (is_rel_free_iff term n)) as is_rel_free1.
+  pose proof (fun term n => proj2 (is_rel_free_iff term n)) as is_rel_free2.
+  clear is_rel_free_iff.
+  split; intros H n; specialize (H n); destruct term;
+  first [ rewrite !is_rel_free1
+        | rewrite !is_rel_free2 ];
+  try reflexivity;
+  inversion H;
+  repeat match goal with
+           | _ => reflexivity
+           | [ H : _ |- _ ] => rewrite !H
+         end.
+Defined.
+
+Fixpoint is_rel_free_iff term
+: is_rel_free term <-> is_rel_free' term.
+Proof.
+  unfold is_rel_free, is_rel_free' in *.
+  destruct term; simpl;
+  (split; intro H;
+   [ intro n'; specialize (fun k => H k n')
+   | intros k n'; specialize (H n') ]);
+  repeat match goal with
+           | [ |- _ <-> _ ] => split
+           | _ => intro
+           | _ => progress simpl in *
+           | _ => reflexivity
+           | [ H : False |- _ ] => solve [ destruct H ]
+           | _ => progress subst
+           | [ H : forall k : Ast.term, k = Ast.tRel ?x |- _ ] => exfalso; clear -H; specialize (H (Ast.tRel (S x)))
+           | _ => discriminate
+           | [ H : Ast.tRel _ = Ast.tRel _ |- _ ] => inversion H; clear H
+           | [ H : S ?x = ?x |- _ ] => apply PeanoNat.Nat.neq_succ_diag_l in H
+           | [ H : ?x = S ?x |- _ ] => symmetry in H; apply PeanoNat.Nat.neq_succ_diag_l in H
+           | [ H : (_ < 0)%nat |- _ ] => apply Coq.Arith.PeanoNat.Nat.nle_succ_0 in H
+           | [ H : Ast.term -> ?T |- _ ] => specialize (H (Ast.tRel 0%nat))
+           | [ H : (?x < ?x)%nat |- _ ] => apply PeanoNat.Nat.lt_irrefl in H
+           | [ H : Nat.pred ?x = ?x |- _ ] => is_var x; destruct x
+           | [ x : option _ |- _ ] => destruct x
+           | [ H : context[Compare_dec.lt_eq_lt_dec ?x ?y] |- _ ] => destruct (Compare_dec.lt_eq_lt_dec x y)
+           | [ |- context[Compare_dec.lt_eq_lt_dec ?x ?y] ] => destruct (Compare_dec.lt_eq_lt_dec x y)
+           | [ |- context[Compare_dec.lt_dec ?x ?y] ] => destruct (Compare_dec.lt_dec x y)
+           | [ H : context[Compare_dec.lt_dec ?x ?y] |- _ ] => destruct (Compare_dec.lt_dec x y)
+           | [ H : sumbool _ _ |- _ ] => destruct H
+           | [ H : ~?T, H' : ?T |- _ ] => specialize (H H')
+           | [ H : (?x < ?y)%nat, H' : (?y < ?x)%nat |- _ ]
+             => exfalso; clear -H H'; apply (PeanoNat.Nat.lt_irrefl x); transitivity y; eassumption
+         end.
+Admitted.
+
+Lemma wkg_rel_free {Γ Δ x A}
+: is_rel_free x
+  -> is_rel_free A
+  -> has_type Γ x A
+  -> has_type (Γ ▻▻ Δ) x A.
+Proof.
+Admitted.
+
+Lemma wkg_conv_rel_free {Γ Δ x y}
+: is_rel_free x
+  -> is_rel_free y
+  -> convertible Γ x y
+  -> convertible (Γ ▻▻ Δ) x y.
+Proof.
+Admitted.
+
+Definition has_type_tConstruct1_Lookup Γ name body n_ctor T
+: option_map (fun T' => subst_n_name (snd (fst T')) (Ast.tInd (Ast.mkInd name 0)) (Some 0%nat) Ast.nAnon)
+             (List.nth_error (Ast.ctors (snd body)) n_ctor)
+  = Some T
+  -> is_rel_free T
+  -> ContextLookupCType Γ name = Some (CType name [body])
+  -> has_type Γ
+              (Ast.tConstruct (Ast.mkInd name 0) n_ctor)
+              T.
+Proof.
+  intros H0 H1.
+  induction Γ as [|[]]; simpl ContextLookupCType;
+  [ intro; discriminate
+  |
+  | edestruct string_dec
+  | ];
+  try (intro H''; specialize (IHΓ H'');
+       apply (@wkg_rel_free Γ [_]); simpl; [ | | assumption ];
+       [ intros ? [?|];
+         simpl;
+         reflexivity
+       | hnf in H1 |- *;
+         (intros ??);
+         rewrite !H1; reflexivity ]).
+  { intro H'.
+    inversion H'; subst.
+    apply has_type_tConstruct1; assumption. }
+Qed.
+
+
+Definition has_type_tInd1_Lookup Γ name body T
+: fst (fst body) = T
+  -> is_rel_free T
+  -> ContextLookupCType Γ name = Some (CType name [body])
+  -> has_type Γ
+              (Ast.tInd (Ast.mkInd name 0))
+              T.
+Proof.
+  intros H0 H1.
+  induction Γ as [|[]]; simpl ContextLookupCType;
+  [ intro; discriminate
+  |
+  | edestruct string_dec
+  | ];
+  try (intro H''; specialize (IHΓ H'');
+       apply (@wkg_rel_free Γ [_]); simpl; [ | | assumption ];
+       [ intros ? [?|];
+         simpl;
+         reflexivity
+       | hnf in H1 |- *;
+         (intros ??);
+         rewrite !H1; reflexivity ]).
+  { intro H'.
+    inversion H'; subst.
+    apply has_type_tInd1; reflexivity. }
+Qed.
+
 Global Instance convertible_Reflexive {Γ} : Reflexive (convertible Γ) := conv_refl _.
 Global Instance convertible_Symmetric {Γ} : Symmetric (convertible Γ) := conv_sym _.
 Global Instance convertible_Transitive {Γ} : Transitive (convertible Γ) := conv_trans _.
+
+Definition conv_delta_Lookup Γ name
+           (body := match ContextLookupCConstr Γ name with
+                      | Some (CConstr _ _ body) => body
+                      | _ => Ast.tConst name
+                    end)
+           (H : is_rel_free body)
+: convertible Γ (Ast.tConst name) match ContextLookupCConstr Γ name with
+                                    | Some (CConstr _ _ body) => body
+                                    | _ => Ast.tConst name
+                                  end.
+Proof.
+  subst body.
+  induction Γ as [|]; simpl in *.
+  { reflexivity. }
+  { hnf in H.
+    edestruct (_ : ContextElement); simpl;
+    auto with nocore;
+    try solve [ apply (@wkg_conv_rel_free Γ [_]); hnf; simpl; [ reflexivity | intros; rewrite ?H; reflexivity | auto with nocore ] ];
+    edestruct (_ : Ast.name); simpl;
+    auto with nocore;
+    try solve [ apply (@wkg_conv_rel_free Γ [_]); hnf; simpl; [ reflexivity | intros; rewrite ?H; reflexivity | auto with nocore ] ];
+    edestruct string_dec; simpl;
+    try (subst; apply conv_delta);
+    try solve [ apply (@wkg_conv_rel_free Γ [_]); hnf; simpl; [ reflexivity | intros; rewrite ?H; reflexivity | auto with nocore ] ]. }
+Qed.
 
 Definition nat_eq_dec (x y : nat) : {x = y} + {x <> y}.
 Proof.
@@ -571,7 +1150,7 @@ Proof.
 Qed.
 
 Global Instance tLambda_Proper1 {Γ n A}
-: Proper (convertible (Γ ▻ (n, A)) ==> convertible Γ) (Ast.tLambda n A).
+: Proper (convertible (Γ ▻ CBinder n A) ==> convertible Γ) (Ast.tLambda n A).
 Proof.
   intros x y H.
   eapply conv_pi_intro_eq; trivial; constructor.
@@ -585,7 +1164,7 @@ Proof.
 Qed.
 
 Global Instance tProd_Proper1 {Γ n A}
-: Proper (convertible (Γ ▻ (n, A)) ==> convertible Γ) (Ast.tProd n A).
+: Proper (convertible (Γ ▻ CBinder n A) ==> convertible Γ) (Ast.tProd n A).
 Proof.
   intros x y H.
   eapply conv_tProd_respectful; trivial; constructor.

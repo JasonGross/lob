@@ -224,7 +224,7 @@ Section quote_term_helpers.
          | cons {| Ast.dname := dname' ; Ast.dtype := dtype' ; Ast.dbody := dbody' ; Ast.rarg := rarg' |} xs'
            => Ast.tApp
                 qcons
-                [Ast.tApp def' [term']; Ast.tApp qmkdef [quote dname'; quote_term dtype'; quote_term dbody'; quote rarg'];
+                [Ast.tApp def' [term']; Ast.tApp qmkdef [term'; quote dname'; quote_term dtype'; quote_term dbody'; quote rarg'];
                   quote_term_helper_def xs']
        end.
 

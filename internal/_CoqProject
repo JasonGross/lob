@@ -1,10 +1,9 @@
 -R . Lob
 -arg -no-native-compiler
 Notations.v
-lob.v
 quote_term.v
 conversion.v
-quote_has_type.v
+conversion_quote.v
 LobsTheoremStatement.v
 LobsTheoremProof.v
 LobsTheoremPreProof.v

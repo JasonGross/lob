@@ -141,7 +141,7 @@ Module Lob1 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
     Notation "‘‘Quote’’" := ((*box'_weaken*) qQuote) : well_typed_term_scope.
 
     Axiom box'_weaken : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
-                        forall {A}, box' ε A -> box' Γ A.
+                        forall {A} {H : is_closed A}, box' ε A -> box' Γ A.
   End PostL.
 End Lob1.
 
@@ -277,7 +277,7 @@ Module Type PostL_Assumptions (LC : LobExtendedContext) (Export PP : PretermPrim
         box' Γ ((‘□’ ‘’ (A' ‘‘→’’ B')) ‘→’ (‘□’ ‘’ A') ‘→’ (‘□’ ‘’ B')).
 
     Axiom box'_weaken
-    : forall {A}, box' ε A -> box' Γ A.
+    : forall {A} {H : is_closed A}, box' ε A -> box' Γ A.
   End context.
 
   Axiom App : forall {A' B'} {H : is_closed B'},
@@ -435,7 +435,7 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
         := (@LA.App _ _ LH.qX_closed).
 
       Definition box'_weaken : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
-                               forall {A}, box' ε A -> box' Γ A
+                               forall {A} {H : is_closed A}, box' ε A -> box' Γ A
         := @LA.box'_weaken _ _.
 
     End M.
