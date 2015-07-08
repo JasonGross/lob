@@ -37,6 +37,8 @@ Module Type LobContext.
                            (C : Typ (Γ ▻ A ▻ B))
                            (a : Term A),
                       Typ (Γ ▻ substTyp B a).
+  Notation "f ‘’₁ x" := (@substTyp1 _ _ _ f x) : typ_scope.
+
 
   Local Open Scope typ_scope.
 

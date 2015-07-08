@@ -49,40 +49,52 @@ Module Type TermPrimitives (Export LC : LobContext).
                             (c : Term C)
                             (a : Term A),
                        Term (@substTyp1 Γ A B C a).
+  Notation "f ‘’₁ x" := (@substTerm1 _ _ _ _ f x) : term_scope.
 
   Axiom substTyp2 : forall {Γ A B C}
                            (D : Typ (Γ ▻ A ▻ B ▻ C))
                            (a : Term A),
                       Typ (Γ ▻ substTyp B a ▻ substTyp1 C a).
+  Notation "f ‘’₂ x" := (@substTyp2 _ _ _ _ f x) : typ_scope.
+
 
   Axiom substTerm2 : forall {Γ A B C D}
                             (c : Term D)
                             (a : Term A),
                        Term (@substTyp2 Γ A B C D a).
+  Notation "f ‘’₂ x" := (@substTerm2 _ _ _ _ _ f x) : term_scope.
 
   Axiom substTyp3 : forall {Γ A B C D}
                            (E : Typ (Γ ▻ A ▻ B ▻ C ▻ D))
                            (a : Term A),
                       Typ (Γ ▻ substTyp B a ▻ substTyp1 C a ▻ substTyp2 D a).
+  Notation "f ‘’₃ x" := (@substTyp3 _ _ _ _ _ f x) : typ_scope.
 
   Axiom substTerm3 : forall {Γ A B C D E}
                             (e : Term E)
                             (a : Term A),
                        Term (@substTyp3 Γ A B C D E a).
+  Notation "f ‘’₃ x" := (@substTerm3 _ _ _ _ _ _ f x) : term_scope.
 
   Axiom substTyp4 : forall {Γ A B C D E}
                            (F : Typ (Γ ▻ A ▻ B ▻ C ▻ D ▻ E))
                            (a : Term A),
                       Typ (Γ ▻ substTyp B a ▻ substTyp1 C a ▻ substTyp2 D a ▻ substTyp3 E a).
+  Notation "f ‘’₄ x" := (@substTyp4 _ _ _ _ _ _ f x) : typ_scope.
 
   Axiom substTerm4 : forall {Γ A B C D E F}
                             (f : Term F)
                             (a : Term A),
                        Term (@substTyp4 Γ A B C D E F a).
+  Notation "f ‘’₄ x" := (@substTerm4 _ _ _ _ _ _ _ f x) : term_scope.
 
   Axiom subst_weaken1_weaken_Typ
   : forall {Γ A B C a},
       Term (@substTyp _ _ (@weakenTyp1 Γ C A (@weakenTyp Γ A B)) a) -> Term (@weakenTyp _ C B).
+
+  (*Axiom subst_weaken1_weaken_Typ_inv
+  : forall {Γ A B C a},
+      Term (@weakenTyp _ C B) -> Term (@substTyp _ _ (@weakenTyp1 Γ C A (@weakenTyp Γ A B)) a).*)
 
 (*Check ‘Term’%typ.
   Definition subst_weaken_many_Typ_0
@@ -159,17 +171,23 @@ Module Type QuotedPrimitives (Export LC : LobContext) (Export TP : TermPrimitive
 
 End QuotedPrimitives.
 
-Module Type TypeQuine (Export LC : LobContext) (Export LH : LobHypotheses LC).
+Module Type TypeQuine (Export LC : LobContext) (Export LH : LobHypotheses LC) (Export TP : TermPrimitives LC).
   Axiom H0 : Typ ε.
   Definition H := Term H0.
   Definition qH0 := quote_typ H0.
   Definition qH := ((substTyp1 ‘Term’ _) ‘’ qH0)%typ.
   Notation "‘H’" := qH : typ_scope.
-  Definition qH' := (‘H’ ‘→’ ‘X’)%typ.
+  Definition H0' := (‘H’ ‘→’ ‘X’)%typ.
+  Definition H' := Term H0'.
+  Definition qH0' := quote_typ H0'.
+  Definition qH' := ((substTyp1 ‘Term’ _) ‘’ qH0')%typ.
   Notation "‘H'’" := qH' : typ_scope.
-  Definition H' := Term ‘H'’.
   Axiom toH : H' -> H.
   Axiom fromH : H -> H'.
+  Axiom qtoH : Term (‘H'’ ‘→’ ‘H’).
+  Axiom qfromH : Term (‘H’ ‘→’ ‘H'’).
+  Notation "‘toH’" := qtoH : term_scope.
+  Notation "‘fromH’" := qfromH : term_scope.
 End TypeQuine.
 
 Module Lob1'
@@ -177,19 +195,25 @@ Module Lob1'
        (LH : LobHypotheses LC)
        (Export TP : TermPrimitives LC)
        (Export QP : QuotedPrimitives LC TP)
-       (Export TQ : TypeQuine LC LH)
+       (Export TQ : TypeQuine LC LH TP)
 <: LobsTheorem LC LH.
+  Notation "f ‘‘’’₅ x" := ((w5 qsubstTerm) ‘’₄ _ ‘’₃ _ ‘’₂ _ ‘’₁ f ‘’ x)%term : term_scope.
+
   Definition lob : X.
   Proof.
 Arguments Term : clear implicits.
     refine (let h : H := toH (subst_weaken1_weaken_Typ
                                 ((w1 ‘f’)
-                                   ‘’ (let f := _ in
+                                   ‘’ (let f := _ ‘fromH’%term : @Term (ε ▻ ‘H’) _ in
                                        let x := _ in
-                                       (_ (substTerm (substTerm1 (substTerm2 (substTerm3 (substTerm4 (w5 qsubstTerm) _) _) _) f) x))%term))) in
+                                       (_ (f ‘‘’’₅ x)%term)))) in
             f (subst_weaken_Typ (fromH h ‘’ ⌜ h ⌝)%term)); shelve_unifiable.
-
-
+lazymatch goal with
+  | [ |- context[(_ ‘’₂ ?x)%typ] ] => pose x
+end.
+pose (?t16@{x:=‘fromH’%term}).
+let t := type of ?t16 in assert t.
+unify ?t16 qH0'.
 
 Arguments Term : clear implicits.
 refine (let f := _ in
