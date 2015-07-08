@@ -7,3 +7,4 @@ conversion_quote.v
 LobsTheoremStatement.v
 LobsTheoremProof.v
 LobsTheoremPreProof.v
+WellTypedLobsTheoremStatement.v
