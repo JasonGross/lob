@@ -1,5 +1,6 @@
 Reserved Notation "x ‘‘→’’ y" (at level 99, right associativity, y at level 200).
 Reserved Notation "x ‘→’ y" (at level 99, right associativity, y at level 200).
+Reserved Notation "x ‘→'’ y" (at level 99, right associativity, y at level 200).
 Reserved Notation "x ‘’ y" (at level 15, left associativity).
 Reserved Notation "x ‘’₀ y" (at level 15, left associativity).
 Reserved Notation "x ‘’₁ y" (at level 15, left associativity).
@@ -11,6 +12,9 @@ Reserved Notation "x ‘’₆ y" (at level 15, left associativity).
 Reserved Notation "x ‘’₇ y" (at level 15, left associativity).
 Reserved Notation "x ‘’₈ y" (at level 15, left associativity).
 Reserved Notation "x ‘’₉ y" (at level 15, left associativity).
+Reserved Notation "x ‘’ₐ y" (at level 15, left associativity).
+Reserved Notation "x ‘’ₐ' y" (at level 15, left associativity).
+Reserved Notation "x ‘'’ₐ y" (at level 15, left associativity).
 Reserved Notation "x ‘‘’’ y" (at level 15, left associativity).
 Reserved Notation "x ‘‘’’₅ y" (at level 15, left associativity).
 Reserved Notation "Γ ▻ x" (at level 65, left associativity).

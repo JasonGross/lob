@@ -6,13 +6,52 @@ Require Export Lob.Notations Lob.WellTypedLobsTheoremStatement.
 Ltac do_shelve tac := tac; [ shelve | | ].
 
 Module Type TermPrimitives (Export LC : LobContext).
-  Axiom subst_weaken_Typ
-  : forall {Γ A B a},
-      @Term Γ (@substTyp Γ A (@weakenTyp Γ A B) a) -> @Term Γ B.
+  Notation W := weakenTyp.
 
   Axiom weakenTerm : forall {Γ A B}, Term B -> Term (@weakenTyp Γ A B).
 
-  Axiom weakenTyp1 : forall {Γ A B}, Typ (Γ ▻ B) -> Typ (Γ ▻ A ▻ (weakenTyp B)).
+  Notation w := weakenTerm.
+
+  Axiom substTyp_weakenTyp
+  : forall {Γ A B a},
+      @Term Γ (@substTyp Γ A (@weakenTyp Γ A B) a) -> @Term Γ B.
+  Notation SW := substTyp_weakenTyp.
+
+  Axiom tProd : forall {Γ} A, Typ (Γ ▻ A) -> Typ Γ.
+  Definition tProd_nd : forall {Γ}, Typ Γ -> Typ Γ -> Typ Γ
+    := fun Γ A B => @tProd Γ A (W B).
+  Notation "A ‘→’ B" := (tProd A B) : typ_scope.
+  Notation "A ‘→'’ B" := (tProd_nd A B) : typ_scope.
+
+  Axiom tLambda : forall {Γ A B}, @Term (Γ ▻ A) B -> Term (A ‘→’ B).
+  Definition tLambda_nd : forall {Γ A B},
+                            @Term Γ B -> Term (A ‘→'’ B)
+    := fun Γ A B b => @tLambda Γ A (W B) (w b).
+  Notation "‘λ.’" := tLambda : term_scope.
+  Notation "‘λ'.’" := tLambda_nd : term_scope.
+
+  Axiom tApp : forall {Γ A B}
+                      (f : Term (@tProd Γ A B))
+                      (x : Term A),
+                 Term (B ‘’ x).
+  Definition tApp_nd : forall {Γ A B},
+                         Term (@tProd_nd Γ A B)
+                         -> Term A
+                         -> Term B
+    := fun Γ A B f x => SW (@tApp Γ A (W B) f x).
+  Notation "f ‘’ₐ x" := (tApp f x) : term_scope.
+  Notation "f ‘'’ₐ x" := (tApp_nd f x) : term_scope.
+
+  Axiom weakenTyp_tProd : forall {Γ A B C},
+                            Term (@weakenTyp Γ C (A ‘→'’ B))
+                            -> Term (@weakenTyp Γ C A ‘→’ W (W B)).
+  Definition weakenProd : forall {Γ A B C},
+                            Term (A ‘→'’ B)
+                            -> Term (@weakenTyp Γ C A ‘→’ W (W B))
+    := fun Γ A B C x => weakenTyp_tProd (w x).
+  Notation "w∀" := weakenProd.
+
+  (*Axiom weakenTyp1 : forall {Γ A B}, Typ (Γ ▻ B) -> Typ (Γ ▻ A ▻ (weakenTyp B)).
 
   Axiom weakenTerm1 : forall {Γ A B C}, @Term (Γ ▻ B) C -> @Term (Γ ▻ A ▻ weakenTyp B) (@weakenTyp1 Γ A B C).
 
@@ -92,6 +131,47 @@ Module Type TermPrimitives (Export LC : LobContext).
   : forall {Γ A B C a},
       Term (@substTyp _ _ (@weakenTyp1 Γ C A (@weakenTyp Γ A B)) a) -> Term (@weakenTyp _ C B).
 
+  Axiom Subst1_Subst_Weaken_Weaken
+  : forall {Γ C B A a b},
+      @Term Γ ((A ‘→’ B ‘→’ C) ‘’₁ a ‘’ b)
+      -> @Term Γ C.
+
+  Axiom subst_Weaken1__weaken_Typ
+  : forall {Γ T B A a},
+      @Term (Γ ▻ T) (W (A ‘’ a))
+      -> @Term (Γ ▻ T) (@weakenTyp1 _ _ _ A ‘’ @weakenTerm _ _ B a).
+
+  Notation W1w := subst_Weaken1__weaken_Typ.
+
+  Axiom Subst_Subst1_Weaken2__weaken__W1w
+  : forall {Γ B C T A a b},
+      @Term (Γ ▻ T) (W (A ‘’₁ a ‘’ b))
+      -> @Term (Γ ▻ T) (@weakenTyp2 _ _ B _ A ‘’₁ w a ‘’ W1w (A := C) (w b)).
+
+  Axiom Subst_Subst1_Subst_Weaken1_Weaken1
+  : forall {Γ} {B C : Typ Γ} {D : Typ (Γ ▻ B)}
+           {A : Typ (Γ ▻ C)}
+           {a : @Term (Γ ▻ B ▻ D) (D ‘→’ B ‘→’ C)}
+           {b : @Term Γ B}
+           {c : @Term Γ (D ‘’ b)},
+      @Term Γ (A ‘’ (Subst1_Subst_Weaken_Weaken (a ‘’₁ b ‘’ c)))
+      -> @Term Γ (W1 (A := D) (W1 (A := B) (B := C) A) ‘’ a ‘’₁ b ‘’ c).
+
+  Axiom Subst_Subst2__Weaken3_Subst2__Subst1_Weaken2_Weaken2__weaken__W1w_w__SS1W2wW1w_w_SS1SW1W1
+  : forall {Γ}
+           {T D : Typ Γ}
+           {E : Typ (Γ ▻ D)}
+           {B : Typ Γ}
+           {C : Typ (Γ ▻ B)}
+           {A : Typ (Γ ▻ B ▻ C)}
+           {a : Term (E ‘→’ D ‘→’ B)}
+           {b : Term D}
+           {c : Term (E ‘’ b)}
+           {d : Term (C ‘’ Subst1_Subst_Weaken_Weaken (a ‘’₁ b ‘’ c))},
+      @Term (Γ ▻ T) (W (A ‘’₁ (Subst1_Subst_Weaken_Weaken (a ‘’₁ b ‘’ c)) ‘’ d))
+      -> @Term (Γ ▻ T) (W3 (B := D) (C := E) (W2 (W2 (B := B) (C := C) A) ‘’₁ a) ‘’₂ w b ‘’₁ W1w (w c) ‘’ Subst_Subst1_Weaken2__weaken__W1w
+                        (w (Subst_Subst1_Subst_Weaken1_Weaken1 d))).
+*)
   (*Axiom subst_weaken1_weaken_Typ_inv
   : forall {Γ A B C a},
       Term (@weakenTyp _ C B) -> Term (@substTyp _ _ (@weakenTyp1 Γ C A (@weakenTyp Γ A B)) a).*)
@@ -128,20 +208,30 @@ _*)
 End TermPrimitives.
 
 Module Type QuotedPrimitives (Export LC : LobContext) (Export TP : TermPrimitives LC).
-  Axiom qcontext_extend : @Term (ε ▻ ‘Context’ ▻ ‘Typ’) (weakenTyp (weakenTyp ‘Context’)).
-  Notation "Γ ‘▻’ x" := ((substTerm1 qcontext_extend Γ) ‘’ x)%term : term_scope.
-  Notation "Γ ‘▻’ x" := ((substTerm1 qcontext_extend Γ) ‘’ x)%term : context_scope.
+  Axiom qcontext_extend : □ (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’).
+  Notation "Γ ‘▻’ x" := (qcontext_extend ‘’ₐ Γ ‘'’ₐ x)%term : term_scope.
+  Notation "Γ ‘▻’ x" := (Γ ‘▻’ x)%term : context_scope.
 
   (*Axiom VAR1 : forall {Γ A B}, @Term (Γ ▻ A ▻ B) (weakenTyp (weakenTyp A)).
   Notation "‘VAR₁’" := VAR1 : term_scope.*)
 
-  Axiom qsubstTyp : @Term (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ (W1 (W1 ‘Typ’) ‘’ qcontext_extend) ▻ W ‘Term’) (W (W (W ‘Typ’))).
+  (*Axiom qsubstTyp : @Term (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ (W1 (W1 ‘Typ’) ‘’ qcontext_extend) ▻ W ‘Term’) (W (W (W ‘Typ’))).
   Notation "f ‘‘’’ x" := (substTerm (substTerm1 (substTerm2 (substTerm3 qsubstTyp _) _) f) x) : typ_scope.
   Axiom qsubstTerm : @Term (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ (W1 (W1 ‘Typ’) ‘’ qcontext_extend) ▻ substTyp1 (W2 (W2 ‘Term’)) _ ▻ W (W ‘Term’))
                            (W1 (W1 (W1 (W1 ‘Term’)) ‘’ qsubstTyp)).
   Notation "f ‘‘’’ x" := (substTerm (substTerm1 (substTerm2 (substTerm3 (substTerm4 qsubstTerm _) _) _) f) x) : term_scope.
 
-  Axiom qquote_context : @Term (ε ▻ ‘Context’) (W ((substTyp1 ‘Term’ ‘ε’) ‘’ ⌜ ‘Context’ ⌝%typ)).
+  (** XXX Is this actually true? *)
+  Axiom Conv0_Typ
+  : forall {qH0},
+      □ (‘Typ’ ‘’ ⌜ ε ▻ ‘Term’ ‘’₁ ⌜ ε ⌝%ctx ‘’ qH0 ⌝%ctx)
+      -> □ (‘Typ’ ‘’ (‘ε’ ‘▻’ qH0)%ctx).
+  Axiom Conv0_Term
+  : forall {T qH0 qH0'},
+      Term (T ‘→’ ‘Term’ ‘’₁ ⌜ ε ▻ ‘Term’ ‘’₁ ⌜ ε ⌝%ctx ‘’ qH0 ⌝%ctx ‘’ qH0') ->
+      Term (T ‘→’ ‘Term’ ‘’₁ (‘ε’ ‘▻’ qH0)%ctx ‘’ Conv0_Typ qH0').
+
+  Axiom qquote_context : @Term (ε ▻ ‘Context’) (W ((substTyp1 ‘Term’ ‘ε’) ‘’ ⌜ ‘Context’ ⌝%typ)).*)
 
 (*
   Definition qqempty_context := qquote_context ε.
@@ -177,15 +267,15 @@ Module Type TypeQuine (Export LC : LobContext) (Export LH : LobHypotheses LC) (E
   Definition qH0 := quote_typ H0.
   Definition qH := ((substTyp1 ‘Term’ _) ‘’ qH0)%typ.
   Notation "‘H’" := qH : typ_scope.
-  Definition H0' := (‘H’ ‘→’ ‘X’)%typ.
+  Definition H0' := (‘H’ ‘→'’ ‘X’)%typ.
   Definition H' := Term H0'.
   Definition qH0' := quote_typ H0'.
   Definition qH' := ((substTyp1 ‘Term’ _) ‘’ qH0')%typ.
   Notation "‘H'’" := qH' : typ_scope.
   Axiom toH : H' -> H.
   Axiom fromH : H -> H'.
-  Axiom qtoH : Term (‘H'’ ‘→’ ‘H’).
-  Axiom qfromH : Term (‘H’ ‘→’ ‘H'’).
+  Axiom qtoH : Term (‘H'’ ‘→'’ ‘H’).
+  Axiom qfromH : Term (‘H’ ‘→'’ ‘H'’).
   Notation "‘toH’" := qtoH : term_scope.
   Notation "‘fromH’" := qfromH : term_scope.
 End TypeQuine.
@@ -197,19 +287,66 @@ Module Lob1'
        (Export QP : QuotedPrimitives LC TP)
        (Export TQ : TypeQuine LC LH TP)
 <: LobsTheorem LC LH.
-  Notation "f ‘‘’’₅ x" := ((w5 qsubstTerm) ‘’₄ _ ‘’₃ _ ‘’₂ _ ‘’₁ f ‘’ x)%term : term_scope.
+  (*Notation "f ‘‘’’₅ x" := ((w5 qsubstTerm) ‘’₄ _ ‘’₃ _ ‘’₂ _ ‘’₁ f ‘’ x)%term : term_scope.*)
 
   Definition lob : X.
   Proof.
 Arguments Term : clear implicits.
-    refine (let h : H := toH (subst_weaken1_weaken_Typ
+    refine (let h : H := toH
+                           (‘λ.’
+                              ((w∀ (‘λ.’ ‘f’))
+                                 ‘'’ₐ _))%term(*(subst_weaken1_weaken_Typ
                                 ((w1 ‘f’)
-                                   ‘’ (let f := _ ‘fromH’%term : @Term (ε ▻ ‘H’) _ in
+                                   ‘’ (let f := Subst_Subst2__Weaken3_Subst2__Subst1_Weaken2_Weaken2__weaken__W1w_w__SS1W2wW1w_w_SS1SW1W1 (Conv0_Term ‘fromH’%term) : @Term (ε ▻ ‘H’) _ in
                                        let x := _ in
-                                       (_ (f ‘‘’’₅ x)%term)))) in
-            f (subst_weaken_Typ (fromH h ‘’ ⌜ h ⌝)%term)); shelve_unifiable.
-lazymatch goal with
-  | [ |- context[(_ ‘’₂ ?x)%typ] ] => pose x
+                                       (_ (f ‘‘’’₅ x)%term))))*) in
+            f (fromH h ‘'’ₐ ⌜ h ⌝)%term); shelve_unifiable.
+
+    refine (let k := (w∀ (tLambda ‘f’))%term in _); shelve_unifiable.
+    unfold tProd_nd.
+    unfold H'.
+    unfold H0'.
+     subst f.
+refine (let k := (W4 (W2 (W2 ‘Term’) ‘’₁ qcontext_extend
+            ‘→’ W1 (W1 ‘Typ’) ‘’ qcontext_extend ‘→’ ‘Term’) ‘’₃
+                                                            w ‘ε’ )%typ in _); shelve_unifiable.
+refine (let k' := (W3 ((W2 (W2 ‘Term’) ‘’₁ qcontext_extend
+            ‘→’ W1 (W1 ‘Typ’) ‘’ qcontext_extend ‘→’ ‘Term’) ‘’₃
+                                                           ‘ε’))%typ in _); shelve_unifiable.
+pose ((W2 (W2 ‘Term’) ‘’₁ qcontext_extend
+            ‘→’ W1 (W1 ‘Typ’) ‘’ qcontext_extend ‘→’ ‘Term’) ‘’₃
+                                                             ‘ε’)%typ.
+pose ((W2 (W2 ‘Term’) ‘’₁ qcontext_extend
+            ‘→’ W1 (W1 ‘Typ’) ‘’ qcontext_extend ‘→’ ‘Term’) ‘’₃
+                                                             ‘ε’)%typ.
+(W4
+           (W2 (W2 ‘Term’) ‘’₁ qcontext_extend
+            ‘→’ W1 (W1 ‘Typ’) ‘’ qcontext_extend ‘→’ ‘Term’) ‘’₃
+         w ‘ε’ ‘’₂ W1w (w qH0)
+         ‘’₁ Subst_Subst1_Weaken2__weaken__W1w
+               (w (Subst_Subst1_Subst_Weaken1_Weaken1 (Conv0_Typ qH0')))
+         ‘’ Subst_Subst2__Weaken3_Subst2__Subst1_Weaken2_Weaken2__weaken__W1w_w__SS1W2wW1w_w_SS1SW1W1
+              (Conv0_Term ‘fromH’))
+
+(W4
+           (W2 (W2 ‘Term’) ‘’₁ qcontext_extend
+            ‘→’ W1 (W1 ‘Typ’) ‘’ qcontext_extend ‘→’ ‘Term’) ‘’₃
+         w ‘ε’ ‘’₂ W1w (w qH0)
+         ‘’₁ Subst_Subst1_Weaken2__weaken__W1w
+               (w (Subst_Subst1_Subst_Weaken1_Weaken1 (Conv0_Typ qH0')))
+         ‘’ Subst_Subst2__Weaken3_Subst2__Subst1_Weaken2_Weaken2__weaken__W1w_w__SS1W2wW1w_w_SS1SW1W1
+              (Conv0_Term ‘fromH’))
+    unfold qH' in *.
+    pose qH0'.
+    unfold qH in *.
+    move t0 at top.
+    pose ‘H'’%typ.
+    unfold qH'.
+    unfold qH in *.
+    Unshelve
+
+match eval unfold t in t with
+  | ?f ?x => pose x
 end.
 pose (?t16@{x:=‘fromH’%term}).
 let t := type of ?t16 in assert t.

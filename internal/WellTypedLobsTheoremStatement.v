@@ -66,8 +66,6 @@ Module Type LobContext.
   Notation "⌜ x ⌝" := (quote_typ x%typ) : typ_scope.
   Axiom quote_term : forall {Γ} {A : Typ Γ}, Term A -> □ ((substTyp1 ‘Term’ ⌜ Γ ⌝%ctx) ‘’ ⌜ A ⌝%typ).
   Notation "⌜ x ⌝" := (quote_term x%term) : term_scope.
-
-  Notation "x ‘→’ y" := (@weakenTyp _ x%typ y) : typ_scope.
 End LobContext.
 
 Module Type LobHypotheses (Export LC : LobContext).
@@ -76,7 +74,7 @@ Module Type LobHypotheses (Export LC : LobContext).
   Notation "‘X’" := qX : typ_scope.
 
   Axiom f : □ ‘X’ -> X.
-  Axiom qf : Term ((‘□’ ‘’ ⌜ ‘X’ ⌝%typ) ‘→’ ‘X’).
+  Axiom qf : @Term (ε ▻ (‘□’ ‘’ ⌜ ‘X’ ⌝%typ)) (weakenTyp ‘X’).
   Notation "‘f’" := qf : term_scope.
 End LobHypotheses.
 
