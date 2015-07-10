@@ -85,17 +85,15 @@ Module Type TermPrimitives0 (Export LC : LobContext).
 
   Notation S₂₁₀W1W1' := substTyp2_substTyp1_substTyp_weakenTyp1_weakenTyp1_inv.*)
 
-  Axiom substTyp2_substTyp1_substTyp_weakenTyp_weakenTyp_inv
-  : forall {Γ B}
-           {b : @Term Γ B}
-           {C D}
-           {A : Typ (Γ ▻ B)}
-           {c : @Term Γ (C ‘’ b)}
-           {d : @Term Γ (D ‘’₁ b ‘’ c)},
-      @Term Γ (W (W A) ‘’₂ b ‘’₁ c ‘’ d)
-      -> @Term Γ (A ‘’ b).
+  Axiom substTyp2_substTyp1_substTyp_weakenTyp_weakenTyp
+  : forall {Γ A B C T}
+           {a : @Term Γ A}
+           {b : @Term Γ (B ‘’ a)}
+           {c : @Term Γ (C ‘’₁ a ‘’ b)},
+      @Term Γ (W (W T) ‘’₂ a ‘’₁ b ‘’ c)
+      -> @Term Γ (T ‘’ a).
 
-  Notation S₂₁₀WW' := substTyp2_substTyp1_substTyp_weakenTyp_weakenTyp_inv.
+  Notation S₂₁₀WW := substTyp2_substTyp1_substTyp_weakenTyp_weakenTyp.
 
   Axiom weakenTyp_substTyp_substTyp2_substTyp1_substTyp_weakenTyp1_weakenTyp1_inv
   : forall {Γ T' B C D A}
@@ -104,7 +102,7 @@ Module Type TermPrimitives0 (Export LC : LobContext).
            {b : @Term Γ B}
            {c : @Term Γ (C ‘’ b)}
            {d : @Term Γ (D ‘’ b)},
-      @Term (Γ ▻ T') (W (T ‘’₁ b ‘’ (S₂₁₀WW' (a ‘’₂ b ‘’₁ c ‘’ S₁₀W' d))))
+      @Term (Γ ▻ T') (W (T ‘’₁ b ‘’ (S₂₁₀WW (a ‘’₂ b ‘’₁ c ‘’ S₁₀W' d))))
       -> @Term (Γ ▻ T') (W ((W1 (W1 T)) ‘’ a ‘’₂ b ‘’₁ c ‘’ S₁₀W' d)).
 
   Notation WS₀₂₁₀W1W1' := weakenTyp_substTyp_substTyp2_substTyp1_substTyp_weakenTyp1_weakenTyp1_inv.
@@ -218,6 +216,17 @@ Module Type TermPrimitives0 (Export LC : LobContext).
       -> Term (@weakenTyp Γ D A ‘→’ W1 B ‘→'’ W1 C)
     := fun Γ A B C D x => weakenTyp_tProd_tProd_nd (w x).
   Notation "w∀→" := weakenProd_Prod_nd.
+
+  Axiom weakenTyp_tProd_nd_tProd_nd
+  : forall {Γ A B C D},
+      Term (@weakenTyp Γ D (A ‘→'’ B ‘→'’ C))
+      -> Term (@weakenTyp Γ D A ‘→'’ W B ‘→'’ W C).
+  Definition weakenProd_nd_Prod_nd
+  : forall {Γ A B C D},
+      Term (A ‘→'’ B ‘→'’ C)
+      -> Term (@weakenTyp Γ D A ‘→'’ W B ‘→'’ W C)
+    := fun Γ A B C D x => weakenTyp_tProd_nd_tProd_nd (w x).
+  Notation "w→→" := weakenProd_nd_Prod_nd.
 End TermPrimitives0.
 
 Module Type QuotedPrimitives0 (Export LC : LobContext) (Export TP0 : TermPrimitives0 LC).
@@ -226,11 +235,12 @@ Module Type QuotedPrimitives0 (Export LC : LobContext) (Export TP0 : TermPrimiti
   Notation "‘tProd_nd’" := qtProd_nd.
 
   Axiom qtApp_nd
-  : □ (‘Context’ ‘→’ ‘Typ’ ‘→’ W ‘Typ’
-        ‘→’ W1 (W1 ‘Term’) ‘’ ‘tProd_nd’
-        ‘→'’ W ‘Term’
-        ‘→'’ W1 ‘Term’).
+  : forall {Γ} {A : □ (‘Typ’ ‘’ Γ)} {B : □ (‘Typ’ ‘’ Γ)},
+      □ (‘Term’ ‘’₁ Γ ‘’ S₂₁₀WW (‘tProd_nd’ ‘’₂ Γ ‘’₁ A ‘’ S₁₀W' B)%term
+          ‘→'’ ‘Term’ ‘’₁ Γ ‘’ A
+          ‘→'’ ‘Term’ ‘’₁ Γ ‘’ B).
   Notation "‘tApp_nd’" := qtApp_nd.
+  Notation "f ‘‘'’’ₐ x" := (qtApp_nd ‘’₁ f ‘’ x)%term : term_scope.
 
   (* XXX Is this actually true? *)
   Axiom Conv0
@@ -240,7 +250,7 @@ Module Type QuotedPrimitives0 (Export LC : LobContext) (Export TP0 : TermPrimiti
       -> @Term (ε ▻ ‘Term’ ‘’₁ ‘ε’ ‘’ qH0)
                (W
                   (‘Term’ ‘’₁ ‘ε’
-                    ‘’ S₂₁₀WW' (‘tProd_nd’ ‘’₂ ‘ε’ ‘’₁ ⌜ ‘Term’ ‘’₁ ‘ε’ ‘’ qH0 ⌝%typ ‘’ S₁₀W' ⌜ qX ⌝%typ))).
+                    ‘’ S₂₁₀WW (‘tProd_nd’ ‘’₂ ‘ε’ ‘’₁ ⌜ ‘Term’ ‘’₁ ‘ε’ ‘’ qH0 ⌝%typ ‘’ S₁₀W' ⌜ qX ⌝%typ))).
 
   Axiom qquote_term : forall {A : Typ ε},
                         @Term ε (A ‘→'’ ‘Term’ ‘’₁ _ ‘’ ⌜ A ⌝%typ).
@@ -284,13 +294,7 @@ Module Lob0
             f (fromH h ‘'’ₐ ⌜ h ⌝)%term); shelve_unifiable.
     refine (let f := Conv0 (SW1W (w∀ ‘fromH’ ‘’ₐ ‘VAR₀’)) in
             let x := (w→ ‘quote_term’ ‘'’ₐ ‘VAR₀’)%term in
-            WS₂₁₀W1
-              (W1S₃₂₁₀W
-                 (WS₂₁₀∀
-                      (W1S₃₂₁₀W
-                         (w∀ (S₂₁₀∀ (S₁₀∀ (S∀ (‘tApp_nd’ ‘’ₐ ‘ε’) ‘’ₐ ⌜ ‘H’ ⌝%typ) ‘’ₐ S₁₀W' ⌜ ‘X’ ⌝%typ))
-                             ‘’ₐ WS₀₂₁₀W1W1' f))
-                      ‘’ₐ WS₂₁₀W' x))%term).
+            w→→ ‘tApp_nd’ ‘'’ₐ f ‘'’ₐ x)%term.
   Defined.
 End Lob0.
 
