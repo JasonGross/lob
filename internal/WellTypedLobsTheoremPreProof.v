@@ -302,6 +302,33 @@ Module Type TermPrimitives (Export LC : LobContext).
 
   Axiom qsigT : forall (T : Typ ε), Typ (ε ▻ T) -> Typ ε.
   Notation "‘sigT’" := qsigT.
+
+  Axiom qexistT : forall {T P} (x : Term T) (p : Term (P ‘’ x)), Term (‘sigT’ T P).
+  Notation "‘existT’" := qexistT.
+
+  Axiom weakenTyp2 : forall {Γ A B C}, Typ (Γ ▻ B ▻ C) -> Typ (Γ ▻ A ▻ W B ▻ W1 C).
+  Notation W2 := weakenTyp2.
+
+  Axiom weakenTerm2 : forall {Γ A B C D}, @Term (Γ ▻ B ▻ C) D -> @Term (Γ ▻ A ▻ W B ▻ W1 C) (@weakenTyp2 Γ A B C D).
+  Notation w2 := weakenTerm2.
+
+  Axiom substTyp_weakenTyp1_inv
+  : forall {Γ A T' T}
+           {a : @Term Γ A},
+      @Term (Γ ▻ T' ‘’ a) (W (T ‘’ a))
+      -> @Term (Γ ▻ T' ‘’ a) (W T ‘’₁ a).
+
+  Notation S₁W' := substTyp_weakenTyp1_inv.
+
+  Axiom substTyp2_substTyp_substTyp_weakenTyp1_weakenTyp_weakenTyp
+  : forall {Γ A} {T : Typ (Γ ▻ A)} {T' C B}
+           {a : @Term Γ A}
+           {b : @Term (Γ ▻ C ‘’ a) (B ‘’₁ a)}
+           {c : @Term (Γ ▻ T') (W (C ‘’ a))},
+      @Term (Γ ▻ T') (W1 (W (W T) ‘’₂ a ‘’ b) ‘’ c)
+      -> @Term (Γ ▻ T') (W (T ‘’ a)).
+
+  Notation S₂₀₀W1WW := substTyp2_substTyp_substTyp_weakenTyp1_weakenTyp_weakenTyp.
 End TermPrimitives.
 
 Module Type QuotedPrimitives (Export LC : LobContext) (Export TP : TermPrimitives LC).
@@ -318,9 +345,8 @@ Module TQ (Export LC : LobContext) (Export LH : LobHypotheses LC) (Export TP : T
 
   Definition dummy : Typ ε := qContext.
 
-  Definition quote_sigma (Γv : { Γ : _ & Typ Γ }) : Term (‘sigT’ ‘Context’ ‘Typ’).
-  Proof.
-  Admitted.
+  Definition quote_sigma (Γv : { Γ : _ & Typ Γ }) : Term (‘sigT’ ‘Context’ ‘Typ’)
+    := ‘existT’ ⌜ Γv.1 ⌝%ctx ⌜ Γv.2 ⌝%typ.
 
   Definition cast (Γv : { Γ : _ & Typ Γ }) : Typ (ε ▻ ‘sigT’ ‘Context’ ‘Typ’).
   Proof.
@@ -332,10 +358,24 @@ Module TQ (Export LC : LobContext) (Export LH : LobHypotheses LC) (Export TP : T
 
   Definition H0 : Typ ε.
   Proof.
-    refine (let h : { Γ : _ & Typ Γ }
-                := ((ε ▻ ‘sigT’ ‘Context’ ‘Typ’)%ctx;
-                    _ (W (‘Term’ ‘’₁ ‘ε’))%typ)
-            in (cast h ‘’ quote_sigma h ‘→'’ ‘X’)%typ).
+    refine ((fun h : { Γ : _ & Typ Γ }
+             => (cast h ‘’ quote_sigma h ‘→'’ ‘X’)%typ)
+              ((ε ▻ ‘sigT’ ‘Context’ ‘Typ’)%ctx;
+               (W1 (‘Term’ ‘’₁ ‘ε’)
+                   ‘’ S₂₀₀W1WW (w1 (‘tProd_nd’ ‘’₂ ‘ε’ ‘’ S₁W' (w ⌜ ‘X’ ⌝%typ)) ‘’ _))%typ)).
+    refine (let f := Conv0 (SW1W (w∀ ‘fromH’ ‘’ₐ ‘VAR₀’)) in
+            let x := (w→ ‘quote_term’ ‘'’ₐ ‘VAR₀’)%term in
+            WS₂₁₀W1
+              (W1S₃₂₁₀W
+                 (WS₂₁₀∀
+                      (W1S₃₂₁₀W
+                         (w∀ (S₂₁₀∀ (S₁₀∀ (S∀ (‘tApp_nd’ ‘’ₐ ‘ε’) ‘’ₐ ⌜ ‘H’ ⌝%typ) ‘’ₐ S₁₀W' ⌜ ‘X’ ⌝%typ))
+                             ‘’ₐ WS₀₂₁₀W1W1' f))
+                      ‘’ₐ WS₂₁₀W' x))%term).
+    Implicit Arguments Term [].
+    refine (let k := %term in _); shelve_unifiable.
+
+            in
     admit'.
   Defined.
 
