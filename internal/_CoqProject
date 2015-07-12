@@ -8,3 +8,5 @@ LobsTheoremStatement.v
 LobsTheoremProof.v
 LobsTheoremPreProof.v
 WellTypedLobsTheoremStatement.v
+WellTypedLobsTheoremPreProof.v
+WellTypedLobsTheoremPreProofMin.v

@@ -64,7 +64,7 @@ Module Type LobContext.
 
   Axiom quote_typ : forall {Γ}, Typ Γ -> □ (‘Typ’ ‘’ ⌜ Γ ⌝%ctx).
   Notation "⌜ x ⌝" := (quote_typ x%typ) : typ_scope.
-  Axiom quote_term : forall {Γ} {A : Typ Γ}, Term A -> □ ((substTyp1 ‘Term’ ⌜ Γ ⌝%ctx) ‘’ ⌜ A ⌝%typ).
+  Axiom quote_term : forall {Γ} {A : Typ Γ}, Term A -> □ (‘Term’ ‘’₁ ⌜ Γ ⌝%ctx ‘’ ⌜ A ⌝%typ).
   Notation "⌜ x ⌝" := (quote_term x%term) : term_scope.
 End LobContext.
 
