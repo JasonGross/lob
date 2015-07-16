@@ -31,3 +31,4 @@ Reserved Infix "‘‘∘’’" (at level 40, left associativity).
 Notation "( x ; y )" := (existT _ x y).
 Notation "x .1" := (projT1 x) (at level 3, format "x '.1'").
 Notation "x .2" := (projT2 x) (at level 3, format "x '.2'").
+Reserved Notation "n .+1" (at level 2, left associativity, format "n .+1").

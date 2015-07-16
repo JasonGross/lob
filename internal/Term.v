@@ -1,6 +1,6 @@
 (* Runs on top of https://github.com/gmalecha/template-coq *)
 Require Import Coq.Setoids.Setoid Coq.Classes.CMorphisms.
-Require Import Template.Template.
+Require Template.Ast.
 
 Set Asymmetric Patterns.
 
@@ -11,8 +11,480 @@ Local Open Scope string_scope.
 Local Open Scope positive_scope.
 Local Open Scope list_scope.
 
-Require Export Lob.quote_term.
+(*Require Export Lob.quote_term.*)
 Require Import Lob.Notations.
+
+Print Ast.term.
+(*Require Import Template.Template.
+Quote Definition foo := let x := 1 in x.
+Print foo.
+Quote Definition J := (fun {A : Type} {x} (P : forall y : A, x = y -> Type) (k : P x eq_refl) {y} (p : x = y)
+                       => match p as p' in (_ = y') return P y' p' with
+                            | eq_refl => k
+                          end).
+Print J.
+Quote Definition negb := (fun b : bool => match b with true => false | false => true end).
+Require Import JMeq.
+Quote Definition JMeq_J := (fun {A : Type} {x : A} (P : forall B (y : B), JMeq x y -> Type) (k : P A x JMeq_refl) {B} {y} (p : @JMeq A x B y)
+                       => match p as p' in (@JMeq _ _ B' y') return P B' y' p' with
+                            | JMeq_refl => k
+                          end).
+Print JMeq_J.*)
+Print Ast.mfixpoint.
+Print Ast.def.
+
+Inductive preinductive_body : Set :=
+| mkpreinductive_body (ctors : list (Ast.ident * pretype))
+with precontext_element : Set :=
+| pconstr (name : Ast.name) (T : pretype) (body : preterm)
+| ptype (name : Ast.ident) (bodies : list (Ast.ident * pretype * preinductive_body))
+| paxiom (name : Ast.ident) (T : pretype)
+| pbinder (name : Ast.name) (T : pretype)
+with precontext : Set :=
+| empty_precontext : precontext
+| precontext_extend (Γ : precontext) (T : precontext_element)
+with pretype : Set :=
+| pretype_of_term (term : preterm)
+with preterm : Set :=
+| ptRel : nat -> preterm
+| ptSort (univ_level : Ast.sort)
+| ptProd (name : Ast.name) (A : pretype) (B : pretype)
+| ptLambda (name : Ast.name) (A : pretype) (B : pretype) (body : preterm)
+| ptLetIn (name : Ast.name) (A : pretype) (a : preterm) (B : pretype) (body : preterm)
+| ptApp (A : pretype) (B : pretype) (f : preterm) (x : preterm)
+| ptConst : string -> preterm
+| ptInd  (T : pretype) (ind_name : string) (mut_ind_idx : nat)
+| ptConstruct (T : pretype) (ind_name : string) (mut_ind_idx : nat) (ctor_idx : nat)
+| ptCase (num_params : nat) (return_type : preterm) (indtype : pretype) (discriminee : preterm) (bodies : list (pretype * preterm))
+| ptFix (type : pretype) (bodies : Ast.mfixpoint preterm) (fix_idx : nat).
+
+Coercion pretype_of_term : preterm >-> pretype.
+Coercion preterm_of_pretype (x : pretype)
+  := match x with
+       | pretype_of_term x' => x'
+     end.
+
+Definition subst_n_name_def
+           (subst_n_name : preterm -> option nat -> preterm)
+           (var_n : option nat)
+           (in_term : Ast.def preterm)
+: Ast.def preterm
+  := match in_term with
+       | {| Ast.dname := dname ; Ast.dtype := dtype ; Ast.dbody := dbody ; Ast.rarg := rarg |}
+         => {| Ast.dname := dname;
+               Ast.dtype := subst_n_name dtype var_n;
+               Ast.dbody := subst_n_name dbody (option_map S var_n);
+               Ast.rarg := rarg |}
+     end.
+
+Fixpoint subst_n_name (in_term : preterm) (subst_term : preterm) (var_n : option nat) (name : Ast.name) {struct in_term} : preterm
+  := match in_term with
+       | ptRel v => match var_n with
+                      | Some var_n'
+                        => match Compare_dec.lt_eq_lt_dec v var_n' with
+                             | inleft (left _) => in_term
+                             | inleft (right _) => subst_term
+                             | inright _ => ptRel (pred v)
+                           end
+                      | None => in_term
+                    end
+       (*| ptVar name0 => match name with
+                `             | pnNamed name1
+                               => if String.string_dec name0 name1
+                                  then subst_term
+                                  else in_term
+                             | pnAnon => in_term
+                           end
+       | ptMeta _ => in_term
+       | ptEvar _ => in_term*)
+       | ptSort _ => in_term
+       (*| ptCast term0' kind term1'
+         => Ast.tCast (subst_n_name term0' subst_term var_n name)
+                      kind
+                      (subst_n_name term1' subst_term var_n name)*)
+       | ptProd name' term0' term1'
+         => let new_name := match name, name' with
+                              | Ast.nNamed n0, Ast.nNamed n1
+                                => if String.string_dec n0 n1
+                                   then Ast.nAnon
+                                   else name
+                              | _, _ => name
+                            end in
+            ptProd name'
+                      (subst_n_name term0' subst_term var_n new_name)
+                      (subst_n_name term1' subst_term (option_map S var_n) new_name)
+       | ptLambda name' A' B' body'
+         => let new_name := match name, name' with
+                              | Ast.nNamed n0, Ast.nNamed n1
+                                => if String.string_dec n0 n1
+                                   then Ast.nAnon
+                                   else name
+                              | _, _ => name
+                            end in
+            ptLambda name'
+                     (subst_n_name A' subst_term var_n name)
+                     (subst_n_name B' subst_term (option_map S var_n) new_name)
+                     (subst_n_name body' subst_term (option_map S var_n) new_name)
+       | ptLetIn name' A' a' B' body'
+         => let new_name := match name, name' with
+                              | Ast.nNamed n0, Ast.nNamed n1
+                                => if String.string_dec n0 n1
+                                   then Ast.nAnon
+                                   else name
+                              | _, _ => name
+                            end in
+            ptLetIn name'
+                       (subst_n_name A' subst_term var_n name)
+                       (subst_n_name a' subst_term var_n name)
+                       (subst_n_name B' subst_term var_n name)
+                       (subst_n_name body' subst_term (option_map S var_n) new_name)
+       | ptApp A B f arg
+         => ptApp (subst_n_name A subst_term var_n name)
+                  (subst_n_name B subst_term var_n name)
+                  (subst_n_name f subst_term var_n name)
+                  (subst_n_name arg subst_term var_n name)
+       | ptConst _ => in_term
+       | ptInd _ _ _ => in_term
+       | ptConstruct _ _ _ _ => in_term
+       | ptCase n term0' term1' term2' branches
+         => ptCase n
+                      (subst_n_name term0' subst_term var_n name)
+                      (subst_n_name term1' subst_term var_n name)
+                      (subst_n_name term2' subst_term var_n name)
+                      (@List.map
+                         (pretype * preterm) (pretype * preterm)
+                         (fun type'_term' =>
+                            (subst_n_name (fst type'_term') subst_term var_n name : pretype,
+                             subst_n_name (snd type'_term') subst_term var_n name))
+                         branches)
+       | ptFix type0' term0' n
+         => ptFix
+              (subst_n_name type0' subst_term var_n name)
+              (List.map (subst_n_name_def (fun term' var_n => subst_n_name term' subst_term var_n name) var_n) term0')
+                     n
+       (*| ptUnknown _ => in_term*)
+     end.
+
+
+
+
+Delimit Scope precontext_scope with pctx.
+Bind Scope precontext_scope with precontext.
+
+Delimit Scope precontext_element_scope with pctxe.
+Bind Scope precontext_element_scope with precontext_element.
+
+Notation ε₀ := empty_precontext.
+Infix "▻" := precontext_extend : precontext_scope.
+Notation "( x ; T )" := (pbinder x T) : precontext_element_scope.
+
+Delimit Scope sort_scope with sort.
+Bind Scope sort_scope with Ast.sort.
+
+Definition umax (U1 U2 : Ast.sort) : Ast.sort
+  := match U1, U2 with
+       | Ast.sProp, _ => U2
+       | _, Ast.sProp => U1
+       | Ast.sSet, _ => U2
+       | _, Ast.sSet => U1
+       | Ast.sType U1', Ast.sType U2' => Ast.sType (Pos.max U1' U2')
+     end.
+
+Definition usucc (U : Ast.sort) : Ast.sort
+  := match U with
+       | Ast.sProp => Ast.sType 1
+       | Ast.sSet => Ast.sType 1
+       | Ast.sType i => Ast.sType (i + 1)
+     end.
+
+Notation "x .+1" := (usucc x) : sort_scope.
+
+Definition ule (x y : Ast.sort) : Prop
+  := match x, y with
+       | Ast.sProp, _ => True
+       | Ast.sSet, Ast.sProp => False
+       | Ast.sSet, _ => True
+       | Ast.sType _, Ast.sProp => False
+       | Ast.sType _, Ast.sSet => False
+       | Ast.sType i, Ast.sType j => i <= j
+     end.
+
+Infix "<=" := ule : sort_scope.
+
+Definition ult x y := (x.+1 <= y)%sort.
+
+Infix "<" := ult : sort_scope.
+
+(*Set Printing Universes.
+Check forall x: Type@{i}, (_ : Type@{j}).*)
+Check ((let k := Prop : Type@{i} in forall x : Type@{i}, (_ : Prop)) : Prop).
+Definition tProd_level (i j : Ast.sort) : Ast.sort
+  := match j with
+       | Ast.sProp => Ast.sProp
+       | _ => umax (usucc i) j
+     end.
+
+Fixpoint precontext_app (Γ0 Γ1 : precontext) : precontext
+  := match Γ1 with
+       | ε₀ => Γ0
+       | precontext_extend Γ1' T => precontext_app (Γ0 ▻ T) Γ1'
+     end.
+
+Infix "▻▻" := precontext_app : precontext_scope.
+
+Inductive preinductive_body_good : preinductive_body -> Set :=
+(*| mkpreinductive_body_good
+  : forall (Γ : precontext) (ctors : list (Ast.ident * pretype))
+  *)
+with precontext_element_good : precontext -> precontext_element -> Set :=
+| pconstr_good {Γ} {Γ_g : precontext_good Γ}
+               (name : Ast.name)
+               {T}
+               {body} (body_good : preterm_good Γ body T)
+  : precontext_element_good Γ (pconstr name T body)
+(*| ptype_good {Γ} {Γ_g : precontext_good Γ}
+             (name : Ast.ident)
+             (bodies : list (Ast.ident * pretype * preinductive_body))*)
+| paxiom_good {Γ} {Γ_g : precontext_good Γ}
+              (name : Ast.ident)
+              {T} (T_g : pretype_good Γ T)
+  : precontext_element_good Γ (paxiom name T)
+| pbinder_good {Γ} {Γ_g : precontext_good Γ}
+               (name : Ast.name)
+               {T} (T_g : pretype_good Γ T)
+  : precontext_element_good Γ (pbinder name T)
+with precontext_good : precontext -> Set :=
+| empty_precontext_good : precontext_good empty_precontext
+| precontext_extend_good {Γ} (Γ_g : precontext_good Γ) {T} (T_g : precontext_element_good Γ T) : precontext_good (Γ ▻ T)
+with pretype_good : precontext -> pretype -> Set :=
+(*| TYPE_good {Γ} (Γ_g : precontext_good Γ) (i : nat) : pretype_good Γ (TYPE i)
+| ptProd_good {Γ} (Γ_g : precontext_good Γ)
+              (x : Ast.name)
+              {A} (A_g : pretype_good Γ A)
+              {B} (B_g : pretype_good (Γ ▻ (x; A)) B)
+  : pretype_good Γ (ptProd x A B)*)
+with preterm_good : precontext -> preterm -> pretype -> Set :=
+| ptRel_0_good {Γ} (Γ_g : precontext_good Γ)
+               (x : Ast.name)
+               {A} (A_g : pretype_good Γ A)
+  : preterm_good (Γ ▻ (x; A)) (ptRel 0) A
+| ptRel_S_good {Γ} (Γ_g : precontext_good Γ)
+               {A n}
+               {B} (B_g : precontext_element_good Γ B)
+  : preterm_good Γ (ptRel n) A
+    -> preterm_good (Γ ▻ B) (ptRel (S n)) A
+| ptSort_good  {Γ} (Γ_g : precontext_good Γ) i j
+  : (i < j)%sort -> preterm_good Γ (ptSort i) (ptSort j)
+| ptProd_good {Γ} (Γ_g : precontext_good Γ)
+              (x : Ast.name)
+              i j
+              {A} (A_g : preterm_good Γ A (ptSort i))
+              {B} (B_g : preterm_good (Γ ▻ (x; A)) B (ptSort j))
+  : preterm_good Γ (ptProd x A B) (ptSort (tProd_level i j))
+| ptLambda_good {Γ} (Γ_g : precontext_good Γ)
+                (x : Ast.name)
+                {A}
+                {B}
+                {body} (b_g : preterm_good (Γ ▻ (x; A)) body B)
+  : preterm_good Γ (ptLambda x A B body) (ptProd x A B)
+| ptLetIn_good {Γ} (Γ_g : precontext_good Γ)
+               (x : Ast.name)
+               {A B}
+               {a} (a_g : preterm_good Γ a A)
+               {b} (b_g : preterm_good (Γ ▻ pconstr x a A) b B)
+  : preterm_good Γ (ptLetIn x A a B b) (subst_n_name B a (Some 0%nat) x)
+| ptApp_good {Γ} (Γ_g : precontext_good Γ)
+             (name : Ast.name)
+             {A B}
+             {f} (f_g : preterm_good Γ f (ptProd name A B))
+             {x} (x_g : preterm_good Γ x A)
+  : preterm_good Γ (ptApp A B f x) (subst_n_name B x (Some 0%nat) name)
+| ptConst_good_0 {Γ} (Γ_g : precontext_good Γ)
+                 (name : string)
+                 {T body} (body_good : preterm_good Γ body T)
+  : preterm_good (Γ ▻ pconstr (Ast.nNamed name) T body) (ptConst name) T
+| ptConst_good_S {Γ} (Γ_g : precontext_good Γ)
+                 {B} (B_g : precontext_element_good Γ B)
+                 {name} {T}
+  : preterm_good Γ (ptConst name) T
+    -> preterm_good (Γ ▻ B) (ptConst name) T.
+
+Fixpoint type_of_term_good {Γ} (T : pretype) (t : preterm) (H : preterm_good Γ t T) : pretype_good Γ T.
+Proof.
+  refine (match H in (preterm_good Γ t T) return pretype_good Γ T with
+            | ptRel_0_good _ _ _ _ A_g => A_g
+            | _ => _
+          end).
+ {Γ} (Γ_g : precontext_good Γ)
+               (x : Ast.name)
+               {A} (A_g : pretype_good Γ A)
+  : preterm_good (Γ ▻ (x; A)) (ptRel 0) A
+| ptRel_S_good {Γ} (Γ_g : precontext_good Γ)
+               {A n}
+               {B} (B_g : precontext_element_good Γ B)
+  : preterm_good Γ (ptRel n) A
+    -> preterm_good (Γ ▻ B) (ptRel (S n)) A
+| ptSort_good  {Γ} (Γ_g : precontext_good Γ) i j
+  : (i < j)%sort -> preterm_good Γ (ptSort i) (ptSort j)
+| ptProd_good {Γ} (Γ_g : precontext_good Γ)
+              (x : Ast.name)
+              i j
+              {A} (A_g : preterm_good Γ A (ptSort i))
+              {B} (B_g : preterm_good (Γ ▻ (x; A)) B (ptSort j))
+  : preterm_good Γ (ptProd x A B) (ptSort (tProd_level i j))
+| ptLambda_good {Γ} (Γ_g : precontext_good Γ)
+                (x : Ast.name)
+                {A}
+                {B}
+                {body} (b_g : preterm_good (Γ ▻ (x; A)) body B)
+  : preterm_good Γ (ptLambda x A B body) (ptProd x A B)
+| ptLetIn_good {Γ} (Γ_g : precontext_good Γ)
+               (x : Ast.name)
+               {A B}
+               {a} (a_g : preterm_good Γ a A)
+               {b} (b_g : preterm_good (Γ ▻ pconstr x a A) b B)
+  : preterm_good Γ (ptLetIn x A a B b) (subst_n_name B a (Some 0%nat) x)
+| ptApp_good {Γ} (Γ_g : precontext_good Γ)
+             (name : Ast.name)
+             {A B}
+             {f} (f_g : preterm_good Γ f (ptProd name A B))
+             {x} (x_g : preterm_good Γ x A)
+  : preterm_good Γ (ptApp A B f x) (subst_n_name B x (Some 0%nat) name)
+| ptConst_good_0 {Γ} (Γ_g : precontext_good Γ)
+                 (name : string)
+                 {T body} (body_good : preterm_good Γ body T)
+  : preterm_good (Γ ▻ pconstr (Ast.nNamed name) T body) (ptConst name) T
+| ptConst_good_S {Γ} (Γ_g : precontext_good Γ)
+                 {B} (B_g : precontext_element_good Γ B)
+                 {name} {T}
+  : preterm_good Γ (ptConst name) T
+    -> preterm_good (Γ ▻ B) (ptConst name) T.
+
+Definition Context : Set := { Γ : precontext & precontext_good Γ }.
+Coercion precontext_of_Context (Γ : Context) := Γ.1.
+
+Definition Typ : Context -> Set := fun Γ => { T : pretype & pretype_good Γ T }.
+Coercion pretype_of_Typ {Γ} (T : Typ Γ) := T.1.
+
+Definition Term : forall {Γ}, Typ Γ -> Set := fun Γ T => { t : preterm & preterm_good Γ t T }.
+Coercion preterm_of_Term {Γ} {T : Typ Γ} (t : Term T) := t.1.
+
+Definition ContextElement : Context -> Set := fun Γ => { T : precontext_element & precontext_element_good Γ T }.
+Coercion precontext_element_of_ContextElement {Γ} (T : ContextElement Γ)
+  := T.1.
+
+Definition empty_context : Context
+  := (empty_precontext; empty_precontext_good).
+
+Definition Context_extend : forall Γ, ContextElement Γ -> Context
+  := fun Γ T => ((Γ ▻ T)%pctx; precontext_extend_good Γ.2 T.2).
+
+Definition PConstr {Γ : Context} (name : Ast.name) (T : Typ Γ) (body : Term T)
+: ContextElement Γ
+  := (pconstr name T body; @pconstr_good Γ.1 Γ.2 name T.1 body.1 body.2).
+
+| ptype (name : Ast.ident) (bodies : list (Ast.ident * pretype * preinductive_body))
+| paxiom (name : Ast.ident) (T : pretype)
+| pbinder (name : Ast.name) (T : pretype)
+
+
+Delimit Scope context_scope with ctx.
+Bind Scope context_scope with Context.
+Notation ε₁ := empty_context.
+Infix "▻" := Context_extend : context_scope.
+(*Notation "( x ; T )" := (pbinder x T) : precontext_element_scope.*)
+
+Require Import Template.Template.
+
+Definition bar := (forall x : Type, x).
+Quote Recursively Definition foo := bar.
+
+Print foo.
+
+Goal Context.
+  pose foo as x.
+  unfold foo in x.
+  Ltac refine_Context_of_program x :=
+    idtac;
+    (lazymatch eval hnf in x with
+    | Ast.PIn _ => refine empty_context
+    | Ast.PConstr ?name ?body ?rest
+      => let Γ := fresh "Γ" in
+         refine (let Γ := _ in
+                 @Context_extend Γ _);
+     [ refine_Context_of_program rest
+     | refine (_; @pconstr_good Γ.1 Γ.2 (Ast.nNamed name) _ _ _); pose (name, body) ]
+    | ?x' => fail 0 "unsupported constructor of program" x'
+     end).
+  Ltac Context_of_program x :=
+    constr:($(refine_Context_of_program x)$).
+
+  refine_Context_of_program x.
+pose (@pconstr_good Γ.1 Γ.2 _ _ _).
+  Ltac refine_ContextElement_of_PConstr name type :=
+    idtac;
+    (lazymatch eval hnf in type with
+    | Ast.PIn _ => refine empty_context
+    | Ast.PConstr ?name ?type ?rest
+      => let Γ := fresh "Γ" in
+         refine (let Γ := _ in
+                 @Context_extend Γ _);
+     [ refine_Context_of_program rest
+     | pose (name, type) ]
+    | ?x' => fail 0 "unsupported constructor of program" x'
+     end).
+  Ltac Context_of_program x :=
+    constr:($(refine_Context_of_program x)$).
+
+  let k := Context_of_program x in idtac k.
+
+
+| ptConstruct_good_0 {Γ} (Γ_g : precontext_good Γ)
+ptype (Γ : precontext) (name : Ast.ident) (bodies : list (Ast.ident * pretype * preinductive_body))
+ (T : pretype) (ind_name : string) (mut_ind_idx : nat) (ctor_idx : nat)
+| ptCase (num_params : nat) (return_type : preterm) (indtype : pretype) (discriminee : preterm) (bodies : list (pretype * preterm))
+| ptInd_good  (T : pretype) (ind_name : string) (mut_ind_idx : nat)
+| ptFix (type : pretype) (bodies : Ast.mfixpoint preterm) (fix_idx : nat).
+
+  (*
+| ptLambda (Γ : precontext) (n : Ast.name) (A : pretype) (B : pretype) (body : preterm).*)
+.
+
+
+| tMeta : nat -> Ast.term
+| tEvar : nat -> Ast.term
+| tCast : Ast.term -> Ast.cast_kind -> Ast.term -> Ast.term
+| tProd : Ast.name -> Ast.term -> Ast.term -> Ast.term
+| tLambda : Ast.name -> Ast.term -> Ast.term -> Ast.term
+| tLetIn : Ast.name -> Ast.term -> Ast.term -> Ast.term -> Ast.term
+| tApp : Ast.term -> list Ast.term -> Ast.term
+| tConst : string -> Ast.term
+| tInd : Ast.inductive -> Ast.term
+| tConstruct : Ast.inductive -> nat -> Ast.term
+| tCase : nat -> Ast.term -> Ast.term -> list Ast.term -> Ast.term
+| tFix : Ast.mfixpoint Ast.term -> nat -> Ast.term
+| tUnknown : string -> Ast.term.
+Inductive precontext :=
+| precontext_extend
+
+
+Inductive term : Type :=
+    tRel : nat -> Ast.term
+  | tVar : Ast.ident -> Ast.term
+  | tMeta : nat -> Ast.term
+  | tEvar : nat -> Ast.term
+  | tSort : Ast.sort -> Ast.term
+  | tCast : Ast.term -> Ast.cast_kind -> Ast.term -> Ast.term
+  | tProd : Ast.name -> Ast.term -> Ast.term -> Ast.term
+  | tLambda : Ast.name -> Ast.term -> Ast.term -> Ast.term
+  | tLetIn : Ast.name -> Ast.term -> Ast.term -> Ast.term -> Ast.term
+  | tApp : Ast.term -> list Ast.term -> Ast.term
+  | tConst : string -> Ast.term
+  | tInd : Ast.inductive -> Ast.term
+  | tConstruct : Ast.inductive -> nat -> Ast.term
+  | tCase : nat -> Ast.term -> Ast.term -> list Ast.term -> Ast.term
+  | tFix : Ast.mfixpoint Ast.term -> nat -> Ast.term
+  | tUnknown : string -> Ast.term
 
 Notation AstType := Ast.term (only parsing).
 Inductive ContextElement :=
@@ -85,7 +557,7 @@ Fixpoint subst_n_name (in_term : Ast.term) (subst_term : Ast.term) (var_n : opti
                               | _, _ => name
                             end in
             Ast.tProd name'
-                      (subst_n_name term0' subst_term var_n name)
+                      (subst_n_name term0' subst_term var_n new_name)
                       (subst_n_name term1' subst_term (option_map S var_n) new_name)
        | Ast.tLambda name' term0' term1'
          => let new_name := match name, name' with
@@ -96,7 +568,7 @@ Fixpoint subst_n_name (in_term : Ast.term) (subst_term : Ast.term) (var_n : opti
                               | _, _ => name
                             end in
             Ast.tLambda name'
-                        (subst_n_name term0' subst_term var_n name)
+                        (subst_n_name term0' subst_term var_n new_name)
                         (subst_n_name term1' subst_term (option_map S var_n) new_name)
        | Ast.tLetIn name' term0' term1' term2'
          => let new_name := match name, name' with
@@ -107,8 +579,8 @@ Fixpoint subst_n_name (in_term : Ast.term) (subst_term : Ast.term) (var_n : opti
                               | _, _ => name
                             end in
             Ast.tLetIn name'
-                       (subst_n_name term0' subst_term var_n name)
-                       (subst_n_name term1' subst_term var_n name)
+                       (subst_n_name term0' subst_term var_n new_name)
+                       (subst_n_name term1' subst_term var_n new_name)
                        (subst_n_name term2' subst_term (option_map S var_n) new_name)
        | Ast.tApp f args
          => Ast.tApp (subst_n_name f subst_term var_n name)
