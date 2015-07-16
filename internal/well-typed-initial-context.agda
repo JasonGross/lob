@@ -1,7 +1,57 @@
-module well-typed-syntax where
+module well-typed-initial-context where
+open import well-typed-syntax
 
+ε : Context
+ε = ε₀ {-
+  ▻ {!!} {- record Σ {A : Set} (P : A → Set) : Set where
+  constructor _,_
+  field
+    proj₁ : A
+    proj₂ : P proj₁ -}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}
+  ▻ {!!}-}
+{-postulate
+  ‘Context’ : Typ ε
+  ‘Typ’ : Typ (ε ▻ ‘Context’)-}
+
+{-
+
+infixr 1 _,_
+
+record Σ {A : Set} (P : A → Set) : Set where
+  constructor _,_
+  field
+    proj₁ : A
+    proj₂ : P proj₁
+
+data _≡_ {A : Set} (x : A) : A → Set where
+  refl : x ≡ x
+
+sym : {A : Set} → {x : A} → {y : A} → x ≡ y → y ≡ x
+sym refl = refl
+
+transport : ∀ {A : Set} {x : A} {y : A} → (P : A → Set) → x ≡ y → P x → P y
+transport P refl v = v
+-}
+
+{-
 infixl 2 _▻_
-infixl 2 _▻Typ_
 infixl 3 _‘’_
 infixl 3 _‘t’_
 infixl 3 _‘’₁_
@@ -13,7 +63,6 @@ infixr 1 _‘→’_
 mutual
   data Context : Set where
     ε₀ : Context
-    _▻Typ_ : (Γ : Context) → Context → Context
     _▻_ : (Γ : Context) → Typ Γ → Context
 
   data Typ : Context → Set where
@@ -25,13 +74,9 @@ mutual
     W1 : ∀ {Γ A B} → Typ (Γ ▻ B) → Typ (Γ ▻ A ▻ (W {Γ = Γ} {A = A} B))
     W2 : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻ A ▻ W B ▻ W1 C)
     _‘→’_ : ∀ {Γ} (A : Typ Γ) → Typ (Γ ▻ A) → Typ Γ
-    ‘TVAR₀’ : ∀ {Γ Γ'} → Typ (Γ ▻Typ Γ')
-    ‘cstTVAR₀’ : ∀ {Γ Γ'} → Term {Γ ▻Typ Γ'} ‘TVAR₀’ → Typ Γ'
-    ‘Σ'’ : ∀ {Γ} (T : Typ Γ) → Typ (Γ ▻ T) → Typ Γ
+    {-‘Σ’ : ∀ (T : Typ ε₀) → Typ (ε₀ ▻ T) → Typ ε₀
     ‘Context’ : Typ ε₀
-    ‘Typ’ : Typ (ε₀ ▻ ‘Context’)
-    {-
--}
+    ‘Typ’ : Typ (ε₀ ▻ ‘Context’)-}
 
 
   data Term : ∀ {Γ} → Typ Γ → Set where
@@ -96,5 +141,6 @@ mutual
     substTyp1-substTyp-weakenTyp2-weakenTyp : ∀ {Γ T' A B T} {a : Term {Γ ▻ T'} (W A)} {b : Term {Γ ▻ T'} (W1 B ‘’ a)}
       → Term {Γ ▻ T'} (W2 (W T) ‘’₁ a ‘’ b)
       → Term {Γ ▻ T'} (W1 T ‘’ a)
-    ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ'’ T P ‘→’ W T)
-    ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ'’ T P} (W1 P ‘’ substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
+
+ε = ε₀
+-}

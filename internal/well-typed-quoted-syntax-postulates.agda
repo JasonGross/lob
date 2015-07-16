@@ -1,6 +1,7 @@
 module well-typed-quoted-syntax-postulates where
 open import common
 open import well-typed-syntax
+open import well-typed-initial-context
 open import well-typed-syntax-helpers
 
 infixl 3 _‘‘’’_
@@ -21,12 +22,6 @@ postulate
 
   ‘tProd-nd’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’)} (W (W ‘Typ’))
 -- ‘tProd-nd’ = {!!}
-
-  ‘proj₁’ : ∀ {T : Typ ε} {P : Typ (ε ▻ T)} → □ (‘Σ’ T P ‘→'’ T)
--- ‘proj₁’ = {!!}
-
-  ‘proj₂’ : ∀ {T : Typ ε} {P : Typ (ε ▻ T)} → Term {ε ▻ ‘Σ’ T P} (W1 P ‘’ (w→ ‘proj₁’ ‘'’ₐ ‘VAR₀’))
--- ‘proj₂’ = {!!}
 
   ‘quote-term’ : ∀ {A : Typ ε} →
                       □ (A ‘→'’ ‘Term’ ‘’₁ _ ‘’ ⌜ A ⌝T)

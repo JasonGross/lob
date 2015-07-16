@@ -1,6 +1,7 @@
 module well-typed-syntax-helpers where
 open import common
 open import well-typed-syntax
+open import well-typed-initial-context
 
 infixl 3 _‘'’ₐ_
 infixr 1 _‘→'’_
@@ -306,12 +307,22 @@ S₁₀W2W : ∀ {Γ T' A B T} {a : Term {Γ ▻ T'} (W A)} {b : Term {Γ ▻ T'
       → Term {Γ ▻ T'} (W1 T ‘’ a)
 S₁₀W2W = substTyp1-substTyp-weakenTyp2-weakenTyp
 
+
+‘Σ’ : ∀ (T : Typ ε) → Typ (ε ▻ T) → Typ ε
+‘Σ’ = ‘Σ'’
+
+‘proj₁’ : ∀ {T : Typ ε} {P : Typ (ε ▻ T)} → Term (‘Σ’ T P ‘→'’ T)
+‘proj₁’ {T} {P} = ‘proj₁'’
+
+‘proj₂’ : ∀ {T : Typ ε} {P : Typ (ε ▻ T)} → Term {ε ▻ ‘Σ’ T P} (W1 P ‘’ (w→ ‘proj₁’ ‘'’ₐ ‘VAR₀’))
+‘proj₂’ {T} {P} = ‘proj₂'’
+
 context-pick-if : ∀ {P : Context → Set}
          {Γ : Context}
-         (dummy : P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’))
+         (dummy : P (ε₀ ▻ ‘Σ’ ‘Context’ ‘Typ’))
          (val : P Γ) →
-    P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
-context-pick-if {P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} dummy val = val
+    P (ε₀ ▻ ‘Σ'’ ‘Context’ ‘Typ’)
+context-pick-if {P} {ε₀ ▻ ‘Σ'’ ‘Context’ ‘Typ’} dummy val = val
 context-pick-if {P} {_} dummy val = dummy
 
 context-pick-if-refl : ∀ {P dummy val} →

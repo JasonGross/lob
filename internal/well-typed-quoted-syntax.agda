@@ -1,6 +1,7 @@
 module well-typed-quoted-syntax where
 open import common
 open import well-typed-syntax
+open import well-typed-initial-context
 open import well-typed-syntax-helpers
 open import well-typed-quoted-syntax-postulates
 
