@@ -307,7 +307,6 @@ S₁₀W2W : ∀ {Γ T' A B T} {a : Term {Γ ▻ T'} (W A)} {b : Term {Γ ▻ T'
       → Term {Γ ▻ T'} (W1 T ‘’ a)
 S₁₀W2W = substTyp1-substTyp-weakenTyp2-weakenTyp
 
-
 ‘Σ’ : ∀ (T : Typ ε) → Typ (ε ▻ T) → Typ ε
 ‘Σ’ = ‘Σ'’
 
@@ -317,14 +316,16 @@ S₁₀W2W = substTyp1-substTyp-weakenTyp2-weakenTyp
 ‘proj₂’ : ∀ {T : Typ ε} {P : Typ (ε ▻ T)} → Term {ε ▻ ‘Σ’ T P} (W1 P ‘’ (w→ ‘proj₁’ ‘'’ₐ ‘VAR₀’))
 ‘proj₂’ {T} {P} = ‘proj₂'’
 
+‘existT’ : ∀ {T P} (x : Term T) (p : Term (P ‘’ x)) → Term (‘Σ’ T P)
+‘existT’ {T} {P} = ‘existT'’
+
 context-pick-if : ∀ {P : Context → Set}
          {Γ : Context}
-         (dummy : P (ε₀ ▻ ‘Σ’ ‘Context’ ‘Typ’))
+         (dummy : P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’))
          (val : P Γ) →
-    P (ε₀ ▻ ‘Σ'’ ‘Context’ ‘Typ’)
-context-pick-if {P} {ε₀ ▻ ‘Σ'’ ‘Context’ ‘Typ’} dummy val = val
-context-pick-if {P} {_} dummy val = dummy
+    P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
+context-pick-if {P} {Γ} dummy val = context-pick-if' {P} {Γ} dummy val
 
 context-pick-if-refl : ∀ {P dummy val} →
     context-pick-if {P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} dummy val ≡ val
-context-pick-if-refl = refl
+context-pick-if-refl {P} {dummy} {val} = context-pick-if-refl' {P} {dummy} {val}

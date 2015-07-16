@@ -25,11 +25,16 @@ mutual
     W1 : ∀ {Γ A B} → Typ (Γ ▻ B) → Typ (Γ ▻ A ▻ (W {Γ = Γ} {A = A} B))
     W2 : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻ A ▻ W B ▻ W1 C)
     _‘→’_ : ∀ {Γ} (A : Typ Γ) → Typ (Γ ▻ A) → Typ Γ
-    ‘TVAR₀’ : ∀ {Γ Γ'} → Typ (Γ ▻Typ Γ')
-    ‘cstTVAR₀’ : ∀ {Γ Γ'} → Term {Γ ▻Typ Γ'} ‘TVAR₀’ → Typ Γ'
+    WT : ∀ {Γ A} → Typ Γ → Typ (Γ ▻Typ A)
+    WT₁ : ∀ {Γ A B} → Typ (Γ ▻ B) → Typ (Γ ▻Typ A ▻ WT B)
+    WT₂ : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻Typ A ▻ WT B ▻ WT₁ C)
+    ‘TVAR₀₀’ : ∀ {Γ} → Typ (Γ ▻Typ Γ)
+    ‘TVAR₀₁’ : ∀ {Γ T} → Typ (Γ ▻Typ (Γ ▻ T) ▻ WT T)
+    ‘TVAR₀₂’ : ∀ {Γ A B} → Typ (Γ ▻Typ (Γ ▻ A ▻ B) ▻ WT A ▻ WT₁ B)
+    {-‘cstTVAR₀’ : ∀ {Γ Γ'} → Term {Γ ▻Typ Γ'} ‘TVAR₀’ → Typ Γ'-}
     ‘Σ'’ : ∀ {Γ} (T : Typ Γ) → Typ (Γ ▻ T) → Typ Γ
-    ‘Context’ : Typ ε₀
-    ‘Typ’ : Typ (ε₀ ▻ ‘Context’)
+    {-‘Context’ : Typ ε₀
+    ‘Typ’ : Typ (ε₀ ▻ ‘Context’)-}
     {-
 -}
 
@@ -98,3 +103,4 @@ mutual
       → Term {Γ ▻ T'} (W1 T ‘’ a)
     ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ'’ T P ‘→’ W T)
     ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ'’ T P} (W1 P ‘’ substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
+    ‘existT'’ : ∀ {Γ T P} (x : Term T) (p : Term (P ‘’ x)) → Term (‘Σ'’ {Γ} T P)

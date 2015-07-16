@@ -11,9 +11,6 @@ postulate
   ⌜_⌝c : Context → Term {Γ = ε} ‘Context’
 -- ⌜ x ⌝c = {!!}
 
-  ‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’)
--- ‘Term’ = {!!}
-
   ⌜_⌝T : ∀ {Γ} → Typ Γ → □ (‘Typ’ ‘’ ⌜ Γ ⌝c)
 -- ⌜ x ⌝T = {!!}
 
@@ -32,9 +29,6 @@ postulate
       □ (‘Context’ ‘→’ P ‘→'’ W (P ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
 
 
-
-  ‘existT’ : ∀ {T P} (x : Term T) (p : Term (P ‘’ x)) → Term (‘Σ’ T P)
--- ‘existT’ = {!!}
 
   ‘context-extend’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’)} (W (W ‘Context’))
 -- ‘context-extend’ = {!!}
