@@ -3,6 +3,7 @@ open import common
 open import well-typed-syntax
 open import well-typed-initial-context
 open import well-typed-syntax-helpers
+open import well-typed-syntax-context-helpers
 
 infixl 3 _‘‘’’_
 infixr 1 _‘‘→'’’_
