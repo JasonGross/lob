@@ -5,6 +5,7 @@ open import well-typed-initial-context
 open import well-typed-syntax-helpers
 open import well-typed-syntax-context-helpers
 open import well-typed-quoted-syntax-postulates
+open import well-typed-quoted-syntax-defs
 
 infixr 2 _‘‘∘’’_
 

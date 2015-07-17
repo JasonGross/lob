@@ -6,6 +6,7 @@ open import well-typed-syntax-helpers
 open import well-typed-quoted-syntax
 open import well-typed-syntax-context-helpers
 open import well-typed-quoted-syntax-postulates
+open import well-typed-quoted-syntax-defs
 
 postulate
   X : Set
