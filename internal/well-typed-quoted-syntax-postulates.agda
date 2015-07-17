@@ -4,20 +4,12 @@ open import well-typed-syntax
 open import well-typed-initial-context
 open import well-typed-syntax-helpers
 open import well-typed-syntax-context-helpers
+open import well-typed-quoted-syntax-defs
 
 infixl 3 _‘‘’’_
 infixr 1 _‘‘→'’’_
 
 postulate
-  ⌜_⌝c : Context → Term {Γ = ε} ‘Context’
--- ⌜ x ⌝c = {!!}
-
-  ⌜_⌝T : ∀ {Γ} → Typ Γ → □ (‘Typ’ ‘’ ⌜ Γ ⌝c)
--- ⌜ x ⌝T = {!!}
-
-  ⌜_⌝t : ∀ {Γ} {A : Typ Γ} → Term {Γ = Γ} A → □ (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T)
--- ⌜ x ⌝t = {!!}
-
   ‘tProd-nd’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’)} (W (W ‘Typ’))
 -- ‘tProd-nd’ = {!!}
 
@@ -31,9 +23,6 @@ postulate
 
 
 
-  ‘context-extend’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’)} (W (W ‘Context’))
--- ‘context-extend’ = {!!}
-
   beta-under-subst : ∀ {A B B'}
            {g : □ (A ‘→'’ B)}
            {x : □ A} →
@@ -46,15 +35,6 @@ postulate
       □ (B' ‘’ (g ‘'’ₐ x))
       → □ (B' ‘’ SW (w→ g ‘'’ₐ ‘VAR₀’ ‘t’ x))
 
-
-_‘▻’_ : (Γ : □ ‘Context’) → □ (‘Typ’ ‘’ Γ) → □ ‘Context’
-Γ ‘▻’ x = (S₁₀WW (‘context-extend’ ‘t’₁ Γ ‘t’ x))
-
-‘ε’ : Term {Γ = ε} ‘Context’
-‘ε’ = ⌜ ε ⌝c
-
-‘□’ : Typ (ε ▻ ‘Typ’ ‘’ ‘ε’)
-‘□’ = ‘Term’ ‘’₁ ‘ε’
 
 _‘‘→'’’_ : ∀ {Γ} → (A : □ (‘Typ’ ‘’ Γ)) → (B : □ (‘Typ’ ‘’ Γ)) → □ (‘Typ’ ‘’ Γ)
 _‘‘→'’’_ {Γ = Γ} A B = (S₂₁₀WW (‘tProd-nd’ ‘t’₂ Γ ‘t’₁ A ‘t’ S₁₀W' B))

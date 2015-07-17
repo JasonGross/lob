@@ -44,6 +44,9 @@ S₂∀ = substTyp2-tProd
 un‘λ∙’ : ∀ {Γ A B} → Term (A ‘→’ B) → Term {Γ ▻ A} B
 un‘λ∙’ f = SW1V (weakenTyp-tProd (w f) ‘’ₐ ‘VAR₀’)
 
+un‘λ'∙’ : ∀ {Γ A B} → Term (A ‘→'’ B) → Term {Γ ▻ A} (W B)
+un‘λ'∙’ f = un‘λ∙’ f
+
 weakenProd : ∀ {Γ A B C} →
                           Term {Γ = Γ} (A ‘→’ B)
                           → Term {Γ = Γ ▻ C} (W A ‘→’ W1 B)

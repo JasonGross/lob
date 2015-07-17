@@ -4,6 +4,7 @@ open import common
 open import common-utilities
 open import well-typed-syntax-pre-eq-dec-defs
 
+-- not sure why we need this; everything is structural on the context/type/term argument, respectively
 {-# NO_TERMINATION_CHECK #-}
 mutual
   ≟'-ctx-refl : ∀ x → (x ≟'-ctx x) ≡ just refl
