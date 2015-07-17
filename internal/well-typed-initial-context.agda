@@ -1,5 +1,6 @@
 module well-typed-initial-context where
 open import well-typed-syntax
+open import well-typed-syntax-helpers
 open import common
 
 pattern ε₀▻‘Typ’ = ε₀
@@ -24,13 +25,35 @@ pattern ‘Typ’p₃     = W1 ‘Typ’p₂
 pattern ‘Term’p₃    = W2 ‘Term’p₂
 pattern ‘ε₀’p₃       = ‘VAR₀’
 
-pattern εp₄ = εp₃
-  ▻ (‘Context’p₃ ‘→’ W ‘Context’p₃ ‘→’ W (W ‘Context’p₃)) {- ‘ε₀’ -}
-pattern ‘Context’p₄ = W ‘Context’p₃
-pattern ‘Typ’p₄     = W1 ‘Typ’p₃
-pattern ‘Term’p₄    = W2 ‘Term’p₃
-pattern ‘ε₀’p₄       = w ‘ε₀’p₃
-pattern _‘▻’p₄_     = ‘VAR₀’
+εp₄ : Context
+εp₄ = εp₃
+  ▻ (‘Context’p₃ ‘→'’ ‘Context’p₃ ‘→'’ ‘Context’p₃) {- ‘_▻Typ_’ -}
+‘Context’p₄ : Typ εp₄
+‘Context’p₄ = W ‘Context’p₃
+‘Typ’p₄     : Typ (εp₄ ▻ ‘Context’p₄)
+‘Typ’p₄     = W1 ‘Typ’p₃
+‘Term’p₄    : Typ (εp₄ ▻ ‘Context’p₄ ▻ ‘Typ’p₄)
+‘Term’p₄    = W2 ‘Term’p₃
+‘ε₀’p₄       : Term ‘Context’p₄
+‘ε₀’p₄       = w ‘ε₀’p₃
+‘_▻Typ_’p₄     : Term (‘Context’p₄ ‘→'’ ‘Context’p₄ ‘→'’ ‘Context’p₄)
+‘_▻Typ_’p₄     = weakenTyp-tProd-nd-tProd-nd ‘VAR₀’
+
+εp₅ : Context
+εp₅ = εp₄
+  ▻ (‘Context’p₄ ‘→’ ‘Typ’p₄ ‘→'’ W ‘Context’p₄) {- ‘_▻_’ -}
+‘Context’p₅ : Typ εp₅
+‘Context’p₅ = W ‘Context’p₄
+‘Typ’p₅     : Typ (εp₅ ▻ ‘Context’p₅)
+‘Typ’p₅     = W1 ‘Typ’p₄
+‘Term’p₅    : Typ (εp₅ ▻ ‘Context’p₅ ▻ ‘Typ’p₅)
+‘Term’p₅    = W2 ‘Term’p₄
+‘ε₀’p₅       : Term ‘Context’p₅
+‘ε₀’p₅       = w ‘ε₀’p₄
+‘_▻Typ_’p₅     : Term (‘Context’p₅ ‘→'’ ‘Context’p₅ ‘→'’ ‘Context’p₅)
+‘_▻Typ_’p₅     = w→→ ‘_▻Typ_’p₄
+‘_▻_’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→'’ W ‘Context’p₅)
+‘_▻_’p₅     = weakenTyp-tProd-tProd-nd-nd ‘VAR₀’
 
 
 {-  ▻ {!!} {- record Σ {A : Set} (P : A → Set) : Set where
@@ -98,27 +121,23 @@ Typ-Context-Tower n = {Γ : Context} → arrow-tower-to-arrow {Context} {Context
 ‘TVAR_₁’ n = λ {Γ} {Γ'} → {!lambda-tower-to-lambda {Context} _▻Typ_ Typ WT n Γ Γ' {!!} {-‘TVAR₀₀’-}!}-}
 
 abstract
-  pattern εp        = εp₃
-  pattern ‘Context’p = ‘Context’p₃
-  pattern ‘Typ’p     = ‘Typ’p₃
-  pattern ‘Term’p    = ‘Term’p₃
-  pattern ‘ε₀’p       = ‘ε₀’p₃
-  pattern _‘▻’p_     = _‘▻’p₄_
-
   ε : Context
-  ε = εp
+  ε = εp₅
 
   ‘Context’ : Typ ε
-  ‘Context’ = ‘Context’p
+  ‘Context’ = ‘Context’p₅
 
   ‘Typ’ : Typ (ε ▻ ‘Context’)
-  ‘Typ’ = ‘Typ’p
+  ‘Typ’ = ‘Typ’p₅
 
   ‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’)
-  ‘Term’ = ‘Term’p
+  ‘Term’ = ‘Term’p₅
 
   ‘ε₀’ : Term ‘Context’
-  ‘ε₀’ = ‘ε₀’p
+  ‘ε₀’ = ‘ε₀’p₅
 
-  {-_‘▻’_ : Term (‘Context’ ‘→’ W ‘Context’ ‘→’ W (W ‘Context’))
-  _‘▻’_ = {!_‘▻’p_!}-}
+  ‘_▻Typ_’ : Term (‘Context’ ‘→'’ ‘Context’ ‘→'’ ‘Context’)
+  ‘_▻Typ_’ = ‘_▻Typ_’p₅
+
+  ‘_▻_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’)
+  ‘_▻_’ = ‘_▻_’p₅
