@@ -122,15 +122,3 @@ abstract
 
   {-_‘▻’_ : Term (‘Context’ ‘→’ W ‘Context’ ‘→’ W (W ‘Context’))
   _‘▻’_ = {!_‘▻’p_!}-}
-
-  context-pick-if' : ∀ {P : Context → Set}
-    → {Γ : Context}
-    → (dummy : P (ε ▻ ‘Σ'’ ‘Context’ ‘Typ’))
-    → (val : P Γ)
-    → P (ε ▻ ‘Σ'’ ‘Context’ ‘Typ’)
-  context-pick-if' {P} {εp ▻ ‘Σ'’ ._ ‘Typ’p} dummy val = val
-  context-pick-if' {P} {_} dummy val = dummy
-
-  context-pick-if-refl' : ∀ {P dummy val} →
-    context-pick-if' {P} {ε ▻ ‘Σ'’ ‘Context’ ‘Typ’} dummy val ≡ val
-  context-pick-if-refl' = refl
