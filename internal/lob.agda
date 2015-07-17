@@ -26,7 +26,7 @@ Hf h = (cast h ‘’ quote-sigma h ‘→'’ ‘X’)
 qh : Term {Γ = (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} (W (‘Typ’ ‘’ ‘ε’))
 qh = w→→ ‘substTyp’ ‘'’ₐ f' ‘'’ₐ x
   where
-    f' : Term (W (‘Typ’ ‘’ ‘ε’ ‘▻’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))
+    f' : Term (W (‘Typ’ ‘’ (‘ε’ ‘▻’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)))
     f' = w→ ‘cast’ ‘'’ₐ ‘VAR₀’
 
     x : Term (W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))

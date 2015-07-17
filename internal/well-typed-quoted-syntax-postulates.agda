@@ -4,7 +4,7 @@ open import well-typed-syntax
 open import well-typed-initial-context
 open import well-typed-syntax-helpers
 open import well-typed-syntax-context-helpers
-open import well-typed-quoted-syntax-defs
+open import well-typed-quoted-syntax-defs public
 
 infixl 3 _‘‘’’_
 infixr 1 _‘‘→'’’_
