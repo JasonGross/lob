@@ -2,10 +2,10 @@ module well-typed-quoted-syntax where
 open import common
 open import well-typed-syntax
 open import well-typed-initial-context
-open import well-typed-syntax-helpers
-open import well-typed-syntax-context-helpers
-open import well-typed-quoted-syntax-postulates
-open import well-typed-quoted-syntax-defs
+open import well-typed-syntax-helpers public
+open import well-typed-syntax-context-helpers public
+open import well-typed-quoted-syntax-postulates public
+open import well-typed-quoted-syntax-defs public
 
 infixr 2 _‘‘∘’’_
 
