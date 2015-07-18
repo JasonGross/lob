@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module well-typed-syntax where
 
 infixl 2 _▻_

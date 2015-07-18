@@ -1,25 +1,49 @@
 {-# OPTIONS --without-K #-}
 
 module common where
+open import Agda.Primitive public
+  using    (Level; _⊔_; lzero; lsuc)
 
 infixr 1 _,_
 
-record Σ {A : Set} (P : A → Set) : Set where
+record Σ {ℓ ℓ′} {A : Set ℓ} (P : A → Set ℓ′) : Set (ℓ ⊔ ℓ′) where
   constructor _,_
   field
     proj₁ : A
     proj₂ : P proj₁
 
-data Maybe (A : Set) : Set where
+data Maybe {ℓ : Level} (A : Set ℓ) : Set ℓ where
   just    : (x : A) → Maybe A
   nothing : Maybe A
+
+Maybe-elim : ∀ {ℓ ℓ′} {A : Set ℓ} (P : Maybe A → Set ℓ′)
+  → ((x : A) → P (just x))
+  → P nothing
+  → (x : Maybe A)
+  → P x
+Maybe-elim P Pjust Pnothing (just x) = Pjust x
+Maybe-elim P Pjust Pnothing nothing = Pnothing
+
+option-map : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′}
+  → (A → B)
+  → Maybe A → Maybe B
+option-map f (just x) = just (f x)
+option-map f nothing = nothing
+
+
+option-bind : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′}
+  → Maybe A
+  → (A → Maybe B)
+  → Maybe B
+option-bind (just x) f = option-map (λ x₁ → x₁) (f x)
+option-bind nothing f = nothing
 
 data ⊥ : Set where
 
 ⊥-elim : ⊥ → {A : Set} → A
 ⊥-elim ()
 
-record ⊤ : Set where
+record ⊤ {ℓ : Level} : Set ℓ where
   constructor tt
 
 infixr 1 _⊎_
