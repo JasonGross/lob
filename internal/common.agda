@@ -115,3 +115,8 @@ data ℕ : Set where
   suc  : (n : ℕ) → ℕ
 
 {-# BUILTIN NATURAL ℕ #-}
+
+max : ℕ → ℕ → ℕ
+max 0 y = y
+max x 0 = x
+max (suc x) (suc y) = suc (max x y)

@@ -31,7 +31,6 @@ mutual
   ≟'-typ-refl (‘Σ'’ x x₁) = lift-≟-2-refl ‘Σ'’ (_ ≟'-typ _) (λ p → _ ≟'-typ _) (≟'-typ-refl x) (≟'-typ-refl x₁)
 
   ≟'-term-refl : ∀ {Γ} {T : Typ Γ} (x : Term T) → (x ≟'-term x) ≡ just refl
-  ≟'-term-refl (x ‘t’ x₁) = lift-≟-1-refl (λ x₂ → x₂ ‘t’ x₁) (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (w x) = lift-≟-1-refl w (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (‘λ∙’ x) = lift-≟-1-refl ‘λ∙’ (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (x ‘’ₐ x₁) = lift-≟-1-refl (λ x₂ → x₂ ‘’ₐ x₁) (_ ≟'-term _) (≟'-term-refl x)

@@ -4,7 +4,6 @@ module well-typed-syntax where
 infixl 2 _▻_
 infixl 2 _▻Typ_
 infixl 3 _‘’_
-infixl 3 _‘t’_
 infixl 3 _‘’₁_
 infixl 3 _‘’₂_
 infixl 3 _‘’₃_
@@ -32,16 +31,10 @@ mutual
     ‘TVAR₀₀’ : ∀ {Γ} → Typ (Γ ▻Typ Γ)
     ‘TVAR₀₁’ : ∀ {Γ T} → Typ (Γ ▻Typ (Γ ▻ T) ▻ WT T)
     ‘TVAR₀₂’ : ∀ {Γ A B} → Typ (Γ ▻Typ (Γ ▻ A ▻ B) ▻ WT A ▻ WT₁ B)
-    {-‘cstTVAR₀’ : ∀ {Γ Γ'} → Term {Γ ▻Typ Γ'} ‘TVAR₀’ → Typ Γ'-}
     ‘Σ'’ : ∀ {Γ} (T : Typ Γ) → Typ (Γ ▻ T) → Typ Γ
-    {-‘Context’ : Typ ε₀
-    ‘Typ’ : Typ (ε₀ ▻ ‘Context’)-}
-    {-
--}
 
 
   data Term : ∀ {Γ} → Typ Γ → Set where
-    _‘t’_ : ∀ {Γ A} {B : Typ (Γ ▻ A)} → (b : Term {Γ = Γ ▻ A} B) → (a : Term {Γ = Γ} A) → Term {Γ = Γ} (B ‘’ a)
     w : ∀ {Γ A B} → Term {Γ = Γ} B → Term {Γ = Γ ▻ A} (W {Γ = Γ} {A = A} B)
     ‘λ∙’ : ∀ {Γ A B} → Term {Γ = (Γ ▻ A)} B → Term {Γ = Γ} (A ‘→’ B)
     _‘’ₐ_ : ∀ {Γ A B} → (f : Term {Γ = Γ} (A ‘→’ B)) → (x : Term {Γ = Γ} A) → Term {Γ = Γ} (B ‘’ x)
@@ -79,9 +72,9 @@ mutual
       → Term {Γ ▻ T'' ▻ W (T' ‘’ a)} (W1 (W (T ‘’ a)))
     weakenTyp-substTyp-substTyp-weakenTyp1 : ∀ {Γ T' B A} {b : Term {Γ} B} {a : Term {Γ ▻ B} (W A)} {T : Typ (Γ ▻ A)}
       → Term {Γ ▻ T'} (W (W1 T ‘’ a ‘’ b))
-      → Term {Γ ▻ T'} (W (T ‘’ (substTyp-weakenTyp (a ‘t’ b))))
+      → Term {Γ ▻ T'} (W (T ‘’ (substTyp-weakenTyp ((‘λ∙’ a) ‘’ₐ b))))
     weakenTyp-substTyp-substTyp-weakenTyp1-inv : ∀ {Γ T' B A} {b : Term {Γ} B} {a : Term {Γ ▻ B} (W A)} {T : Typ (Γ ▻ A)}
-      → Term {Γ ▻ T'} (W (T ‘’ (substTyp-weakenTyp (a ‘t’ b))))
+      → Term {Γ ▻ T'} (W (T ‘’ (substTyp-weakenTyp ((‘λ∙’ a) ‘’ₐ b))))
       → Term {Γ ▻ T'} (W (W1 T ‘’ a ‘’ b))
     substTyp-weakenTyp1-weakenTyp : ∀ {Γ T} {A : Typ Γ} {B : Typ Γ}
       → {a : Term {Γ = Γ ▻ T} (W {Γ = Γ} {A = T} B)}

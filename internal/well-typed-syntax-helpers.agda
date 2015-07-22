@@ -4,6 +4,7 @@ open import well-typed-syntax
 
 infixl 3 _‘'’ₐ_
 infixr 1 _‘→'’_
+infixl 3 _‘t’_
 infixl 3 _‘t’₁_
 infixl 3 _‘t’₂_
 infixl 3 _‘t’₃_
@@ -21,6 +22,9 @@ _‘→'’_ {Γ = Γ} A B = _‘→’_ {Γ = Γ} A (W {Γ = Γ} {A = A} B)
 
 _‘'’ₐ_ : ∀ {Γ A B} → Term {Γ = Γ} (A ‘→'’ B) → Term A → Term B
 _‘'’ₐ_ {Γ} {A} {B} f x = SW (_‘’ₐ_ {Γ} {A} {W B} f x)
+
+_‘t’_ : ∀ {Γ A} {B : Typ (Γ ▻ A)} → (b : Term {Γ = Γ ▻ A} B) → (a : Term {Γ = Γ} A) → Term {Γ = Γ} (B ‘’ a)
+b ‘t’ a = ‘λ∙’ b ‘’ₐ a
 
 substTyp-tProd : ∀ {Γ T A B} {a : Term {Γ = Γ} T} →
                          Term {Γ = Γ} ((A ‘→’ B) ‘’ a)

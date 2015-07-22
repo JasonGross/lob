@@ -51,7 +51,6 @@ mutual
   ‘Σ'’ x x₁ ≟'-typ y = nothing
 
   _≟'-term_ : {Γ : Context} → {T : Typ Γ} → (x : Term T) → (y : Term T) → Maybe (x ≡ y)
-  (x ‘t’ x₁) ≟'-term (y ‘t’ .x₁) = lift-≟-1 (λ x₂ → x₂ ‘t’ x₁) (_ ≟'-term _)
   w x ≟'-term w y = lift-≟-1 w (_ ≟'-term _)
   ‘λ∙’ x ≟'-term ‘λ∙’ y = lift-≟-1 ‘λ∙’ (_ ≟'-term _)
   (x ‘’ₐ x₁) ≟'-term (y ‘’ₐ .x₁) = lift-≟-1 (λ x₂ → x₂ ‘’ₐ x₁) (_ ≟'-term _)
@@ -90,7 +89,6 @@ mutual
   ‘proj₁'’ ≟'-term ‘proj₁'’ = just refl
   ‘proj₂'’ ≟'-term ‘proj₂'’ = just refl
   ‘existT'’ x x₁ ≟'-term ‘existT'’ y y₁ = lift-≟-2 ‘existT'’ (_ ≟'-term _) (λ p → _ ≟'-term _)
-  (x ‘t’ x₁) ≟'-term y = nothing
   w x ≟'-term y = nothing
   ‘λ∙’ x ≟'-term y = nothing
   (x ‘’ₐ x₁) ≟'-term y = nothing
