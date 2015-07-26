@@ -6,10 +6,16 @@ open import common-utilities
 mutual
   _≟'-ctx_ : (x : Context) → (y : Context) → Maybe (x ≡ y)
   ε₀ ≟'-ctx ε₀ = just refl
-  (x ▻Typ x₁) ≟'-ctx (y ▻Typ y₁) = lift-≟-2 _▻Typ_ (x ≟'-ctx y) (λ p → _ ≟'-ctx y₁)
+  (x ▻Typε) ≟'-ctx (y ▻Typε) = lift-≟-1 _▻Typε (x ≟'-ctx y)
+  (x ▻Typ₁ x₁) ≟'-ctx (y ▻Typ₁ y₁) = lift-≟-2 _▻Typ₁_ (x ≟'-ctx y) (λ p → _ ≟'-typ y₁)
+  (x ▻Typ₂ x₁ ▻T x₂) ≟'-ctx (y ▻Typ₂ y₁ ▻T y₂) = lift-≟-3 _▻Typ₂_▻T_ (x ≟'-ctx y) (λ p → _ ≟'-typ y₁) (λ p q → _ ≟'-typ y₂)
+  (x ▻Typ₃ x₁ ▻T x₂ ▻T x₃) ≟'-ctx (y ▻Typ₃ y₁ ▻T y₂ ▻T y₃) = lift-≟-4 _▻Typ₃_▻T_▻T_ (x ≟'-ctx y) (λ p → _ ≟'-typ y₁) (λ p q → _ ≟'-typ y₂) (λ p q r → _ ≟'-typ y₃)
   (x ▻ x₁) ≟'-ctx (y ▻ y₁) = lift-≟-2 _▻_ (x ≟'-ctx y) (λ p → _ ≟'-typ _)
   ε₀ ≟'-ctx _ = nothing
-  (x ▻Typ x₁) ≟'-ctx _ = nothing
+  (x ▻Typε) ≟'-ctx _ = nothing
+  (x ▻Typ₁ x₁) ≟'-ctx _ = nothing
+  (x ▻Typ₂ x₁ ▻T x₂) ≟'-ctx _ = nothing
+  (x ▻Typ₃ x₁ ▻T x₂ ▻T x₃) ≟'-ctx _ = nothing
   (x ▻ x₁) ≟'-ctx _ = nothing
 
   _≟'-typ_ : {Γ : Context} → (x : Typ Γ) → (y : Typ Γ) → Maybe (x ≡ y)
@@ -26,7 +32,7 @@ mutual
       helper = lift-≟-2 _‘→’_ (_ ≟'-typ _) (λ p → _ ≟'-typ _)
   WT x ≟'-typ (WT y) = lift-≟-1 WT (_ ≟'-typ _)
   WT₁ x₁ ≟'-typ (WT₁ y) = lift-≟-1 WT₁ (_ ≟'-typ _)
-  WT₂ x₂ ≟'-typ (WT₂ y) = lift-≟-1 WT₂ (_ ≟'-typ _)
+  WT₁₂ x₂ ≟'-typ (WT₁₂ y) = lift-≟-1 WT₁₂ (_ ≟'-typ _)
   ‘TVAR₀₀’ ≟'-typ ‘TVAR₀₀’ = just refl
   ‘TVAR₀₁’ ≟'-typ ‘TVAR₀₁’ = just refl
   ‘TVAR₀₂’ ≟'-typ ‘TVAR₀₂’ = just refl
@@ -44,7 +50,7 @@ mutual
   (x ‘→’ x₁) ≟'-typ y = nothing
   WT x ≟'-typ y = nothing
   WT₁ x₁ ≟'-typ y = nothing
-  WT₂ x₂ ≟'-typ y = nothing
+  WT₁₂ x₂ ≟'-typ y = nothing
   ‘TVAR₀₀’ ≟'-typ y = nothing
   ‘TVAR₀₁’ ≟'-typ y = nothing
   ‘TVAR₀₂’ ≟'-typ y = nothing

@@ -2,19 +2,20 @@ module well-typed-syntax-interpreter-full where
 open import common public
 open import well-typed-syntax
 open import well-typed-syntax-interpreter
-open import well-typed-initial-context
+open import well-typed-initial-context-internal
 
-Context' : ∀ {ℓ} → ⊤ {ℓ} → Set
-Context' _ = Context
-
-Typ' : Context⇓ (ε₀ ▻Typ ε₀ ▻ ‘TVAR₀₀’) → Set
-Typ' (tt , proj₂ , proj₃) = {!!}
 
 Contextε⇓ : Context⇓ ε
-Contextε⇓ = tt , Context' , Typ' , {!!} , {!!} , {!!} , {!!}
+Contextε⇓ = tt , Context , Typ , (λ Γ → Term {Γ}) , ε₀ , _▻_ -- , {!!} , {!!}
 
 Typε⇓ : Typ ε → Set max-level
 Typε⇓ T = Typ⇓ T Contextε⇓
 
 Termε⇓ : {T : Typ ε} → Term T → Typε⇓ T
 Termε⇓ t = Term⇓ t Contextε⇓
+
+Typε▻⇓ : ∀ {A} → Typ (ε ▻ A) → Typε⇓ A → Set max-level
+Typε▻⇓ T A⇓ = Typ⇓ T (Contextε⇓ , A⇓)
+
+Termε▻⇓ : ∀ {A} → {T : Typ (ε ▻ A)} → Term T → (x : Typε⇓ A) → Typε▻⇓ T x
+Termε▻⇓ t x = Term⇓ t (Contextε⇓ , x)

@@ -2,7 +2,9 @@
 module well-typed-syntax where
 
 infixl 2 _▻_
-infixl 2 _▻Typ_
+infixl 2 _▻Typ₁_
+infixl 2 _▻Typ₂_▻T_
+infixl 2 _▻Typ₃_▻T_▻T_
 infixl 3 _‘’_
 infixl 3 _‘’₁_
 infixl 3 _‘’₂_
@@ -13,8 +15,11 @@ infixr 1 _‘→’_
 mutual
   data Context : Set where
     ε₀ : Context
-    _▻Typ_ : (Γ : Context) → Context → Context
     _▻_ : (Γ : Context) → Typ Γ → Context
+    _▻Typε : (Γ : Context) → Context
+    _▻Typ₁_ : (Γ : Context) → Typ Γ → Context
+    _▻Typ₂_▻T_ : (Γ : Context) → (A : Typ Γ) → Typ (Γ ▻ A) → Context
+    _▻Typ₃_▻T_▻T_ : (Γ : Context) → (A : Typ Γ) → (B : Typ (Γ ▻ A)) → Typ (Γ ▻ A ▻ B) → Context
 
   data Typ : Context → Set where
     _‘’_ : ∀ {Γ A} → Typ (Γ ▻ A) → Term {Γ = Γ} A → Typ Γ
@@ -25,12 +30,13 @@ mutual
     W1 : ∀ {Γ A B} → Typ (Γ ▻ B) → Typ (Γ ▻ A ▻ (W {Γ = Γ} {A = A} B))
     W2 : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻ A ▻ W B ▻ W1 C)
     _‘→’_ : ∀ {Γ} (A : Typ Γ) → Typ (Γ ▻ A) → Typ Γ
-    WT : ∀ {Γ A} → Typ Γ → Typ (Γ ▻Typ A)
-    WT₁ : ∀ {Γ A B} → Typ (Γ ▻ B) → Typ (Γ ▻Typ A ▻ WT B)
-    WT₂ : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻Typ A ▻ WT B ▻ WT₁ C)
-    ‘TVAR₀₀’ : ∀ {Γ} → Typ (Γ ▻Typ Γ)
-    ‘TVAR₀₁’ : ∀ {Γ T} → Typ (Γ ▻Typ (Γ ▻ T) ▻ WT T)
-    ‘TVAR₀₂’ : ∀ {Γ A B} → Typ (Γ ▻Typ (Γ ▻ A ▻ B) ▻ WT A ▻ WT₁ B)
+    WT : ∀ {Γ A} → Typ Γ → Typ (Γ ▻Typ₁ A)
+    WT₁ : ∀ {Γ A B} → Typ Γ → Typ (Γ ▻Typ₂ A ▻T B)
+    WT₁₂ : ∀ {Γ A B} → Typ (Γ ▻ A) → Typ (Γ ▻Typ₂ A ▻T B ▻ WT₁ A)
+    -- WT₂ : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻Typ₃ A ▻T W B ▻T W1 C)
+    ‘TVAR₀₀’ : ∀ {Γ} → Typ (Γ ▻Typε)
+    ‘TVAR₀₁’ : ∀ {Γ T} → Typ (Γ ▻Typ₁ T ▻ WT T)
+    ‘TVAR₀₂’ : ∀ {Γ A B} → Typ (Γ ▻Typ₂ A ▻T B ▻ WT₁ A ▻ WT₁₂ B)
     ‘Σ'’ : ∀ {Γ} (T : Typ Γ) → Typ (Γ ▻ T) → Typ Γ
 
 

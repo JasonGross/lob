@@ -9,7 +9,10 @@ open import well-typed-syntax-pre-eq-dec-defs
 mutual
   ≟'-ctx-refl : ∀ x → (x ≟'-ctx x) ≡ just refl
   ≟'-ctx-refl ε₀ = refl
-  ≟'-ctx-refl (x ▻Typ x₁) = lift-≟-2-refl _▻Typ_ (_ ≟'-ctx _) (λ p → _ ≟'-ctx _) (≟'-ctx-refl x) (≟'-ctx-refl x₁)
+  ≟'-ctx-refl (y ▻Typε) = lift-≟-1-refl _▻Typε (_ ≟'-ctx y) (≟'-ctx-refl y)
+  ≟'-ctx-refl (y ▻Typ₁ y₁) = lift-≟-2-refl _▻Typ₁_ (_ ≟'-ctx y) (λ p → _ ≟'-typ y₁) (≟'-ctx-refl y) (≟'-typ-refl y₁)
+  ≟'-ctx-refl (y ▻Typ₂ y₁ ▻T y₂) = lift-≟-3-refl _▻Typ₂_▻T_ (_ ≟'-ctx y) (λ p → _ ≟'-typ y₁) (λ p q → _ ≟'-typ y₂) (≟'-ctx-refl y) (≟'-typ-refl y₁) (≟'-typ-refl y₂)
+  ≟'-ctx-refl (y ▻Typ₃ y₁ ▻T y₂ ▻T y₃) = lift-≟-4-refl _▻Typ₃_▻T_▻T_ (_ ≟'-ctx y) (λ p → _ ≟'-typ y₁) (λ p q → _ ≟'-typ y₂) (λ p q r → _ ≟'-typ y₃) (≟'-ctx-refl y) (≟'-typ-refl y₁) (≟'-typ-refl y₂) (≟'-typ-refl y₃)
   ≟'-ctx-refl (x ▻ x₁) = lift-≟-2-refl _▻_ (_ ≟'-ctx _) (λ p → _ ≟'-typ _) (≟'-ctx-refl x) (≟'-typ-refl _)
 
   ≟'-typ-refl : ∀ {Γ} (x : Typ Γ) → (x ≟'-typ x) ≡ just refl
@@ -24,7 +27,7 @@ mutual
   ≟'-typ-refl (x ‘→’ x₁) = lift-≟-2-refl _‘→’_ (_ ≟'-typ _) (λ p → _ ≟'-typ _) (≟'-typ-refl x) (≟'-typ-refl x₁)
   ≟'-typ-refl (WT x) = lift-≟-1-refl WT (_ ≟'-typ _) (≟'-typ-refl x)
   ≟'-typ-refl (WT₁ x₁) = lift-≟-1-refl WT₁ (_ ≟'-typ _) (≟'-typ-refl x₁)
-  ≟'-typ-refl (WT₂ x₂) = lift-≟-1-refl WT₂ (_ ≟'-typ _) (≟'-typ-refl x₂)
+  ≟'-typ-refl (WT₁₂ x₂) = lift-≟-1-refl WT₁₂ (_ ≟'-typ _) (≟'-typ-refl x₂)
   ≟'-typ-refl ‘TVAR₀₀’ = refl
   ≟'-typ-refl ‘TVAR₀₁’ = refl
   ≟'-typ-refl ‘TVAR₀₂’ = refl

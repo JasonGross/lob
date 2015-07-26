@@ -41,6 +41,15 @@ lift-≟-4-helper {A} {B} {C} {D} {E} {f} {x} {y} {.y} {z} {z'} {w} {w'} (just r
                                                                                            (q refl) (r refl)
 lift-≟-4-helper nothing q r = nothing
 
+lift-≟-4 : ∀ {A B C D E} → (f : (x : A) → (y : B x) → (z : C x y) → (w : D x y z) → E) → {x x' : A} → {y : B x} → {y' : B x'} → {z : C x y} → {z' : C x' y'} → {w : D x y z} → {w' : D x' y' z'}
+  → Maybe (x ≡ x')
+  → ((p : x ≡ x') → Maybe (transport B p y ≡ y'))
+  → ((p : x ≡ x') → (q : transport B p y ≡ y') → Maybe (transport2 C p q z ≡ z'))
+  → ((p : x ≡ x') → (q : transport B p y ≡ y') → (r : transport2 C p q z ≡ z') → Maybe (transport3 D p q r w ≡ w'))
+  → Maybe (f x y z w ≡ f x' y' z' w')
+lift-≟-4 {A} {B} {C} {D} {E} f {x} {.x} {y} {y'} {z} {z'} {w} {w'} (just refl) q r s = lift-≟-4-helper {A} {B} {C} {D} {E} {f} {x} {y} {y'} {z} {z'} {w} {w'} (q refl) (r refl) (s refl)
+lift-≟-4 f nothing q r s = nothing
+
 lift-≟-5-helper : ∀ {A : Set} {B : A → Set} {C : (x : A) → B x → Set} {D : (x : A) → (y : B x) → C x y → Set} {E F} → {f : (x : A) → (y : B x) → (z : C x y) → (w : D x y z) → (v : E x y z w) → F} → {x : A} → {y y' : B x} → {z : C x y} → {z' : C x y'} → {w : D x y z} → {w' : D x y' z'} → {v : E x y z w} → {v' : E x y' z' w'} → Maybe (y ≡ y') → ((q : y ≡ y') → Maybe (transport2 C refl q z ≡ z')) → ((q : y ≡ y') → (r : transport2 C refl q z ≡ z') → Maybe (transport3 D refl q r w ≡ w')) → ((q : y ≡ y') → (r : transport2 C refl q z ≡ z') → (s : transport3 D refl q r w ≡ w') → Maybe (transport4 E refl q r s v ≡ v')) → Maybe (f x y z w v ≡ f x y' z' w' v')
 lift-≟-5-helper {A} {B} {C} {D} {E} {F} {f} {x} {y} {.y} {z} {z'} {w} {w'} {v} {v'} (just refl) q r s
   = lift-≟-4-helper {B x} {C x} {D x} {E x} {F} {f x} {y} {z} {z'} {w}
@@ -54,6 +63,9 @@ lift-≟-5 f nothing q r s t = nothing
 lift-≟-4-helper-refl : ∀ {A B C D E f x y z w p q r} → p ≡ just refl → q refl ≡ just refl → r refl refl ≡ just refl → lift-≟-4-helper {A} {B} {C} {D} {E} {f} {x} {y} {y} {z} {z} {w} {w} p q r ≡ just refl
 lift-≟-4-helper-refl {A} {B} {C} {D} {E} {f} {x} {y} {z} {w} {._} {q} {r} refl q' r' = lift-≟-3-helper-refl {B x} {C x} {D x} {E} {f x} {y} {z} {w}
                                                                                          {q refl} {r refl} q' r'
+
+lift-≟-4-refl : ∀ {A B C D E} f {x y z w} p q r s → p ≡ just refl → q refl ≡ just refl → r refl refl ≡ just refl → s refl refl refl ≡ just refl → lift-≟-4 {A} {B} {C} {D} {E} f {x} {x} {y} {y} {z} {z} {w} {w} p q r s ≡ just refl
+lift-≟-4-refl {A} {B} {C} {D} {E} f {x} {y} {z} {w} ._ q r s refl q' r' s' = lift-≟-4-helper-refl {A} {B} {C} {D} {E} {f} {x} {y} {z} {w} {q refl} {r refl} {s refl} q' r' s'
 
 lift-≟-5-helper-refl : ∀ {A B C D E F f x y z w v p q r s} → p ≡ just refl → q refl ≡ just refl → r refl refl ≡ just refl → s refl refl refl ≡ just refl → lift-≟-5-helper {A} {B} {C} {D} {E} {F} {f} {x} {y} {y} {z} {z} {w} {w} {v} {v} p q r s ≡ just refl
 lift-≟-5-helper-refl {A} {B} {C} {D} {E} {F} {f} {x} {y} {z} {w} {v} {._} {q} {r} {s} refl q' r' s'

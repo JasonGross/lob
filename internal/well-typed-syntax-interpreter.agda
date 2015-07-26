@@ -7,16 +7,28 @@ max-level = lzero
 
 Context-size : Context → Level
 Context-size ε₀ = lzero
-Context-size (Γ ▻Typ Γ₁) = lsuc max-level ⊔ (Context-size Γ ⊔ Context-size Γ₁)
+Context-size (Γ ▻Typε) = lsuc max-level ⊔ Context-size Γ
+Context-size (Γ ▻Typ₁ T₁) = lsuc max-level ⊔ Context-size Γ
+Context-size (Γ ▻Typ₂ T₁ ▻T T₂) = lsuc max-level ⊔ Context-size Γ
+Context-size (Γ ▻Typ₃ T₁ ▻T T₂ ▻T T₃) = lsuc max-level ⊔ Context-size Γ
 Context-size (Γ ▻ x) = Context-size Γ ⊔ max-level
 
 mutual
   Context⇓ : (Γ : Context) → Set (Context-size Γ)
+  Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
+  Context⇓-helper₀ : (Γ : Context) → (Γ' : Context⇓ Γ) → (T₁ : Typ Γ) → Typ⇓ T₁ Γ' → Context⇓ (Γ ▻ T₁)
+
   Context⇓ ε₀ = ⊤
-  Context⇓ (Γ ▻Typ Γ₁) = Σ (λ (Γ' : Context⇓ Γ) → (Context⇓ Γ₁ → Set max-level))
+  Context⇓ (Γ ▻Typε) = Σ (λ (Γ' : Context⇓ Γ) → Set max-level)
+  Context⇓ (Γ ▻Typ₁ T₁) = Σ (λ (Γ' : Context⇓ Γ) → (Typ⇓ T₁ Γ' → Set max-level))
+  Context⇓ (Γ ▻Typ₂ T₁ ▻T T₂) = Σ
+                     (λ (Γ' : Context⇓ Γ) →
+                        (T₁⇓ : Typ⇓ T₁ Γ') → Typ⇓ T₂ (Context⇓-helper₀ Γ Γ' T₁ T₁⇓) → Set max-level)
+  Context⇓ (Γ ▻Typ₃ T₁ ▻T T₂ ▻T T₃) = Σ (λ (Γ' : Context⇓ Γ) → (T₁⇓ : Typ⇓ T₁ Γ') → (T₂⇓ : Typ⇓ T₂ (Context⇓-helper₀ Γ Γ' T₁ T₁⇓)) → Typ⇓ T₃ (Context⇓-helper₀ (Γ ▻ T₁) (Context⇓-helper₀ Γ Γ' T₁ T₁⇓) T₂ T₂⇓) → Set max-level)
   Context⇓ (Γ ▻ T) = Σ (λ (Γ' : Context⇓ Γ) → Typ⇓ T Γ')
 
-  Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
+  Context⇓-helper₀ Γ Γ⇓ T₁ T₁⇓ = Γ⇓ , T₁⇓
+
   Typ⇓ (T₁ ‘’ x) Γ⇓ = Typ⇓ T₁ (Γ⇓ , Term⇓ x Γ⇓)
   Typ⇓ (T₂ ‘’₁ a) (Γ⇓ , A⇓) = Typ⇓ T₂ ((Γ⇓ , Term⇓ a Γ⇓) , A⇓)
   Typ⇓ (T₃ ‘’₂ a) ((Γ⇓ , A⇓) , B⇓) = Typ⇓ T₃ (((Γ⇓ , Term⇓ a Γ⇓) , A⇓) , B⇓)
@@ -26,13 +38,13 @@ mutual
   Typ⇓ (W2 T₃) (((Γ⇓ , A⇓) , B⇓) , C⇓) = Typ⇓ T₃ ((Γ⇓ , B⇓) , C⇓)
   Typ⇓ (T ‘→’ T₁) Γ⇓ = (T⇓ : Typ⇓ T Γ⇓) → Typ⇓ T₁ (Γ⇓ , T⇓)
   Typ⇓ (WT T) (Γ⇓ , A⇓) = Typ⇓ T Γ⇓
-  Typ⇓ (WT₁ T₁) ((Γ⇓ , A⇓) , B⇓) = Typ⇓ T₁ (Γ⇓ , B⇓)
-  Typ⇓ (WT₂ T₂) (((Γ⇓ , A⇓) , B⇓) , C⇓ ) = Typ⇓ T₂ ((Γ⇓ , B⇓) , (C⇓))
-  Typ⇓ ‘TVAR₀₀’ (Γ⇓ , A⇓) = A⇓ Γ⇓
-  Typ⇓ ‘TVAR₀₁’ ((Γ⇓ , A⇓) , B⇓) = A⇓ (Γ⇓ , B⇓)
-  Typ⇓ ‘TVAR₀₂’ (((Γ⇓ , A⇓) , B⇓) , C⇓) = A⇓ (Γ⇓ , B⇓ , C⇓)
+  Typ⇓ (WT₁ T₁) (Γ⇓ , A⇓) = Typ⇓ T₁ Γ⇓
+  Typ⇓ (WT₁₂ T₂) (Γ⇓ , A⇓ , B⇓) = Typ⇓ T₂ (Γ⇓ , B⇓)
+  --Typ⇓ (WT₂ T₂) (Γ⇓ , A⇓) = Typ⇓ T₂ ((Γ⇓ , {!!}) , {!!}) -- (((Γ⇓ , A⇓) , B⇓) , C⇓ ) = Typ⇓ T₂ ((Γ⇓ , B⇓) , (C⇓))
+  Typ⇓ ‘TVAR₀₀’ (Γ⇓ , A⇓) = A⇓
+  Typ⇓ ‘TVAR₀₁’ ((Γ⇓ , A⇓) , B⇓) = A⇓ B⇓
+  Typ⇓ ‘TVAR₀₂’ (((Γ⇓ , A⇓) , B⇓) , C⇓) = A⇓ B⇓ C⇓
   Typ⇓ (‘Σ'’ T T₁) Γ⇓ = Σ (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
-
 
   Term⇓ : ∀ {Γ : Context} {T : Typ Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Typ⇓ T Γ⇓
   Term⇓ (w t) (Γ⇓ , A⇓) = Term⇓ t Γ⇓
