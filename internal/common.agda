@@ -4,13 +4,35 @@ module common where
 open import Agda.Primitive public
   using    (Level; _⊔_; lzero; lsuc)
 
-infixr 1 _,_
+infixl 1 _,_
+infixr 2 _∧_
+infixr 2 _×_
+
+data bool : Set where
+  true : bool
+  false : bool
+
+_∧_ : bool → bool → bool
+true ∧ true = true
+true ∧ false = false
+false ∧ true = false
+false ∧ false = false
 
 record Σ {ℓ ℓ′} {A : Set ℓ} (P : A → Set ℓ′) : Set (ℓ ⊔ ℓ′) where
   constructor _,_
   field
     proj₁ : A
     proj₂ : P proj₁
+
+_×_ : ∀ {ℓ ℓ′} (A : Set ℓ) (B : Set ℓ′) → Set (ℓ ⊔ ℓ′)
+A × B = Σ (λ (_ : A) → B)
+
+if_then_else_ : ∀ {ℓ} {A : Set ℓ} → (b : bool) → A → A → A
+if true then t else f = t
+if false then t else f = f
+
+data Lifted {a b} (A : Set a) : Set (b ⊔ a) where
+  lift : A → Lifted A
 
 data Maybe {ℓ : Level} (A : Set ℓ) : Set ℓ where
   just    : (x : A) → Maybe A
@@ -38,9 +60,9 @@ option-bind : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′}
 option-bind (just x) f = option-map (λ x₁ → x₁) (f x)
 option-bind nothing f = nothing
 
-data ⊥ : Set where
+data ⊥ {ℓ : Level} : Set ℓ where
 
-⊥-elim : ⊥ → {A : Set} → A
+⊥-elim : {ℓ ℓ′ : Level} → ⊥ {ℓ} → {A : Set ℓ′} → A
 ⊥-elim ()
 
 record ⊤ {ℓ : Level} : Set ℓ where

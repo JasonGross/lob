@@ -5,10 +5,15 @@ open import well-typed-syntax
 max-level : Level
 max-level = lzero
 
+Context-size : Context → Level
+Context-size ε₀ = lzero
+Context-size (Γ ▻Typ Γ₁) = lsuc max-level ⊔ (Context-size Γ ⊔ Context-size Γ₁)
+Context-size (Γ ▻ x) = Context-size Γ ⊔ max-level
+
 mutual
-  Context⇓ : Context → Set max-level
+  Context⇓ : (Γ : Context) → Set (Context-size Γ)
   Context⇓ ε₀ = ⊤
-  Context⇓ (Γ ▻Typ Γ₁) = Σ (λ (Γ' : Context⇓ Γ) → {!!})
+  Context⇓ (Γ ▻Typ Γ₁) = Σ (λ (Γ' : Context⇓ Γ) → (Context⇓ Γ₁ → Set max-level))
   Context⇓ (Γ ▻ T) = Σ (λ (Γ' : Context⇓ Γ) → Typ⇓ T Γ')
 
   Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
@@ -23,9 +28,9 @@ mutual
   Typ⇓ (WT T) (Γ⇓ , A⇓) = Typ⇓ T Γ⇓
   Typ⇓ (WT₁ T₁) ((Γ⇓ , A⇓) , B⇓) = Typ⇓ T₁ (Γ⇓ , B⇓)
   Typ⇓ (WT₂ T₂) (((Γ⇓ , A⇓) , B⇓) , C⇓ ) = Typ⇓ T₂ ((Γ⇓ , B⇓) , (C⇓))
-  Typ⇓ ‘TVAR₀₀’ (Γ⇓ , A⇓) = {!!}
-  Typ⇓ ‘TVAR₀₁’ ((Γ⇓ , A⇓) , B⇓) = {!!}
-  Typ⇓ ‘TVAR₀₂’ (((Γ⇓ , A⇓) , B⇓) , C⇓) = {!!}
+  Typ⇓ ‘TVAR₀₀’ (Γ⇓ , A⇓) = A⇓ Γ⇓
+  Typ⇓ ‘TVAR₀₁’ ((Γ⇓ , A⇓) , B⇓) = A⇓ (Γ⇓ , B⇓)
+  Typ⇓ ‘TVAR₀₂’ (((Γ⇓ , A⇓) , B⇓) , C⇓) = A⇓ (Γ⇓ , B⇓ , C⇓)
   Typ⇓ (‘Σ'’ T T₁) Γ⇓ = Σ (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
 
 

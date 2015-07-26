@@ -120,24 +120,23 @@ Typ-Context-Tower n = {Γ : Context} → arrow-tower-to-arrow {Context} {Context
 {-‘TVAR_₁’ : (n : ℕ) → Typ-Context-Tower n
 ‘TVAR_₁’ n = λ {Γ} {Γ'} → {!lambda-tower-to-lambda {Context} _▻Typ_ Typ WT n Γ Γ' {!!} {-‘TVAR₀₀’-}!}-}
 
-abstract
-  ε : Context
-  ε = εp₅
+ε : Context
+ε = εp₅
 
-  ‘Context’ : Typ ε
-  ‘Context’ = ‘Context’p₅
+‘Context’ : Typ ε
+‘Context’ = ‘Context’p₅
 
-  ‘Typ’ : Typ (ε ▻ ‘Context’)
-  ‘Typ’ = ‘Typ’p₅
+‘Typ’ : Typ (ε ▻ ‘Context’)
+‘Typ’ = ‘Typ’p₅
 
-  ‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’)
-  ‘Term’ = ‘Term’p₅
+‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’)
+‘Term’ = ‘Term’p₅
 
-  ‘ε₀’ : Term ‘Context’
-  ‘ε₀’ = ‘ε₀’p₅
+‘ε₀’ : Term ‘Context’
+‘ε₀’ = ‘ε₀’p₅
 
-  ‘_▻Typ_’ : Term (‘Context’ ‘→'’ ‘Context’ ‘→'’ ‘Context’)
-  ‘_▻Typ_’ = ‘_▻Typ_’p₅
+‘_▻Typ_’ : Term (‘Context’ ‘→'’ ‘Context’ ‘→'’ ‘Context’)
+‘_▻Typ_’ = ‘_▻Typ_’p₅
 
-  ‘_▻_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’)
-  ‘_▻_’ = ‘_▻_’p₅
+‘_▻_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’)
+‘_▻_’ = ‘_▻_’p₅
