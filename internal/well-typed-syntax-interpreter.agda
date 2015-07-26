@@ -5,16 +5,8 @@ open import well-typed-syntax
 max-level : Level
 max-level = lzero
 
-Context-size : Context → Level
-Context-size ε₀ = lzero
-Context-size (Γ ▻Typε) = lsuc max-level ⊔ Context-size Γ
-Context-size (Γ ▻Typ₁ T₁) = lsuc max-level ⊔ Context-size Γ
-Context-size (Γ ▻Typ₂ T₁ ▻T T₂) = lsuc max-level ⊔ Context-size Γ
-Context-size (Γ ▻Typ₃ T₁ ▻T T₂ ▻T T₃) = lsuc max-level ⊔ Context-size Γ
-Context-size (Γ ▻ x) = Context-size Γ ⊔ max-level
-
 mutual
-  Context⇓ : (Γ : Context) → Set (Context-size Γ)
+  Context⇓ : (Γ : Context) → Set (lsuc max-level)
   Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
   Context⇓-helper₀ : (Γ : Context) → (Γ' : Context⇓ Γ) → (T₁ : Typ Γ) → Typ⇓ T₁ Γ' → Context⇓ (Γ ▻ T₁)
 
