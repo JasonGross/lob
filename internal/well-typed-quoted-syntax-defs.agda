@@ -11,7 +11,7 @@ mutual
   abstract
     ⌜_⌝c : Context → Term {Γ = ε} ‘Context’
     ⌜ ε₀ ⌝c = ‘ε₀’
-    ⌜ Γ ▻ x ⌝c = cheat -- S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ x ⌝T)
+    ⌜ Γ ▻ x ⌝c = S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ x ⌝T)
     ⌜ Γ ▻Typε ⌝c = cheat
     ⌜ Γ ▻Typ₁ x ⌝c = cheat
     ⌜ Γ ▻Typ₂ A ▻T x ⌝c = cheat
