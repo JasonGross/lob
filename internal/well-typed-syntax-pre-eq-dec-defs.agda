@@ -6,16 +6,8 @@ open import common-utilities
 mutual
   _≟'-ctx_ : (x : Context) → (y : Context) → Maybe (x ≡ y)
   ε₀ ≟'-ctx ε₀ = just refl
-  (x ▻Typε) ≟'-ctx (y ▻Typε) = lift-≟-1 _▻Typε (x ≟'-ctx y)
-  (x ▻Typ₁ x₁) ≟'-ctx (y ▻Typ₁ y₁) = lift-≟-2 _▻Typ₁_ (x ≟'-ctx y) (λ p → _ ≟'-typ y₁)
-  (x ▻Typ₂ x₁ ▻T x₂) ≟'-ctx (y ▻Typ₂ y₁ ▻T y₂) = lift-≟-3 _▻Typ₂_▻T_ (x ≟'-ctx y) (λ p → _ ≟'-typ y₁) (λ p q → _ ≟'-typ y₂)
-  (x ▻Typ₃ x₁ ▻T x₂ ▻T x₃) ≟'-ctx (y ▻Typ₃ y₁ ▻T y₂ ▻T y₃) = lift-≟-4 _▻Typ₃_▻T_▻T_ (x ≟'-ctx y) (λ p → _ ≟'-typ y₁) (λ p q → _ ≟'-typ y₂) (λ p q r → _ ≟'-typ y₃)
   (x ▻ x₁) ≟'-ctx (y ▻ y₁) = lift-≟-2 _▻_ (x ≟'-ctx y) (λ p → _ ≟'-typ _)
   ε₀ ≟'-ctx _ = nothing
-  (x ▻Typε) ≟'-ctx _ = nothing
-  (x ▻Typ₁ x₁) ≟'-ctx _ = nothing
-  (x ▻Typ₂ x₁ ▻T x₂) ≟'-ctx _ = nothing
-  (x ▻Typ₃ x₁ ▻T x₂ ▻T x₃) ≟'-ctx _ = nothing
   (x ▻ x₁) ≟'-ctx _ = nothing
 
   _≟'-typ_ : {Γ : Context} → (x : Typ Γ) → (y : Typ Γ) → Maybe (x ≡ y)
@@ -26,16 +18,12 @@ mutual
   W x₁ ≟'-typ W y = lift-≟-1 W (x₁ ≟'-typ y)
   W1 x₂ ≟'-typ (W1 y) = lift-≟-1 W1 (_ ≟'-typ _)
   W2 x₃ ≟'-typ (W2 y) = lift-≟-1 W2 (_ ≟'-typ _)
+  ‘Set’ ≟'-typ ‘Set’ = just refl
+  El x ≟'-typ (El y) = lift-≟-1 El (_ ≟'-term _)
   (x ‘→’ x₁) ≟'-typ (y ‘→’ y₁) = helper
     where {- work around what is probably https://code.google.com/p/agda/issues/detail?id=891 -}
       helper : Maybe ((x ‘→’ x₁) ≡ (y ‘→’ y₁))
       helper = lift-≟-2 _‘→’_ (_ ≟'-typ _) (λ p → _ ≟'-typ _)
-  WT x ≟'-typ (WT y) = lift-≟-1 WT (_ ≟'-typ _)
-  WT₁ x₁ ≟'-typ (WT₁ y) = lift-≟-1 WT₁ (_ ≟'-typ _)
-  WT₁₂ x₂ ≟'-typ (WT₁₂ y) = lift-≟-1 WT₁₂ (_ ≟'-typ _)
-  ‘TVAR₀₀’ ≟'-typ ‘TVAR₀₀’ = just refl
-  ‘TVAR₀₁’ ≟'-typ ‘TVAR₀₁’ = just refl
-  ‘TVAR₀₂’ ≟'-typ ‘TVAR₀₂’ = just refl
   ‘Σ'’ x x₁ ≟'-typ ‘Σ'’ y y₁ = helper
     where
       helper : Maybe (‘Σ'’ x x₁ ≡ ‘Σ'’ y y₁)
@@ -44,16 +32,12 @@ mutual
   (x₂ ‘’₁ a) ≟'-typ y = nothing
   (x₃ ‘’₂ a) ≟'-typ y = nothing
   (x₄ ‘’₃ a) ≟'-typ y = nothing
+  El x₁ ≟'-typ y = nothing
+  ‘Set’ ≟'-typ y = nothing
   W x₁ ≟'-typ y = nothing
   W1 x₂ ≟'-typ y = nothing
   W2 x₃ ≟'-typ y = nothing
   (x ‘→’ x₁) ≟'-typ y = nothing
-  WT x ≟'-typ y = nothing
-  WT₁ x₁ ≟'-typ y = nothing
-  WT₁₂ x₂ ≟'-typ y = nothing
-  ‘TVAR₀₀’ ≟'-typ y = nothing
-  ‘TVAR₀₁’ ≟'-typ y = nothing
-  ‘TVAR₀₂’ ≟'-typ y = nothing
   ‘Σ'’ x x₁ ≟'-typ y = nothing
 
   _≟'-term_ : {Γ : Context} → {T : Typ Γ} → (x : Term T) → (y : Term T) → Maybe (x ≡ y)
@@ -61,6 +45,9 @@ mutual
   ‘λ∙’ x ≟'-term ‘λ∙’ y = lift-≟-1 ‘λ∙’ (_ ≟'-term _)
   (x ‘’ₐ x₁) ≟'-term (y ‘’ₐ .x₁) = lift-≟-1 (λ x₂ → x₂ ‘’ₐ x₁) (_ ≟'-term _)
   ‘VAR₀’ ≟'-term ‘VAR₀’ = just refl
+  WSet x ≟'-term WSet y = lift-≟-1 WSet (_ ≟'-term _)
+  WWSet x ≟'-term WWSet y = lift-≟-1 WWSet (_ ≟'-term _)
+  WWWSet x ≟'-term WWWSet y = lift-≟-1 WWWSet (_ ≟'-term _)
   substTyp-weakenTyp x₁ ≟'-term substTyp-weakenTyp y = lift-≟-3 (λ A a → substTyp-weakenTyp {A = A} {a = a}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
   weakenTyp-substTyp-tProd x₁ ≟'-term weakenTyp-substTyp-tProd y = lift-≟-1 weakenTyp-substTyp-tProd (_ ≟'-term _)
   substTyp-weakenTyp1-VAR₀ x ≟'-term substTyp-weakenTyp1-VAR₀ y = lift-≟-1 substTyp-weakenTyp1-VAR₀ (_ ≟'-term _)
@@ -98,6 +85,9 @@ mutual
   w x ≟'-term y = nothing
   ‘λ∙’ x ≟'-term y = nothing
   (x ‘’ₐ x₁) ≟'-term y = nothing
+  WSet x ≟'-term y = nothing
+  WWSet x ≟'-term y = nothing
+  WWWSet x ≟'-term y = nothing
   ‘VAR₀’ ≟'-term y = nothing
   substTyp-weakenTyp x₁ ≟'-term y = nothing
   weakenTyp-substTyp-tProd x₁ ≟'-term y = nothing

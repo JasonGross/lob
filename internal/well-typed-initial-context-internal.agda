@@ -4,30 +4,44 @@ open import well-typed-syntax-helpers
 open import common
 
 pattern ε₀▻‘Typ’ = ε₀
-  ▻Typε {- ‘Context’ : Typ ε -}
-pattern ‘Context’p₀ = ‘TVAR₀₀’
-pattern ε₀▻‘Typ’▻‘Context’ = ε₀▻‘Typ’
-  ▻Typ₁ ‘Context’p₀ {- ‘Typ’ : Typ (ε ▻ ‘Context’)-}
-pattern ‘Context’p₁ = WT ‘Context’p₀
-pattern ‘Typ’p₁     = ‘TVAR₀₁’
-pattern ε₀▻‘Typ’▻‘Context’▻‘Term’ = ε₀▻‘Typ’▻‘Context’
-  ▻Typ₂ ‘Context’p₁ ▻T ‘Typ’p₁ {- ‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’) -}
+  ▻ ‘Set’ {- ‘Context’ : Typ ε -}
+pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 
-pattern εp₂        = ε₀▻‘Typ’▻‘Context’▻‘Term’
-pattern ‘Context’p₂ = WT₁ ‘Context’p₁
-pattern ‘Typ’p₂     = WT₁₂ ‘Typ’p₁
-pattern ‘Term’p₂    = ‘TVAR₀₂’
+εp₁ : Context
+εp₁ = ε₀▻‘Typ’
+  ▻ (‘Context’p₀ ‘→'’ ‘Set’) {- ‘Typ’ : Typ (ε ▻ ‘Context’)-}
+‘Context’p₁ : Typ εp₁
+‘Context’p₁ = W ‘Context’p₀
+‘Typ’p₁     : Typ (εp₁ ▻ ‘Context’p₁)
+‘Typ’p₁     = El (WWSet (un‘λ'∙’ (weakenTyp-tProd-nd ‘VAR₀’)))
 
-pattern εp₃ = εp₂
+εp₂        : Context
+‘Context’p₂ : Typ εp₂
+‘Typ’p₂     : Typ (εp₂ ▻ ‘Context’p₂)
+‘Term’p₂    : Typ (εp₂ ▻ ‘Context’p₂ ▻ ‘Typ’p₂)
+εp₂ = εp₁
+  ▻ (‘Context’p₁ ‘→’ ‘Typ’p₁ ‘→'’ W ‘Set’) {- ‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’) -}
+‘Context’p₂ = W ‘Context’p₁
+‘Typ’p₂     = W1 ‘Typ’p₁
+‘Term’p₂    = El (WWWSet
+                    (weakenTyp-weakenTyp1-weakenTyp
+                     (un‘λ'∙’ (un‘λ∙’ (weakenTyp-tProd-tProd-nd ‘VAR₀’)))))
+
+εp₃        : Context
+‘Context’p₃ : Typ εp₃
+‘Typ’p₃     : Typ (εp₃ ▻ ‘Context’p₃)
+‘Term’p₃    : Typ (εp₃ ▻ ‘Context’p₃ ▻ ‘Typ’p₃)
+‘ε₀’p₃       : Term ‘Context’p₃
+εp₃ = εp₂
   ▻ ‘Context’p₂ {- ‘ε₀’ -}
-pattern ‘Context’p₃ = W ‘Context’p₂
-pattern ‘Typ’p₃     = W1 ‘Typ’p₂
-pattern ‘Term’p₃    = W2 ‘Term’p₂
-pattern ‘ε₀’p₃       = ‘VAR₀’
+‘Context’p₃ = W ‘Context’p₂
+‘Typ’p₃     = W1 ‘Typ’p₂
+‘Term’p₃    = W2 ‘Term’p₂
+‘ε₀’p₃       = ‘VAR₀’
 
 εp₄ : Context
 εp₄ = εp₃
-  ▻ (‘Context’p₃ ‘→’ ‘Typ’p₃ ‘→'’ W ‘Context’p₃) {- ‘_▻Typ_’ -}
+  ▻ (‘Context’p₃ ‘→’ ‘Typ’p₃ ‘→'’ W ‘Context’p₃) {- ‘_▻_’ -}
 ‘Context’p₄ : Typ εp₄
 ‘Context’p₄ = W ‘Context’p₃
 ‘Typ’p₄     : Typ (εp₄ ▻ ‘Context’p₄)

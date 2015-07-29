@@ -2,9 +2,6 @@
 module well-typed-syntax where
 
 infixl 2 _▻_
-infixl 2 _▻Typ₁_
-infixl 2 _▻Typ₂_▻T_
-infixl 2 _▻Typ₃_▻T_▻T_
 infixl 3 _‘’_
 infixl 3 _‘’₁_
 infixl 3 _‘’₂_
@@ -16,10 +13,6 @@ mutual
   data Context : Set where
     ε₀ : Context
     _▻_ : (Γ : Context) → Typ Γ → Context
-    _▻Typε : (Γ : Context) → Context
-    _▻Typ₁_ : (Γ : Context) → Typ Γ → Context
-    _▻Typ₂_▻T_ : (Γ : Context) → (A : Typ Γ) → Typ (Γ ▻ A) → Context
-    _▻Typ₃_▻T_▻T_ : (Γ : Context) → (A : Typ Γ) → (B : Typ (Γ ▻ A)) → Typ (Γ ▻ A ▻ B) → Context
 
   data Typ : Context → Set where
     _‘’_ : ∀ {Γ A} → Typ (Γ ▻ A) → Term {Γ = Γ} A → Typ Γ
@@ -30,13 +23,8 @@ mutual
     W1 : ∀ {Γ A B} → Typ (Γ ▻ B) → Typ (Γ ▻ A ▻ (W {Γ = Γ} {A = A} B))
     W2 : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻ A ▻ W B ▻ W1 C)
     _‘→’_ : ∀ {Γ} (A : Typ Γ) → Typ (Γ ▻ A) → Typ Γ
-    WT : ∀ {Γ A} → Typ Γ → Typ (Γ ▻Typ₁ A)
-    WT₁ : ∀ {Γ A B} → Typ Γ → Typ (Γ ▻Typ₂ A ▻T B)
-    WT₁₂ : ∀ {Γ A B} → Typ (Γ ▻ A) → Typ (Γ ▻Typ₂ A ▻T B ▻ WT₁ A)
-    -- WT₂ : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻Typ₃ A ▻T W B ▻T W1 C)
-    ‘TVAR₀₀’ : ∀ {Γ} → Typ (Γ ▻Typε)
-    ‘TVAR₀₁’ : ∀ {Γ T} → Typ (Γ ▻Typ₁ T ▻ WT T)
-    ‘TVAR₀₂’ : ∀ {Γ A B} → Typ (Γ ▻Typ₂ A ▻T B ▻ WT₁ A ▻ WT₁₂ B)
+    ‘Set’ : ∀ {Γ} → Typ Γ
+    El : ∀ {Γ} → Term {Γ} ‘Set’ → Typ Γ
     ‘Σ'’ : ∀ {Γ} (T : Typ Γ) → Typ (Γ ▻ T) → Typ Γ
 
 
@@ -45,6 +33,9 @@ mutual
     ‘λ∙’ : ∀ {Γ A B} → Term {Γ = (Γ ▻ A)} B → Term {Γ = Γ} (A ‘→’ B)
     _‘’ₐ_ : ∀ {Γ A B} → (f : Term {Γ = Γ} (A ‘→’ B)) → (x : Term {Γ = Γ} A) → Term {Γ = Γ} (B ‘’ x)
     ‘VAR₀’ : ∀ {Γ T} → Term {Γ = Γ ▻ T} (W T)
+    WSet : ∀ {Γ A} → Term {Γ ▻ A} (W ‘Set’) → Term {Γ ▻ A} ‘Set’
+    WWSet : ∀ {Γ A B} → Term {Γ ▻ A ▻ B} (W (W ‘Set’)) → Term {Γ ▻ A ▻ B} ‘Set’ -- todo: collapse this
+    WWWSet : ∀ {Γ A B C} → Term {Γ ▻ A ▻ B ▻ C} (W (W (W ‘Set’))) → Term {Γ ▻ A ▻ B ▻ C} ‘Set’ -- todo: collapse this
     substTyp-weakenTyp : ∀ {Γ A B} {a : Term {Γ = Γ} A} → Term {Γ = Γ} (W B ‘’ a) → Term {Γ = Γ} B
     weakenTyp-substTyp-tProd : ∀ {Γ T T' A B} {a : Term {Γ = Γ} T} → Term {Γ = Γ ▻ T'} (W ((A ‘→’ B) ‘’ a)) → Term {Γ ▻ T'} (W ((A ‘’ a) ‘→’ (B ‘’₁ a)))
     substTyp-weakenTyp1-VAR₀ : ∀ {Γ A T} → Term {Γ ▻ A} (W1 T ‘’ ‘VAR₀’) → Term {Γ ▻ A} T

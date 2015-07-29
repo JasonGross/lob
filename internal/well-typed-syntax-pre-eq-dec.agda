@@ -9,10 +9,6 @@ open import well-typed-syntax-pre-eq-dec-defs
 mutual
   ≟'-ctx-refl : ∀ x → (x ≟'-ctx x) ≡ just refl
   ≟'-ctx-refl ε₀ = refl
-  ≟'-ctx-refl (y ▻Typε) = lift-≟-1-refl _▻Typε (_ ≟'-ctx y) (≟'-ctx-refl y)
-  ≟'-ctx-refl (y ▻Typ₁ y₁) = lift-≟-2-refl _▻Typ₁_ (_ ≟'-ctx y) (λ p → _ ≟'-typ y₁) (≟'-ctx-refl y) (≟'-typ-refl y₁)
-  ≟'-ctx-refl (y ▻Typ₂ y₁ ▻T y₂) = lift-≟-3-refl _▻Typ₂_▻T_ (_ ≟'-ctx y) (λ p → _ ≟'-typ y₁) (λ p q → _ ≟'-typ y₂) (≟'-ctx-refl y) (≟'-typ-refl y₁) (≟'-typ-refl y₂)
-  ≟'-ctx-refl (y ▻Typ₃ y₁ ▻T y₂ ▻T y₃) = lift-≟-4-refl _▻Typ₃_▻T_▻T_ (_ ≟'-ctx y) (λ p → _ ≟'-typ y₁) (λ p q → _ ≟'-typ y₂) (λ p q r → _ ≟'-typ y₃) (≟'-ctx-refl y) (≟'-typ-refl y₁) (≟'-typ-refl y₂) (≟'-typ-refl y₃)
   ≟'-ctx-refl (x ▻ x₁) = lift-≟-2-refl _▻_ (_ ≟'-ctx _) (λ p → _ ≟'-typ _) (≟'-ctx-refl x) (≟'-typ-refl _)
 
   ≟'-typ-refl : ∀ {Γ} (x : Typ Γ) → (x ≟'-typ x) ≡ just refl
@@ -24,13 +20,9 @@ mutual
   ≟'-typ-refl (W x₁) = lift-≟-1-refl W (_ ≟'-typ _) (≟'-typ-refl x₁)
   ≟'-typ-refl (W1 x₂) = lift-≟-1-refl W1 (_ ≟'-typ _) (≟'-typ-refl x₂)
   ≟'-typ-refl (W2 x₃) = lift-≟-1-refl W2 (_ ≟'-typ _) (≟'-typ-refl x₃)
+  ≟'-typ-refl ‘Set’ = refl
+  ≟'-typ-refl (El y) = lift-≟-1-refl El (_ ≟'-term _) (≟'-term-refl y)
   ≟'-typ-refl (x ‘→’ x₁) = lift-≟-2-refl _‘→’_ (_ ≟'-typ _) (λ p → _ ≟'-typ _) (≟'-typ-refl x) (≟'-typ-refl x₁)
-  ≟'-typ-refl (WT x) = lift-≟-1-refl WT (_ ≟'-typ _) (≟'-typ-refl x)
-  ≟'-typ-refl (WT₁ x₁) = lift-≟-1-refl WT₁ (_ ≟'-typ _) (≟'-typ-refl x₁)
-  ≟'-typ-refl (WT₁₂ x₂) = lift-≟-1-refl WT₁₂ (_ ≟'-typ _) (≟'-typ-refl x₂)
-  ≟'-typ-refl ‘TVAR₀₀’ = refl
-  ≟'-typ-refl ‘TVAR₀₁’ = refl
-  ≟'-typ-refl ‘TVAR₀₂’ = refl
   ≟'-typ-refl (‘Σ'’ x x₁) = lift-≟-2-refl ‘Σ'’ (_ ≟'-typ _) (λ p → _ ≟'-typ _) (≟'-typ-refl x) (≟'-typ-refl x₁)
 
   ≟'-term-refl : ∀ {Γ} {T : Typ Γ} (x : Term T) → (x ≟'-term x) ≡ just refl
@@ -38,6 +30,9 @@ mutual
   ≟'-term-refl (‘λ∙’ x) = lift-≟-1-refl ‘λ∙’ (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (x ‘’ₐ x₁) = lift-≟-1-refl (λ x₂ → x₂ ‘’ₐ x₁) (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl ‘VAR₀’ = refl
+  ≟'-term-refl (WSet x) = lift-≟-1-refl WSet (_ ≟'-term _) (≟'-term-refl x)
+  ≟'-term-refl (WWSet x) = lift-≟-1-refl WWSet (_ ≟'-term _) (≟'-term-refl x)
+  ≟'-term-refl (WWWSet x) = lift-≟-1-refl WWWSet (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (substTyp-weakenTyp {A = A} {a = a} x₁) = lift-≟-3-refl (λ A a → substTyp-weakenTyp {A = A} {a = a})
                                            (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl A) (≟'-term-refl (transport Term refl a)) (≟'-term-refl x₁)
   ≟'-term-refl (weakenTyp-substTyp-tProd x₁) = lift-≟-1-refl weakenTyp-substTyp-tProd (_ ≟'-term _) (≟'-term-refl x₁)

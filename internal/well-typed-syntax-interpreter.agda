@@ -3,7 +3,7 @@ open import common public
 open import well-typed-syntax
 
 max-level : Level
-max-level = lzero
+max-level = lsuc lzero
 
 mutual
   Context⇓ : (Γ : Context) → Set (lsuc max-level)
@@ -11,12 +11,6 @@ mutual
   Context⇓-helper₀ : (Γ : Context) → (Γ' : Context⇓ Γ) → (T₁ : Typ Γ) → Typ⇓ T₁ Γ' → Context⇓ (Γ ▻ T₁)
 
   Context⇓ ε₀ = ⊤
-  Context⇓ (Γ ▻Typε) = Σ (λ (Γ' : Context⇓ Γ) → Set max-level)
-  Context⇓ (Γ ▻Typ₁ T₁) = Σ (λ (Γ' : Context⇓ Γ) → (Typ⇓ T₁ Γ' → Set max-level))
-  Context⇓ (Γ ▻Typ₂ T₁ ▻T T₂) = Σ
-                     (λ (Γ' : Context⇓ Γ) →
-                        (T₁⇓ : Typ⇓ T₁ Γ') → Typ⇓ T₂ (Context⇓-helper₀ Γ Γ' T₁ T₁⇓) → Set max-level)
-  Context⇓ (Γ ▻Typ₃ T₁ ▻T T₂ ▻T T₃) = Σ (λ (Γ' : Context⇓ Γ) → (T₁⇓ : Typ⇓ T₁ Γ') → (T₂⇓ : Typ⇓ T₂ (Context⇓-helper₀ Γ Γ' T₁ T₁⇓)) → Typ⇓ T₃ (Context⇓-helper₀ (Γ ▻ T₁) (Context⇓-helper₀ Γ Γ' T₁ T₁⇓) T₂ T₂⇓) → Set max-level)
   Context⇓ (Γ ▻ T) = Σ (λ (Γ' : Context⇓ Γ) → Typ⇓ T Γ')
 
   Context⇓-helper₀ Γ Γ⇓ T₁ T₁⇓ = Γ⇓ , T₁⇓
@@ -29,13 +23,9 @@ mutual
   Typ⇓ (W1 T₂) ((Γ⇓ , A⇓) , B⇓) = Typ⇓ T₂ (Γ⇓ , B⇓)
   Typ⇓ (W2 T₃) (((Γ⇓ , A⇓) , B⇓) , C⇓) = Typ⇓ T₃ ((Γ⇓ , B⇓) , C⇓)
   Typ⇓ (T ‘→’ T₁) Γ⇓ = (T⇓ : Typ⇓ T Γ⇓) → Typ⇓ T₁ (Γ⇓ , T⇓)
-  Typ⇓ (WT T) (Γ⇓ , A⇓) = Typ⇓ T Γ⇓
-  Typ⇓ (WT₁ T₁) (Γ⇓ , A⇓) = Typ⇓ T₁ Γ⇓
-  Typ⇓ (WT₁₂ T₂) (Γ⇓ , A⇓ , B⇓) = Typ⇓ T₂ (Γ⇓ , B⇓)
+  Typ⇓ ‘Set’ Γ⇓ = Set
+  Typ⇓ (El T) Γ⇓ = Lifted (Term⇓ T Γ⇓)
   --Typ⇓ (WT₂ T₂) (Γ⇓ , A⇓) = Typ⇓ T₂ ((Γ⇓ , {!!}) , {!!}) -- (((Γ⇓ , A⇓) , B⇓) , C⇓ ) = Typ⇓ T₂ ((Γ⇓ , B⇓) , (C⇓))
-  Typ⇓ ‘TVAR₀₀’ (Γ⇓ , A⇓) = A⇓
-  Typ⇓ ‘TVAR₀₁’ ((Γ⇓ , A⇓) , B⇓) = A⇓ B⇓
-  Typ⇓ ‘TVAR₀₂’ (((Γ⇓ , A⇓) , B⇓) , C⇓) = A⇓ B⇓ C⇓
   Typ⇓ (‘Σ'’ T T₁) Γ⇓ = Σ (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
 
   Term⇓ : ∀ {Γ : Context} {T : Typ Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Typ⇓ T Γ⇓
@@ -43,6 +33,9 @@ mutual
   Term⇓ (‘λ∙’ t) Γ⇓ T⇓ = Term⇓ t (Γ⇓ , T⇓)
   Term⇓ (t ‘’ₐ t₁) Γ⇓ = Term⇓ t Γ⇓ (Term⇓ t₁ Γ⇓)
   Term⇓ ‘VAR₀’ (Γ⇓ , A⇓) = A⇓
+  Term⇓ (WSet T) Γ⇓ = Term⇓ T Γ⇓
+  Term⇓ (WWSet T) Γ⇓ = Term⇓ T Γ⇓
+  Term⇓ (WWWSet T) Γ⇓ = Term⇓ T Γ⇓
   Term⇓ (substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (substTyp-weakenTyp1-VAR₀ t) Γ⇓ = Term⇓ t Γ⇓
