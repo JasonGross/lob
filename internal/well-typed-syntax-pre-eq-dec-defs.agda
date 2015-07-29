@@ -81,7 +81,7 @@ mutual
   weakenTyp-weakenTyp1-weakenTyp x ≟'-term weakenTyp-weakenTyp1-weakenTyp x' = lift-≟-1 weakenTyp-weakenTyp1-weakenTyp (_ ≟'-term _)
   ‘proj₁'’ ≟'-term ‘proj₁'’ = just refl
   ‘proj₂'’ ≟'-term ‘proj₂'’ = just refl
-  ‘existT'’ x x₁ ≟'-term ‘existT'’ y y₁ = lift-≟-2 ‘existT'’ (_ ≟'-term _) (λ p → _ ≟'-term _)
+  ‘existT'’ ≟'-term ‘existT'’ = just refl
   w x ≟'-term y = nothing
   ‘λ∙’ x ≟'-term y = nothing
   (x ‘’ₐ x₁) ≟'-term y = nothing
@@ -121,4 +121,4 @@ mutual
   weakenTyp-weakenTyp1-weakenTyp x ≟'-term y = nothing
   ‘proj₁'’ ≟'-term y = nothing
   ‘proj₂'’ ≟'-term y = nothing
-  ‘existT'’ x x₁ ≟'-term y = nothing
+  ‘existT'’ ≟'-term y = nothing

@@ -19,7 +19,7 @@ open import well-typed-initial-context
 ‘proj₂’ {T} {P} = ‘proj₂'’
 
 ‘existT’ : ∀ {T P} (x : Term T) (p : Term (P ‘’ x)) → Term (‘Σ’ T P)
-‘existT’ {T} {P} = ‘existT'’
+‘existT’ {T} {P} x p = S₁₀WW (S∀ (‘existT'’ ‘’ₐ x) ‘’ₐ p)
 
 context-pick-if-helper : ∀ {P : Context → Set}
          {Γ : Context}

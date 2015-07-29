@@ -92,4 +92,4 @@ mutual
   ≟'-term-refl (weakenTyp-weakenTyp1-weakenTyp x) = lift-≟-1-refl weakenTyp-weakenTyp1-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl ‘proj₁'’ = refl
   ≟'-term-refl ‘proj₂'’ = refl
-  ≟'-term-refl (‘existT'’ x x₁) = lift-≟-2-refl ‘existT'’ (_ ≟'-term _) (λ p → _ ≟'-term _) (≟'-term-refl x) (≟'-term-refl x₁)
+  ≟'-term-refl ‘existT'’ = refl

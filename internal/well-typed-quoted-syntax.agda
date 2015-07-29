@@ -71,3 +71,12 @@ Conv0 : ∀ {qH0 qX} →
              (W
                 (‘□’ ‘’ (⌜ ‘□’ ‘’ qH0 ⌝T ‘‘→'’’ ⌜ qX ⌝T)))
 Conv0 {qH0} {qX} x = w→ quote-typ-distr-tProd-nd ‘'’ₐ x
+
+{-‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
+‘quote-sigma’ = ‘λ'∙’ {!!}
+  where helper : Term {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W (‘Σ’ ‘Context’ ‘Typ’))
+        helper = SW1W (S₁₀W (S∀ (w∀→ ‘existT'’ ‘’ₐ {!!}) ‘’ₐ {!!})) --
+
+        helper' : Term {ε} (‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
+        helper' = {!!}
+-}

@@ -288,6 +288,29 @@ substTyp-substTyp-weakenTyp1-inv : ∀ {Γ B A}
 substTyp-substTyp-weakenTyp1-inv x = (SW (WS₀₀W1' (w x) ‘t’ x))
 S₀₀W1' = substTyp-substTyp-weakenTyp1-inv
 
+substTyp-substTyp-weakenTyp1-arr : ∀ {Γ B A}
+         {b : Term {Γ} B}
+         {a : Term {Γ ▻ B} (W A)}
+         {T : Typ (Γ ▻ A)}
+         {X}
+    → Term {Γ} (W1 T ‘’ a ‘’ b ‘→'’ X)
+    → Term {Γ} (T ‘’ (SW (a ‘t’ b)) ‘→'’ X)
+substTyp-substTyp-weakenTyp1-arr x = ‘λ∙’ (w→ x ‘'’ₐ WS₀₀W1' ‘VAR₀’)
+
+S₀₀W1→ = substTyp-substTyp-weakenTyp1-arr
+
+substTyp-substTyp-weakenTyp1-arr- : ∀ {Γ B A}
+         {b : Term {Γ} B}
+         {a : Term {Γ ▻ B} (W A)}
+         {T : Typ (Γ ▻ A)}
+         {X}
+    → Term {Γ} (X ‘→'’ W1 T ‘’ a ‘’ b)
+    → Term {Γ} (X ‘→'’ T ‘’ (SW (a ‘t’ b)))
+substTyp-substTyp-weakenTyp1-arr- x = ‘λ∙’ (WS₀₀W1 (un‘λ∙’ x))
+
+S₀₀W1← = substTyp-substTyp-weakenTyp1-arr-
+
+
 SW1W : ∀ {Γ T} {A : Typ Γ} {B : Typ Γ}
       → {a : Term {Γ = Γ ▻ T} (W {Γ = Γ} {A = T} B)}
       → Term {Γ = Γ ▻ T} (W1 (W A) ‘’ a)

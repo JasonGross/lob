@@ -68,4 +68,4 @@ mutual
   Term⇓ (weakenTyp-weakenTyp1-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x
   Term⇓ ‘proj₂'’ (Γ⇓ , (x , p)) = p
-  Term⇓ (‘existT'’ t t₁) Γ⇓ = (Term⇓ t Γ⇓) , (Term⇓ t₁ Γ⇓)
+  Term⇓ ‘existT'’ Γ⇓ x p = x , p
