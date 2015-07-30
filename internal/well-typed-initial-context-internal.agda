@@ -55,7 +55,7 @@ pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 
 {-εp₅ : Context
 εp₅ = εp₄
-  ▻ (‘Context’p₄ ‘→’ ‘Typ’p₄ ‘→’ W1 ‘Typ’p₄ ‘’ ‘_▻_’p₄ ‘→'’ W ‘Typ’p₄) {- ‘Σ'’ -}
+  ▻ (‘Context’p₄ ‘→’ ‘Typ’p₄ ‘→’ W1 (W1 ‘Typ’p₄) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₄) ‘→'’ W ‘Typ’p₄) {- ‘Σ'’ -}
 ‘Context’p₅ : Typ εp₅
 ‘Context’p₅ = W ‘Context’p₄
 ‘Typ’p₅     : Typ (εp₅ ▻ ‘Context’p₅)
@@ -65,9 +65,14 @@ pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 ‘ε₀’p₅       : Term ‘Context’p₅
 ‘ε₀’p₅       = w ‘ε₀’p₄
 ‘_▻_’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→'’ W ‘Context’p₅)
-‘_▻_’p₅     = w∀→ ‘_▻_’p₄
-‘‘Σ'’’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→’ W1 ‘Typ’p₅ ‘’ ‘_▻_’p₅ ‘→'’ W ‘Typ’p₅)
-‘‘Σ'’’p₅     = w∀∀→ ‘‘Σ'’’p₄-}
+‘_▻_’p₅     = w∀→₂ ‘_▻_’p₄
+‘‘Σ'’’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→’ W1 (W1 ‘Typ’p₅) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₅) ‘→'’ W ‘Typ’p₅)
+‘‘Σ'’’p₅     = {!!}
+  where helper : {Γ : Context} {A : Typ Γ} {B : Typ (Γ ▻ A)} {C D : Typ (Γ ▻ A ▻ B)}
+                   {E : Typ Γ} →
+                   Term (W (A ‘→’ B ‘→’ C ‘→'’ D)) →
+                   Term (W A ‘→’ W1 B ‘→’ W2 C ‘→'’ W2 D)
+        helper = weakenTyp-tProd-tProd-tProd-nd-}
 
 -- ‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
 {-εp₅ : Context
