@@ -2,6 +2,10 @@ language: haskell
 
 sudo: false
 
+cache:
+ directories:
+  - $HOME/cache
+
 addons:
   apt:
     packages:
