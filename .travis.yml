@@ -28,7 +28,7 @@ install:
  - rm -rf $HOME/cache
  - mkdir -p "$HOME/cache"
  - if [ ! -z "$AGDA" -a ! -d "$HOME/cache/.cabal-sandbox" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
- - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install cabal-install); fi
+ - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install cabal-install && cabal install alex); fi
  - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install Agda-$AGDA); fi
 
 
