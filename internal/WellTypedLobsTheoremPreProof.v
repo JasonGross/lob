@@ -241,8 +241,8 @@ Module Type QuotedPrimitives0 (Export LC : LobContext) (Export TP0 : TermPrimiti
                (W
                   (‘Term’ ‘’₁ ‘ε’ ‘’ (⌜ ‘Term’ ‘’₁ ‘ε’ ‘’ qH0 ⌝ ‘‘→'’’ ⌜ qX ⌝))).
 
-  Axiom qquote_term : forall {A : Typ ε},
-                        @Term ε (A ‘→'’ ‘Term’ ‘’₁ _ ‘’ ⌜ A ⌝%typ).
+  Axiom qquote_term : forall {A},
+                        @Term ε (‘□’ ‘’ A ‘→'’ ‘□’ ‘’ ⌜ ‘□’ ‘’ A ⌝%typ).
   Notation "‘quote_term’" := qquote_term : term_scope.
 
 End QuotedPrimitives0.
@@ -401,6 +401,9 @@ Module Type QuotedPrimitives (Export LC : LobContext) (Export TP : TermPrimitive
   Notation "‘substTyp’" := qsubstTyp.
   Notation "f ‘‘’’ x" := (qsubstTyp ‘'’ₐ f ‘'’ₐ x)%term : term_scope.
 
+  Axiom qquote_sigma : @Term ε (‘sigT’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘sigT’ ‘Context’ ‘Typ’ ⌝%typ).
+  Notation "‘quote_sigma’" := qquote_sigma : term_scope.
+
   Axiom qcast : □ (‘sigT’ ‘Context’ ‘Typ’ ‘→'’ ‘Typ’ ‘’ (‘ε’ ‘▻’ ⌜ ‘sigT’ ‘Context’ ‘Typ’ ⌝)).
   Notation "‘cast’" := qcast.
 
@@ -411,7 +414,7 @@ Module Type QuotedPrimitives (Export LC : LobContext) (Export TP : TermPrimitive
           ((⌜ T ‘’ qs ⌝)
              ‘‘→'’’
              (‘cast’ ‘'’ₐ quote_sigma (ε ▻ ‘sigT’ ‘Context’ ‘Typ’; T)
-               ‘‘’’ (‘quote_term’ ‘'’ₐ qs)))).
+               ‘‘’’ (‘quote_sigma’ ‘'’ₐ qs)))).
   Notation "‘cast_refl’" := qcast_refl_app.
 
   Axiom qcast_refl_app_inv
@@ -419,7 +422,7 @@ Module Type QuotedPrimitives (Export LC : LobContext) (Export TP : TermPrimitive
            (qs := quote_sigma (ε ▻ ‘sigT’ ‘Context’ ‘Typ’; T)),
       □ (‘Term’ ‘’₁ ‘ε’ ‘’
           ((‘cast’ ‘'’ₐ quote_sigma (ε ▻ ‘sigT’ ‘Context’ ‘Typ’; T)
-             ‘‘’’ (‘quote_term’ ‘'’ₐ qs))
+             ‘‘’’ (‘quote_sigma’ ‘'’ₐ qs))
              ‘‘→'’’ (⌜ T ‘’ qs ⌝))).
   Notation "‘cast_refl'’" := qcast_refl_app_inv.
 
@@ -532,7 +535,7 @@ Module TQC (Export LC : LobContext) (Export LH : LobHypotheses LC) (Export TP : 
 
   Definition qh : @Term (ε ▻ ‘sigT’ ‘Context’ ‘Typ’) (W (‘Typ’ ‘’ ‘ε’))
     := (let f := w→ ‘cast’ ‘'’ₐ ‘VAR₀’ in
-        let x := (w→ ‘quote_term’ ‘'’ₐ ‘VAR₀’)%term in
+        let x := (w→ ‘quote_sigma’ ‘'’ₐ ‘VAR₀’)%term in
         w→→ ‘substTyp’ ‘'’ₐ f ‘'’ₐ x)%term.
 
   Definition h2 : Typ (ε ▻ ‘sigT’ ‘Context’ ‘Typ’)

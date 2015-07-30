@@ -702,10 +702,6 @@ Module Type QuotedContextPrimitives
   Notation "‘tApp_nd’" := qtApp_nd.
   Notation "f ‘‘'’’ₐ x" := (qtApp_nd ‘’₁ f ‘’ x)%term : term_scope.
 
-  Axiom qquote_term : forall {A : Typ ε},
-                        @Term ε (A ‘→'’ ‘Term’ ‘’₁ _ ‘’ ⌜ A ⌝%typ).
-  Notation "‘quote_term’" := qquote_term : term_scope.
-
   Axiom qsigT : forall (T : Typ ε), Typ (ε ▻ T) -> Typ ε.
   Notation "‘sigT’" := qsigT.
 
@@ -714,6 +710,13 @@ Module Type QuotedContextPrimitives
 
   Axiom qprojT2 : forall {T : Typ ε} {P : Typ (ε ▻ T)}, @Term (ε ▻ ‘sigT’ T P) (W1 P ‘’ (w→ ‘projT1’ ‘'’ₐ ‘VAR₀’)).
   Notation "‘projT2’" := qprojT2.
+
+  Axiom qquote_term : forall {A},
+                        @Term ε (‘□’ ‘’ A ‘→'’ ‘□’ ‘’ ⌜ ‘□’ ‘’ A ⌝%typ).
+  Notation "‘quote_term’" := qquote_term : term_scope.
+
+  Axiom qquote_sigma : @Term ε (‘sigT’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘sigT’ ‘Context’ ‘Typ’ ⌝%typ).
+  Notation "‘quote_sigma’" := qquote_sigma : term_scope.
 
   Axiom context_pick_if_rev
   : forall {P : Context -> Type}
@@ -811,17 +814,17 @@ Module Type QuotedContextPrimitives
           (⌜‘▻’⌝ ⌜ A ⌝%typ ‘‘’’ ⌜ b ⌝ ‘‘→'’’ ⌜ A ‘’ b ⌝)).
   Notation "⌜‘’⌝'" := quote_undistr_substTyp.
 
-  Axiom qquote_term_under_app
-  : forall {A} {f} {t : □ A},
+  Axiom qquote_sigma_under_app
+  : forall {f} {t},
       □ (‘Term’ ‘’₁ ‘ε’ ‘’
-          (f ‘‘’’ ⌜ t ⌝ ‘‘→'’’ f ‘‘’’ (‘quote_term’ ‘'’ₐ t))).
-  Notation "⌜⌜⌝⌝" := qquote_term_under_app.
+          (f ‘‘’’ ⌜ t ⌝ ‘‘→'’’ f ‘‘’’ (‘quote_sigma’ ‘'’ₐ t))).
+  Notation "⌜⌜⌝⌝" := qquote_sigma_under_app.
 
-  Axiom qquote_term_under_app_inv
-  : forall {A} {f} {t : □ A},
+  Axiom qquote_sigma_under_app_inv
+  : forall {f} {t},
       □ (‘Term’ ‘’₁ ‘ε’ ‘’
-          (f ‘‘’’ (‘quote_term’ ‘'’ₐ t) ‘‘→'’’ f ‘‘’’ ⌜ t ⌝)).
-  Notation "⌜⌜⌝⌝'" := qquote_term_under_app_inv.
+          (f ‘‘’’ (‘quote_sigma’ ‘'’ₐ t) ‘‘→'’’ f ‘‘’’ ⌜ t ⌝)).
+  Notation "⌜⌜⌝⌝'" := qquote_sigma_under_app_inv.
 
   Axiom qbeta_nd_inv
   : forall {T A}
@@ -993,10 +996,10 @@ Module LobMin
       := @qtApp_nd.
     Notation "‘tApp_nd’" := qtApp_nd.
     Notation "f ‘‘'’’ₐ x" := (qtApp_nd ‘’₁ f ‘’ x)%term : term_scope.
-    Definition qquote_term : forall {A : Typ ε},
+    Definition qquote_sigma : forall {A : Typ ε},
                                @Term ε (A ‘→'’ ‘Term’ ‘’₁ _ ‘’ ⌜ A ⌝%typ)
-      := @qquote_term.
-    Notation "‘quote_term’" := qquote_term : term_scope.
+      := @qquote_sigma.
+    Notation "‘quote_sigma’" := qquote_sigma : term_scope.
     Definition qsigT : forall (T : Typ ε), Typ (ε ▻ T) -> Typ ε
       := @qsigT.
     Notation "‘sigT’" := qsigT.
@@ -1065,7 +1068,7 @@ Module LobMin
             ((⌜ T ‘’ qs ⌝)
                ‘‘→'’’
                (‘cast’ ‘'’ₐ quote_sigma (ε ▻ ‘sigT’ ‘Context’ ‘Typ’; T)
-                 ‘‘’’ (‘quote_term’ ‘'’ₐ qs)))).
+                 ‘‘’’ (‘quote_sigma’ ‘'’ₐ qs)))).
     Proof.
       intros.
       refine (_ ‘‘∘’’ ⌜‘’⌝)%term.
@@ -1086,7 +1089,7 @@ Module LobMin
              (qs := quote_sigma (ε ▻ ‘sigT’ ‘Context’ ‘Typ’; T)),
         □ (‘Term’ ‘’₁ ‘ε’ ‘’
             ((‘cast’ ‘'’ₐ quote_sigma (ε ▻ ‘sigT’ ‘Context’ ‘Typ’; T)
-               ‘‘’’ (‘quote_term’ ‘'’ₐ qs))
+               ‘‘’’ (‘quote_sigma’ ‘'’ₐ qs))
                ‘‘→'’’ (⌜ T ‘’ qs ⌝))).
     Proof.
       intros.
