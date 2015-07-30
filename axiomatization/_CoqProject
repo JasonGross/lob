@@ -1,0 +1,3 @@
+-R . ModalLob
+-arg -no-native-compiler
+lob.v
