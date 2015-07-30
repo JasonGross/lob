@@ -21,12 +21,12 @@ addons:
 
 env:
  matrix:
-  - AGDA="2.4.2.3"  INTERNAL_COQ=""     AXIOMATIZATION=""
-#  - AGDA=""     INTERNAL_COQ="yes"  AXIOMATIZATION=""
-  - AGDA=""     INTERNAL_COQ=""     AXIOMATIZATION="yes"
+  - AGDA="2.4.2.3"  INTERNAL_COQ=""     AXIOMATIZATION=""    TARGETS="agda"
+#  - AGDA=""         INTERNAL_COQ="yes"  AXIOMATIZATION=""    TARGETS="coq"
+  - AGDA=""         INTERNAL_COQ=""     AXIOMATIZATION="yes" TARGETS="coq coq-axiomatization"
 
 install:
- - export PATH="$HOME/.cabal/bin:$PATH"
+ - export PATH="$HOME/cache/.cabal-sandbox/bin:$HOME/.cabal/bin:$PATH"
 # - rm -rf $HOME/cache
  - mkdir -p "$HOME/cache"
  - cat $HOME/.cabal/config
@@ -52,4 +52,4 @@ before_script:
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam list -a; fi
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then eval `opam config env`; fi
 
-script: false
+script: make $TARGETS
