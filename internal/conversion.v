@@ -3,6 +3,7 @@ Require Import Coq.Setoids.Setoid Coq.Classes.CMorphisms.
 Require Import Template.Template.
 
 Set Asymmetric Patterns.
+Set Universe Polymorphism.
 
 Require Import Coq.Strings.String.
 Require Import Coq.Program.Program.
@@ -1117,7 +1118,7 @@ Global Instance tApp_Proper {Γ}
                        then True
                        else False)
                       (List.map
-                         (fun ab => convertible Γ (fst ab) (snd ab))
+                         (fun ab => convertible Γ (fst ab) (snd ab) : Type)
                          (List.combine ls1 ls2)))
             ==> convertible Γ) Ast.tApp.
 Proof.
