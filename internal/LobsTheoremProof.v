@@ -566,7 +566,7 @@ eapply has_type_tConstruct1_Lookup; simpl.
 simpl.
 all:simpl; try exact _.
 all:simpl; try exact _.
-t_has_type'.
+(*t_has_type'.
 t_has_type'.
 Global Existing Instance has_type__quote_term_1
 refine (@has_type__quote_term _ [(_, _)]%list).
@@ -583,8 +583,8 @@ rewrite eq__quote_term__closed_helper.
 admit'.
         (* refine ((fun Ui H => @wkg_1_nil nil Ast.nAnon _ _ _ Ui H bA.2) _ _); shelve_unifiable.
         unfold qtProd, qtApp, tApp, tLambda.
-        t_has_type.*)
-      Qed.
+        t_has_type.*)*)
+      Admitted.
     End context.
 
     Definition App : forall {A' B'} {H : is_closed B'},
@@ -605,8 +605,7 @@ admit'.
     Print Assumptions lob.
   End Lob.
 End WithContext.
-
-
+(*
   Module DQT <: DoublyQuotedThings.
     Export TR LC PP PRP PreL'.
     Definition qbox_Ui' : Ast.universe := 1.
@@ -806,3 +805,4 @@ End WithContext.
   End Lob.
 
   Print Assumptions Lob.lob.
+*)
