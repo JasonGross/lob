@@ -54,6 +54,7 @@ mutual
                                                                (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl C) (≟'-term-refl c) (≟'-term-refl x₃)
   ≟'-term-refl (weakenTyp-substTyp2-substTyp1-substTyp-tProd x₃) = lift-≟-1-refl weakenTyp-substTyp2-substTyp1-substTyp-tProd (_ ≟'-term _) (≟'-term-refl x₃)
   ≟'-term-refl (weakenTyp2-weakenTyp1 x) = lift-≟-1-refl weakenTyp2-weakenTyp1 (_ ≟'-term _) (≟'-term-refl x)
+  ≟'-term-refl (weakenTyp-weakenTyp2-weakenTyp x) = lift-≟-1-refl weakenTyp-weakenTyp2-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp x) = lift-≟-1-refl weakenTyp1-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp-inv x) = lift-≟-1-refl weakenTyp1-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp1-weakenTyp x) = lift-≟-1-refl weakenTyp1-weakenTyp1-weakenTyp (_ ≟'-term _) (≟'-term-refl x)

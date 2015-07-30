@@ -1,6 +1,7 @@
 module well-typed-initial-context-internal where
 open import well-typed-syntax
 open import well-typed-syntax-helpers
+open import well-typed-syntax-helpers-postulates
 open import common
 
 pattern ε₀▻‘Typ’ = ε₀
@@ -53,7 +54,7 @@ pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 ‘_▻_’p₄     : Term (‘Context’p₄ ‘→’ ‘Typ’p₄ ‘→'’ W ‘Context’p₄)
 ‘_▻_’p₄     = weakenTyp-tProd-tProd-nd-nd ‘VAR₀’
 
-{-εp₅ : Context
+εp₅ : Context
 εp₅ = εp₄
   ▻ (‘Context’p₄ ‘→’ ‘Typ’p₄ ‘→’ W1 (W1 ‘Typ’p₄) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₄) ‘→'’ W ‘Typ’p₄) {- ‘Σ'’ -}
 ‘Context’p₅ : Typ εp₅
@@ -67,13 +68,14 @@ pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 ‘_▻_’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→'’ W ‘Context’p₅)
 ‘_▻_’p₅     = w∀→₂ ‘_▻_’p₄
 ‘‘Σ'’’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→’ W1 (W1 ‘Typ’p₅) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₅) ‘→'’ W ‘Typ’p₅)
-‘‘Σ'’’p₅     = {!!}
-  where helper : {Γ : Context} {A : Typ Γ} {B : Typ (Γ ▻ A)} {C D : Typ (Γ ▻ A ▻ B)}
-                   {E : Typ Γ} →
-                   Term (W (A ‘→’ B ‘→’ C ‘→'’ D)) →
-                   Term (W A ‘→’ W1 B ‘→’ W2 C ‘→'’ W2 D)
-        helper = weakenTyp-tProd-tProd-tProd-nd-}
+‘‘Σ'’’p₅     = weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-weakenTyp ‘VAR₀’
 
+-- (W (W2 (W1 (W1 ‘Typ’p₄) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₄))))
+--                helper'' : ∀ {Γ A B C D}
+  --                → {x : Term {Γ} (A ‘→’ B ‘→'’ W C)}
+
+--  W2 (W1 (W1 f) ‘’ un‘λ'∙’ (un‘λ∙’ (w∀→₂ x))
+--W1 (W1 f) ‘’ un‘λ'∙’ (un‘λ∙’ x))
 -- ‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
 {-εp₅ : Context
 εp₅ = εp₄
@@ -157,22 +159,25 @@ Typ-Context-Tower n = {Γ : Context} → arrow-tower-to-arrow {Context} {Context
 ‘TVAR_₁’ n = λ {Γ} {Γ'} → {!lambda-tower-to-lambda {Context} _▻Typ_ Typ WT n Γ Γ' {!!} {-‘TVAR₀₀’-}!}-}
 
 ε : Context
-ε = εp₄
+ε = εp₅
 
 ‘Context’ : Typ ε
-‘Context’ = ‘Context’p₄
+‘Context’ = ‘Context’p₅
 
 ‘Typ’ : Typ (ε ▻ ‘Context’)
-‘Typ’ = ‘Typ’p₄
+‘Typ’ = ‘Typ’p₅
 
 ‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’)
-‘Term’ = ‘Term’p₄
+‘Term’ = ‘Term’p₅
 
 ‘ε₀’ : Term ‘Context’
-‘ε₀’ = ‘ε₀’p₄
+‘ε₀’ = ‘ε₀’p₅
 
 --‘_▻Typ_’ : Term (‘Context’ ‘→'’ ‘Context’ ‘→'’ ‘Context’)
---‘_▻Typ_’ = ‘_▻Typ_’p₄
+--‘_▻Typ_’ = ‘_▻Typ_’p₅
 
 ‘_▻_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’)
-‘_▻_’ = ‘_▻_’p₄
+‘_▻_’ = ‘_▻_’p₅
+
+‘‘Σ'’’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ W ‘Typ’)
+‘‘Σ'’’ = ‘‘Σ'’’p₅

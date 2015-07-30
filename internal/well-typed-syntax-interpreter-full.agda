@@ -10,6 +10,10 @@ lift→ f (lift x) = f x
 lift→→ : ∀ {ℓ ℓ′ ℓ′′ ℓ′′′ ℓ′′′′ A B} {R : Set ℓ′′′′} → ((x : A) → B x → R) → ((x : Lifted {ℓ} {ℓ′} A) → Lifted {ℓ′′} {ℓ′′′} (lift→ B x) → R)
 lift→→ f (lift x) (lift y) = f x y
 
+lift→→→ : ∀ {ℓ₀ ℓ ℓ′ ℓ′′ ℓ′′′ ℓ′′′′ ℓ′′′′′ A B C} {R : Set ℓ₀} → ((x : A) → (y : B x) → C x y → R)
+  → ((x : Lifted {ℓ} {ℓ′} A) → (y : Lifted {ℓ′′} {ℓ′′′} (lift→ B x)) → Lifted {ℓ′′′′} {ℓ′′′′′} (lift→→ C x y) → R)
+lift→→→ f (lift x) (lift y) (lift z) = f x y z
+
 Context' : Set₀
 Context' = Context
 
@@ -25,8 +29,14 @@ Term' = lift→→ (λ Γ → Term {Γ})
 _▻'_ : (Γ⇓ : Lifted {_} {max-level} Context') → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓)) → Lifted {_} {max-level} Context'
 Γ⇓ ▻' T⇓ = lift (lift→→ _▻_ Γ⇓ T⇓)
 
+‘Σ'’' : (Γ⇓ : Lifted {_} {max-level} Context')
+  → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓))
+  → Lifted {_} {max-level} (Typ' (Γ⇓ ▻' T⇓))
+  → Lifted {_} {max-level} (Typ' Γ⇓)
+‘Σ'’' (lift Γ) (lift T) (lift P) = lift (‘Σ'’ {Γ} T P)
+
 Contextε⇓ : Context⇓ ε
-Contextε⇓ = tt , Context' , Typ' , Term' , ε₀' , _▻'_ -- , {!!} , {!!}
+Contextε⇓ = tt , Context' , Typ' , Term' , ε₀' , _▻'_ , ‘Σ'’' -- , {!!} , {!!}
 
 Typε⇓ : Typ ε → Set max-level
 Typε⇓ T = Typ⇓ T Contextε⇓

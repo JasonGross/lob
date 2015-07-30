@@ -118,8 +118,8 @@ S₂₁₀WW = substTyp2-substTyp1-substTyp-weakenTyp-weakenTyp
 W2W1 : ∀ {Γ A B C D} → Term {Γ ▻ A ▻ W B ▻ W1 C} (W2 (W D)) → Term {Γ ▻ A ▻ W B ▻ W1 C} (W (W1 D))
 W2W1 = weakenTyp2-weakenTyp1
 
---WWW2 : ∀ {Γ A B C D} → Term {Γ ▻ A ▻ W B ▻ W1 C} (W (W (W2 D))) → Term {Γ ▻ A ▻ W B ▻ W1 C} (W (W1 (W D)))
---WWW2 = {!weakenTyp-weakenTyp-weakenTyp2!}
+WW2W : ∀ {Γ A B C D E} → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D} (W (W2 (W E))) → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D} (W (W (W1 E)))
+WW2W = weakenTyp-weakenTyp2-weakenTyp
 
 W1W : ∀ {Γ A B C} → Term {Γ ▻ A ▻ W B} (W1 (W C)) → Term {Γ ▻ A ▻ W B} (W (W C))
 W1W = weakenTyp1-weakenTyp
