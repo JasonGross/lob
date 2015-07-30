@@ -3,10 +3,14 @@
 all: agda coq coq-axiomatization
 
 agda:
-	cd internal && make agda
+	cd internal && $(MAKE) agda
 
 coq:
-	cd internal && make coq
+	cd internal && $(MAKE) coq
 
 coq-axiomatization:
-	cd axiomatization && make
+	cd axiomatization && $(MAKE)
+
+clean::
+	cd internal && $(MAKE) clean
+	cd axiomatization && $(MAKE) clean
