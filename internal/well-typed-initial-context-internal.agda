@@ -86,10 +86,28 @@ pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 ‘_▻_’p₆     = w∀→₂ ‘_▻_’p₅
 ‘‘Σ'’’p₆     : Term (‘Context’p₆ ‘→’ ‘Typ’p₆ ‘→’ W1 (W1 ‘Typ’p₆) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₆) ‘→'’ W ‘Typ’p₆)
 ‘‘Σ'’’p₆     = w∀∀‘’→ ‘‘Σ'’’p₅
-‘_‘’_’p₆       : Term (‘Context’p₆ ‘→’ ‘Typ’p₆ ‘→’ W1 (W1 ‘Typ’p₆) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₆) ‘→'’ ‘Term’p₆ ‘→'’ W ‘Typ’p₆)
-‘_‘’_’p₆       = weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp ‘VAR₀’
+‘_‘’_’p₆     : Term (‘Context’p₆ ‘→’ ‘Typ’p₆ ‘→’ W1 (W1 ‘Typ’p₆) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₆) ‘→'’ ‘Term’p₆ ‘→'’ W ‘Typ’p₆)
+‘_‘’_’p₆     = weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp ‘VAR₀’
+{-
+εp₇ : Context
+εp₇ = εp₆
+  ▻ (‘Context’p₆ ‘→’ ‘Typ’p₆ ‘→’ W1 (W1 ‘Typ’p₆) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₆) ‘→'’ ‘Term’p₆ ‘→'’ W ‘Typ’p₆) {- _‘’_ -}
+‘Context’p₇ : Typ εp₇
+‘Context’p₇ = W ‘Context’p₆
+‘Typ’p₇     : Typ (εp₇ ▻ ‘Context’p₇)
+‘Typ’p₇     = W1 ‘Typ’p₆
+‘Term’p₇    : Typ (εp₇ ▻ ‘Context’p₇ ▻ ‘Typ’p₇)
+‘Term’p₇    = W2 ‘Term’p₆
+‘ε₀’p₇       : Term ‘Context’p₇
+‘ε₀’p₇       = w ‘ε₀’p₆
+‘_▻_’p₇     : Term (‘Context’p₇ ‘→’ ‘Typ’p₇ ‘→'’ W ‘Context’p₇)
+‘_▻_’p₇     = w∀→₂ ‘_▻_’p₆
+‘‘Σ'’’p₇     : Term (‘Context’p₇ ‘→’ ‘Typ’p₇ ‘→’ W1 (W1 ‘Typ’p₇) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₇) ‘→'’ W ‘Typ’p₇)
+‘‘Σ'’’p₇     = w∀∀‘’→ ‘‘Σ'’’p₆
+‘_‘’_’p₇     : Term (‘Context’p₇ ‘→’ ‘Typ’p₇ ‘→’ W1 (W1 ‘Typ’p₇) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₇) ‘→'’ ‘Term’p₇ ‘→'’ W ‘Typ’p₇)
+‘_‘’_’p₇     = w∀∀‘’→→ ‘_‘’_’p₆
 
-
+-}
 
 --  ‘context-pick-if’ : ∀ {P : Typ (ε ▻ ‘Context’)}
 --           (dummy : Term (P ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c)) →
