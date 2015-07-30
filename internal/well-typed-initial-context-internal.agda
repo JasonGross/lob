@@ -55,6 +55,23 @@ pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 
 {-εp₅ : Context
 εp₅ = εp₄
+  ▻ (‘Context’p₄ ‘→’ ‘Typ’p₄ ‘→’ W1 ‘Typ’p₄ ‘’ ‘_▻_’p₄ ‘→'’ W ‘Typ’p₄) {- ‘Σ'’ -}
+‘Context’p₅ : Typ εp₅
+‘Context’p₅ = W ‘Context’p₄
+‘Typ’p₅     : Typ (εp₅ ▻ ‘Context’p₅)
+‘Typ’p₅     = W1 ‘Typ’p₄
+‘Term’p₅    : Typ (εp₅ ▻ ‘Context’p₅ ▻ ‘Typ’p₅)
+‘Term’p₅    = W2 ‘Term’p₄
+‘ε₀’p₅       : Term ‘Context’p₅
+‘ε₀’p₅       = w ‘ε₀’p₄
+‘_▻_’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→'’ W ‘Context’p₅)
+‘_▻_’p₅     = w∀→ ‘_▻_’p₄
+‘‘Σ'’’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→’ W1 ‘Typ’p₅ ‘’ ‘_▻_’p₅ ‘→'’ W ‘Typ’p₅)
+‘‘Σ'’’p₅     = w∀∀→ ‘‘Σ'’’p₄-}
+
+-- ‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
+{-εp₅ : Context
+εp₅ = εp₄
   ▻ (‘Context’p₄ ‘→’ ‘Typ’p₄ ‘→'’ W ‘Context’p₄) {- ‘_▻_’ -}
 ‘Context’p₅ : Typ εp₅
 ‘Context’p₅ = W ‘Context’p₄

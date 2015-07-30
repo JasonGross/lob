@@ -77,6 +77,10 @@ Conv0 {qH0} {qX} x = w→ quote-typ-distr-tProd-nd ‘'’ₐ x
   where helper : Term {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W (‘Σ’ ‘Context’ ‘Typ’))
         helper = SW1W (S₁₀W (S∀ (w∀→ ‘existT'’ ‘’ₐ {!!}) ‘’ₐ {!!})) --
 
+        helper'' : Term
+                     (‘Term’ ‘’₁ ⌜ ε ▻ {!!} ⌝c ‘’ ⌜ W ‘Context’ ‘→’ W1 ‘Typ’ ‘→'’ W1 (W (‘Σ’ ‘Context’ ‘Typ’)) ⌝T)
+        helper'' = ⌜ w∀→ ‘existT'’ ⌝t
+
         helper' : Term {ε} (‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
         helper' = {!!}
 -}

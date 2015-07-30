@@ -56,6 +56,7 @@ mutual
   weakenTyp-weakenTyp-tProd x ≟'-term weakenTyp-weakenTyp-tProd y = lift-≟-1 weakenTyp-weakenTyp-tProd (_ ≟'-term _)
   substTyp1-tProd x₁ ≟'-term substTyp1-tProd y = lift-≟-1 substTyp1-tProd (_ ≟'-term _)
   weakenTyp1-tProd x ≟'-term weakenTyp1-tProd y = lift-≟-1 weakenTyp1-tProd (_ ≟'-term _)
+  weakenTyp2-tProd-nd x ≟'-term weakenTyp2-tProd-nd y = lift-≟-1 weakenTyp2-tProd-nd (_ ≟'-term _)
   substTyp2-tProd x₁ ≟'-term substTyp2-tProd y = lift-≟-1 substTyp2-tProd (_ ≟'-term _)
   substTyp1-substTyp-weakenTyp-inv x₂ ≟'-term substTyp1-substTyp-weakenTyp-inv y = lift-≟-1 substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _)
   substTyp1-substTyp-weakenTyp x₂ ≟'-term substTyp1-substTyp-weakenTyp y = lift-≟-3 (λ T b → substTyp1-substTyp-weakenTyp {T = T} {b = b}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
@@ -97,6 +98,7 @@ mutual
   weakenTyp-weakenTyp-tProd x ≟'-term y = nothing
   substTyp1-tProd x₁ ≟'-term y = nothing
   weakenTyp1-tProd x ≟'-term y = nothing
+  weakenTyp2-tProd-nd x ≟'-term y = nothing
   substTyp2-tProd x₁ ≟'-term y = nothing
   substTyp1-substTyp-weakenTyp-inv x₂ ≟'-term y = nothing
   substTyp1-substTyp-weakenTyp x₂ ≟'-term y = nothing

@@ -34,8 +34,8 @@ mutual
     _‘’ₐ_ : ∀ {Γ A B} → (f : Term {Γ = Γ} (A ‘→’ B)) → (x : Term {Γ = Γ} A) → Term {Γ = Γ} (B ‘’ x)
     ‘VAR₀’ : ∀ {Γ T} → Term {Γ = Γ ▻ T} (W T)
     WSet : ∀ {Γ A} → Term {Γ ▻ A} (W ‘Set’) → Term {Γ ▻ A} ‘Set’
-    WWSet : ∀ {Γ A B} → Term {Γ ▻ A ▻ B} (W (W ‘Set’)) → Term {Γ ▻ A ▻ B} ‘Set’ -- todo: collapse this
-    WWWSet : ∀ {Γ A B C} → Term {Γ ▻ A ▻ B ▻ C} (W (W (W ‘Set’))) → Term {Γ ▻ A ▻ B ▻ C} ‘Set’ -- todo: collapse this
+    WWSet : ∀ {Γ A B} → Term {Γ ▻ A ▻ B} (W (W ‘Set’)) → Term {Γ ▻ A ▻ B} ‘Set’
+    WWWSet : ∀ {Γ A B C} → Term {Γ ▻ A ▻ B ▻ C} (W (W (W ‘Set’))) → Term {Γ ▻ A ▻ B ▻ C} ‘Set’
     substTyp-weakenTyp : ∀ {Γ A B} {a : Term {Γ = Γ} A} → Term {Γ = Γ} (W B ‘’ a) → Term {Γ = Γ} B
     weakenTyp-substTyp-tProd : ∀ {Γ T T' A B} {a : Term {Γ = Γ} T} → Term {Γ = Γ ▻ T'} (W ((A ‘→’ B) ‘’ a)) → Term {Γ ▻ T'} (W ((A ‘’ a) ‘→’ (B ‘’₁ a)))
     substTyp-weakenTyp1-VAR₀ : ∀ {Γ A T} → Term {Γ ▻ A} (W1 T ‘’ ‘VAR₀’) → Term {Γ ▻ A} T
@@ -44,6 +44,7 @@ mutual
     weakenTyp-weakenTyp-tProd : ∀ {Γ A B C D} → Term {Γ ▻ C ▻ D} (W (W (A ‘→’ B))) → Term {Γ ▻ C ▻ D} (W (W A ‘→’ W1 B))
     substTyp1-tProd : ∀ {Γ T T' A B} {a : Term {Γ} T} → Term {Γ ▻ T' ‘’ a} ((A ‘→’ B) ‘’₁ a) → Term {Γ ▻ T' ‘’ a} ((A ‘’₁ a) ‘→’ (B ‘’₂ a))
     weakenTyp1-tProd : ∀ {Γ C D A B} → Term {Γ ▻ C ▻ W D} (W1 (A ‘→’ B)) → Term {Γ ▻ C ▻ W D} (W1 A ‘→’ W2 B)
+    weakenTyp2-tProd-nd : ∀ {Γ C D E A B} → Term {Γ ▻ C ▻ W D ▻ W1 E} (W2 (A ‘→’ W B)) → Term {Γ ▻ C ▻ W D ▻ W1 E} (W2 A ‘→’ W (W2 B))
     substTyp2-tProd : ∀ {Γ T T' T'' A B} {a : Term {Γ} T} → Term {Γ ▻ T' ‘’ a ▻ T'' ‘’₁ a} ((A ‘→’ B) ‘’₂ a) → Term {Γ ▻ T' ‘’ a ▻ T'' ‘’₁ a} ((A ‘’₂ a) ‘→’ (B ‘’₃ a))
     substTyp1-substTyp-weakenTyp-inv : ∀ {Γ C T A} {a : Term {Γ} C} {b : Term {Γ} (T ‘’ a)} → Term {Γ} (A ‘’ a) → Term {Γ} (W A ‘’₁ a ‘’ b)
     substTyp1-substTyp-weakenTyp : ∀ {Γ C T A} {a : Term {Γ} C} {b : Term {Γ} (T ‘’ a)} → Term {Γ} (W A ‘’₁ a ‘’ b) → Term {Γ} (A ‘’ a)
