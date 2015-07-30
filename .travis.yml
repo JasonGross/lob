@@ -35,6 +35,7 @@ install:
  - if [ ! -z "$AGDA" ]; then cabal update; fi
  - if [ ! -z "$AGDA" ]; then cabal install cabal-install; fi
  - if [ ! -z "$AGDA" ]; then cabal install alex; fi
+ - if [ ! -z "$AGDA" ]; then cabal install haskell-src-exts; fi
  - if [ ! -z "$AGDA" ]; then cabal install Agda-$AGDA; fi
 
 
