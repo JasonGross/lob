@@ -23,14 +23,17 @@ env:
 #  - AGDA=""     INTERNAL_COQ="yes"  AXIOMATIZATION=""
   - AGDA=""     INTERNAL_COQ=""     AXIOMATIZATION="yes"
 
-before_script:
- - uname -a
+install:
  - export PATH="$HOME/cache/.cabal-sandbox/bin:$PATH"
  - rm -rf $HOME/cache
  - mkdir -p "$HOME/cache"
  - if [ ! -z "$AGDA" ]; then cabal update || true; fi
  - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
  - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install Agda); fi
+
+
+before_script:
+ - uname -a
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then (cd "$HOME/cache" && opam update); fi
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then (cd "$HOME/cache" && opam list && opam install -j4 -v coq.8.5~beta2); fi
 
