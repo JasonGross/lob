@@ -17,8 +17,6 @@ env:
 
 before_script:
  - uname -a
-
-install:
  - export PATH="$HOME/cache/.cabal-sandbox/bin:$PATH"
  - mkdir -p "$HOME/cache"
  - if [ ! -z "$AGDA" ]; then cabal update || true; fi
