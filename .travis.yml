@@ -27,8 +27,7 @@ install:
  - export PATH="$HOME/cache/.cabal-sandbox/bin:$PATH"
  - rm -rf $HOME/cache
  - mkdir -p "$HOME/cache"
- - if [ ! -z "$AGDA" ]; then cabal update || true; fi
- - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
+ - if [ ! -z "$AGDA" -a ! -d "$HOME/cache/.cabal-sandbox" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
  - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install Agda); fi
 
 
