@@ -16,6 +16,10 @@ VECHO_0 := @echo
 VECHO_1 := @true
 VECHO = $(VECHO_$(V))
 
+QECHO_0 := @true
+QECHO_1 := @echo
+QECHO = $(QECHO_$(V))
+
 containing = $(foreach v,$2,$(if $(findstring $1,$v),$v))
 not-containing = $(foreach v,$2,$(if $(findstring $1,$v),,$v))
 
@@ -54,6 +58,7 @@ $(filter-out $(VOFILES),$(call vo_closure,$(VOFILES))): FORCE
 	@ echo 'error: $@ is missing from _CoqProject.'
 	@ echo 'error: Please run `make update-_CoqProject`.'
 	@ echo
+	$(QECHO) '_CoqProject contents: $(VOFILES)'
 	@ false
 
 coq: $(VOFILES)
