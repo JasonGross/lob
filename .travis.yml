@@ -16,14 +16,12 @@ addons:
      - avsm
     packages:
      - opam
-#    - haskell-platform
-#    - cabal-install
 
 env:
  matrix:
   - AGDA="2.4.2.3"  INTERNAL_COQ=""     AXIOMATIZATION=""    TARGETS="agda"
 #  - AGDA=""         INTERNAL_COQ="yes"  AXIOMATIZATION=""    TARGETS="coq"
-  - AGDA=""         INTERNAL_COQ=""     AXIOMATIZATION="yes" TARGETS="coq coq-axiomatization"
+  - AGDA=""         INTERNAL_COQ=""     AXIOMATIZATION="yes" TARGETS="clean" # TARGETS="coq coq-axiomatization"
 
 install:
  - export PATH="$HOME/cache/.cabal-sandbox/bin:$HOME/.cabal/bin:$PATH"
