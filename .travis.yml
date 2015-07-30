@@ -29,13 +29,16 @@ install:
 # - rm -rf $HOME/cache
  - mkdir -p "$HOME/cache"
  - if [ ! -z "$AGDA" -a ! -d "$HOME/cache/.cabal-sandbox" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
- - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install cabal-install && cabal install alex); fi
+ - if [ ! -z "$AGDA" ]; then cabal install cabal-install && cabal install alex; fi
  - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install Agda-$AGDA); fi
 
 
 before_script:
  - uname -a
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then (cd "$HOME/cache" && opam update); fi
- - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then (cd "$HOME/cache" && opam list && opam install -j4 -v coq.8.5~beta2); fi
+# - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then (cd "$HOME/cache" && opam repo add coq-core-dev https://coq.inria.fr/opam/core-dev); fi
+# - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then (cd "$HOME/cache" && opam repo add coq-released https://coq.inria.fr/opam/released); fi
+ - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then (cd "$HOME/cache" && opam list && opam install -j4 -v coq.8.5~beta1); fi
+# - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then (cd "$HOME/cache" && opam list && opam install -j4 -v coq:template-coq.1.0.0~beta2); fi
 
 script: false

@@ -13,3 +13,5 @@
 *.v#
 *.agda#
 *.jpg
+*.html
+internal/html/Agda.css
