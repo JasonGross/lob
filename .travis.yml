@@ -42,7 +42,7 @@ install:
 
 before_script:
  - uname -a
- - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam init; fi
+ - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam init --auto-setup; fi
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam update; fi
 # - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam repo add coq-core-dev https://coq.inria.fr/opam/core-dev; fi
 # - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam repo add coq-released https://coq.inria.fr/opam/released; fi
