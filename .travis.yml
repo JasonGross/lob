@@ -19,7 +19,7 @@ addons:
 
 env:
  matrix:
-  - AGDA="yes"  INTERNAL_COQ=""     AXIOMATIZATION=""
+  - AGDA="2.4.2.3"  INTERNAL_COQ=""     AXIOMATIZATION=""
 #  - AGDA=""     INTERNAL_COQ="yes"  AXIOMATIZATION=""
   - AGDA=""     INTERNAL_COQ=""     AXIOMATIZATION="yes"
 
@@ -28,7 +28,8 @@ install:
  - rm -rf $HOME/cache
  - mkdir -p "$HOME/cache"
  - if [ ! -z "$AGDA" -a ! -d "$HOME/cache/.cabal-sandbox" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
- - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install Agda); fi
+ - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install cabal-install); fi
+ - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install Agda-$AGDA); fi
 
 
 before_script:
