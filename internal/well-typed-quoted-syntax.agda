@@ -54,13 +54,13 @@ g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
         ((⌜ T ‘’ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T) ⌝T)
            ‘‘→'’’
            (‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)
-             ‘‘’’ (‘quote-term’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))))
+             ‘‘’’ (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))))
 ‘cast-refl’ = ‘β'’ ‘‘∘’’ substTerm-undistr-stuff ‘‘∘’’ qexistT-iota-inv ‘‘∘’’ ⌜⌜⌝⌝ ‘‘∘’’ ‘context-pick-if’-refl-inv ‘‘∘’’ ⌜‘’⌝
 
 ‘cast-refl'’ : ∀ {T} →
     □ (‘□’ ‘’
         ((‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)
-           ‘‘’’ (‘quote-term’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))
+           ‘‘’’ (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))
            ‘‘→'’’ (⌜ T ‘’ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T) ⌝T)))
 ‘cast-refl'’ = ⌜‘’⌝' ‘‘∘’’ ‘context-pick-if’-refl ‘‘∘’’ ⌜⌜⌝⌝' ‘‘∘’’ qexistT-iota ‘‘∘’’ substTerm-distr-stuff ‘‘∘’’ ‘β’
 

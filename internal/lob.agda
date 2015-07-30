@@ -34,7 +34,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
       f' = w→ ‘cast’ ‘'’ₐ ‘VAR₀’
 
       x : Term (W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))
-      x = (w→ ‘quote-term’ ‘'’ₐ ‘VAR₀’)
+      x = (w→ ‘quote-sigma’ ‘'’ₐ ‘VAR₀’)
 
   h2 : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
   h2 = (W1 (‘□’)
@@ -106,7 +106,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
       f' : Term (W (‘□’ ‘’ S₂₁₀WW (‘tProd-nd’ ‘t’₂ ‘ε’ ‘t’₁ ⌜ ‘□’ ‘’ ‘H0’ ⌝T ‘t’ S₁₀W' ⌜ ‘X’ ⌝T)))
       f' = Conv0 {‘H0’} {‘X’} (SW1W (w∀ ‘fromH’ ‘’ₐ ‘VAR₀’))
 
-      x : Term (W (‘□’ ‘’ ⌜ ‘H’ ⌝T))
+      x : Term {ε ▻ ‘□’ ‘’ ‘H0’} (W (‘□’ ‘’ ⌜ ‘H’ ⌝T))
       x = w→ ‘quote-term’ ‘'’ₐ ‘VAR₀’
 
       h' : H

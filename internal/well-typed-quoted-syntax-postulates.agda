@@ -13,8 +13,10 @@ postulate
   ‘tProd-nd’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’)} (W (W ‘Typ’))
 -- ‘tProd-nd’ = {!!}
 
-  ‘quote-term’ : ∀ {A : Typ ε} →
-                      □ (A ‘→'’ ‘Term’ ‘’₁ _ ‘’ ⌜ A ⌝T)
+  ‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
+-- ‘quote-sigma’ = {!!}
+
+  ‘quote-term’ : ∀ {A} → □ (‘□’ ‘’ A ‘→'’ ‘□’ ‘’ ⌜ ‘□’ ‘’ A ⌝T)
 -- ‘quote-term’ = {!!}
 
   ‘context-pick-if’ : ∀ {P : Typ (ε ▻ ‘Context’)}
@@ -157,13 +159,13 @@ postulate
              ‘‘→'’’
              (⌜‘▻’⌝ ⌜ T ⌝T ‘‘’’ qqs)))
 
-  qquote-term-under-app : ∀ {A} {f} {t : □ A} →
+  qquote-term-under-app : ∀ {f} {t : □ (‘Σ’ ‘Context’ ‘Typ’)} →
       □ (‘Term’ ‘’₁ ‘ε’ ‘’
-          (f ‘‘’’ ⌜ t ⌝t ‘‘→'’’ f ‘‘’’ (‘quote-term’ ‘'’ₐ t)))
+          (f ‘‘’’ ⌜ t ⌝t ‘‘→'’’ f ‘‘’’ (‘quote-sigma’ ‘'’ₐ t)))
 
-  qquote-term-under-app-inv : ∀ {A} {f} {t : □ A} →
+  qquote-term-under-app-inv : ∀ {f} {t : □ (‘Σ’ ‘Context’ ‘Typ’)} →
       □ (‘Term’ ‘’₁ ‘ε’ ‘’
-          (f ‘‘’’ (‘quote-term’ ‘'’ₐ t) ‘‘→'’’ f ‘‘’’ ⌜ t ⌝t))
+          (f ‘‘’’ (‘quote-sigma’ ‘'’ₐ t) ‘‘→'’’ f ‘‘’’ ⌜ t ⌝t))
 
   qbeta-nd-inv : ∀ {T A}
            {f : Term {ε ▻ A} (W (‘Typ’ ‘’ ⌜ ε ▻ T ⌝c))}
