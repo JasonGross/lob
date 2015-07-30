@@ -14,7 +14,7 @@ cache:
 addons:
   apt:
     sources:
-     - ppa:avsm/ppa
+     - avsm
     packages:
      - opam
 #    - haskell-platform
