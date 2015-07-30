@@ -58,7 +58,7 @@ $(filter-out $(VOFILES),$(call vo_closure,$(VOFILES))): FORCE
 	@ echo 'error: $@ is missing from _CoqProject.'
 	@ echo 'error: Please run `make update-_CoqProject`.'
 	@ echo
-	$(QECHO) '_CoqProject contents: $(VOFILES)'
+	@ echo '_CoqProject contents: $(VOFILES)'
 	@ false
 
 coq: $(VOFILES)
