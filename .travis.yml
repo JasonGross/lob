@@ -12,7 +12,7 @@ cache:
 
 addons:
   apt:
-    source:
+    sources:
      - opam
 #    packages:
 #    - haskell-platform
