@@ -134,19 +134,14 @@ Module Lob1 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
   Notation "‘‘Conv’’" := (box'_weaken qConv) : well_typed_term_scope.*)
 
     Axiom qQuote
-    : let Γ := (ε(* ▻ ‘□’ ‘’ ‘L’*)) in
+    : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
       let A := (‘□’ ‘’ ‘L’)%preterm in
       box' Γ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
 
-    Axiom qQuote_T_is_closed : is_closed (let A := (‘□’ ‘’ ‘L’)%preterm in
-                                          (A ‘→’ (‘□’ ‘’ (⌜ A ⌝)))).
-
+    Notation "‘‘Quote’’" := ((*box'_weaken*) qQuote) : well_typed_term_scope.
 
     Axiom box'_weaken : let Γ := (ε ▻ ‘□’ ‘’ ‘L’) in
                         forall {A} {H : is_closed A}, box' ε A -> box' Γ A.
-
-    Notation "‘‘Quote’’" := (@box'_weaken _ qQuote_T_is_closed qQuote) : well_typed_term_scope.
-
   End PostL.
 End Lob1.
 
@@ -185,32 +180,7 @@ Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPri
                                           (new_value : Preterm),
                                      Preterm.
   Notation "x [ 0 ↦ y ]" := (capture_avoiding_subst_0 x y).
-
-  Axiom box_beta_under_app_inv
-  : forall {Γ f T body x},
-      box' Γ (f ‘’ (capture_avoiding_subst_0 body x))
-      -> box' Γ (f ‘’ ((tLambda T body) ‘’ x)).
-  Axiom box_beta_under_app
-  : forall {Γ f T body x},
-      box' Γ (f ‘’ ((tLambda T body) ‘’ x))
-      -> box' Γ (f ‘’ (capture_avoiding_subst_0 body x)).
-  Axiom subst_distr_qtProd_under_app_inv
-  : forall {Γ f A B x},
-      box' Γ (f ‘’ ((capture_avoiding_subst_0 A x) ‘‘→’’ (capture_avoiding_subst_0 B x)))
-      -> box' Γ (f ‘’ (capture_avoiding_subst_0 (A ‘‘→’’ B) x)).
-  Axiom subst_distr_qtProd_under_app
-  : forall {Γ f A B x},
-      box' Γ (f ‘’ (capture_avoiding_subst_0 (A ‘‘→’’ B) x))
-      -> box' Γ (f ‘’ ((capture_avoiding_subst_0 A x) ‘‘→’’ (capture_avoiding_subst_0 B x))).
-  Axiom subst_distr_tApp_pre_inv
-  : forall {Γ f A B C D E X x},
-      box' Γ (f ‘’ ((capture_avoiding_subst_0 A x ‘’ capture_avoiding_subst_0 B x) ‘’ ((capture_avoiding_subst_0 C x) ‘’ x ‘’ (capture_avoiding_subst_0 D x ‘’ capture_avoiding_subst_0 E x ‘’ x)) ‘‘→’’ X))
-      -> box' Γ (f ‘’ (capture_avoiding_subst_0 ((A ‘’ B) ‘’ (C ‘’ ‘VAR₀’ ‘’ (D ‘’ E ‘’ ‘VAR₀’))) x ‘‘→’’ X)).
-  Axiom subst_distr_tApp_pre
-  : forall {Γ f A B C D E X x},
-      box' Γ (f ‘’ (capture_avoiding_subst_0 ((A ‘’ B) ‘’ (C ‘’ ‘VAR₀’ ‘’ (D ‘’ E ‘’ ‘VAR₀’))) x ‘‘→’’ X))
-      -> box' Γ (f ‘’ ((capture_avoiding_subst_0 A x ‘’ capture_avoiding_subst_0 B x) ‘’ ((capture_avoiding_subst_0 C x) ‘’ x ‘’ (capture_avoiding_subst_0 D x ‘’ capture_avoiding_subst_0 E x ‘’ x)) ‘‘→’’ X)).
-(*  Axiom convertible : Context -> Preterm -> Preterm -> Type.
+  Axiom convertible : Context -> Preterm -> Preterm -> Type.
   Axiom box'_respectful : forall {Γ A B},
                             convertible Γ A B
                             -> box' Γ A
@@ -254,59 +224,36 @@ Module Type TypingRules (Export LC : LobExtendedContext) (Export PP : PretermPri
       convertible Γ (‘App’ [ 0 ↦ x ]) (‘App’).
   Axiom convertible__quote__app
   : forall Γ A B,
-      convertible Γ (⌜ A ‘’ B ⌝) ((‘App’ ‘’ ⌜ A ⌝) ‘’ ⌜ B ⌝).*)
+      convertible Γ (⌜ A ‘’ B ⌝) ((‘App’ ‘’ ⌜ A ⌝) ‘’ ⌜ B ⌝).
 End TypingRules.
 
 Module Type PretermReflectionTypingRules (Export LC : LobExtendedContext) (Export PP : PretermPrimitives LC) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP).
-  (*Axiom convertible__qquote__closed
+  Axiom convertible__qquote__closed
   : forall Γ x,
       convertible Γ (‘quote’ [ 0 ↦ x ]) (‘quote’).
 
   (*Axiom box_distr_qtProd_quote
   : forall Γ A B,
       convertible Γ (‘□’ ‘’ (A ‘‘→’’ ⌜ B ⌝)) ((‘□’ ‘’ A) ‘‘→’’ (‘□’ ‘’ ⌜ B ⌝)).*)
-*)
-  Axiom box_qtProd_qcompose
-  : forall {Γ} {A B C},
-      box' Γ (‘□’ ‘’ (A ‘‘→’’ B))
-      -> box' Γ (‘□’ ‘’ (B ‘‘→’’ C))
-      -> box' Γ (‘□’ ‘’ (A ‘‘→’’ C)).
 
-  Axiom box_qtProd_dom_compose
+  Axiom box_qtProd_dom_precompose
   : forall {Γ} A B C,
       (box' Γ (‘□’ ‘’ B) -> box' Γ (‘□’ ‘’ A))
       -> box' Γ (‘□’ ‘’ (A ‘‘→’’ C))
       -> box' Γ (‘□’ ‘’ (B ‘‘→’’ C)).
 
-  Axiom quote_distr_tProd
-  : forall {f A B},
-      □ (f ‘’ ⌜ A ‘→’ B ⌝)
-      -> □ (f ‘’ (⌜ A ⌝ ‘‘→’’ ⌜ B ⌝)).
-  Axiom quote_closed_app_inv
-  : forall {x y},
-      □ (‘□’ ‘’ (⌜ x ⌝ ‘‘→’’ capture_avoiding_subst_0 ⌜ x ⌝ y)).
-  Axiom quote_closed_app
-  : forall {Γ x y},
-      box' Γ (‘□’ ‘’ (capture_avoiding_subst_0 ⌜ x ⌝ y ‘‘→’’ ⌜ x ⌝)).
-  Axiom quote_closed_app_misc_inv
-  : forall {f A B C D E X x},
-      □ (f ‘’ ((capture_avoiding_subst_0 A x ‘’ ⌜ B ⌝) ‘’ ((capture_avoiding_subst_0 C x) ‘’ x ‘’ (capture_avoiding_subst_0 D x ‘’ ⌜ E ⌝ ‘’ x)) ‘‘→’’ X))
-      -> □ (f ‘’ ((capture_avoiding_subst_0 A x ‘’ capture_avoiding_subst_0 ⌜ B ⌝ x) ‘’ ((capture_avoiding_subst_0 C x) ‘’ x ‘’ (capture_avoiding_subst_0 D x ‘’ capture_avoiding_subst_0 ⌜ E ⌝ x ‘’ x)) ‘‘→’’ X)).
-  Axiom quote_closed_qapp_app_misc_inv
-  : forall {f B C E X x},
-      □ (f ‘’ ((‘App’ ‘’ ⌜ B ⌝) ‘’ (‘App’ ‘’ x ‘’ (‘App’ ‘’ ⌜ E ⌝ ‘’ x)) ‘‘→’’ X))
-      -> □ (f ‘’ ((capture_avoiding_subst_0 ‘App’ x ‘’ ⌜ B ⌝) ‘’ ((capture_avoiding_subst_0 C x) ‘’ x ‘’ (capture_avoiding_subst_0 ‘App’ x ‘’ ⌜ E ⌝ ‘’ x)) ‘‘→’’ X)).
-  Axiom quote_triple_tApp
-  : forall {f A B C D X},
-      □ (f ‘’ (⌜ A ‘’ (B ‘’ (C ‘’ D)) ⌝ ‘‘→’’ X))
-      -> □ (f ‘’ ((‘App’ ‘’ ⌜ A ⌝ ‘’ (‘App’ ‘’ ⌜ B ⌝ ‘’ (‘App’ ‘’ ⌜ C ⌝ ‘’ ⌜ D ⌝))) ‘‘→’’ X)).
-  Axiom box_box_qtProd
-  : forall {A B},
-      □ (‘□’ ‘’ ⌜ ‘□’ ‘’ (A ‘‘→’’ B) ⌝)
-      -> □ (‘□’ ‘’ ⌜ ‘□’ ‘’ A ‘→’ ‘□’ ‘’ B ⌝).
-  Axiom quote_qquote
-  : forall {qL0},
-      □ (‘□’ ‘’ (qL0 ‘’ (‘quote’ ‘’ qL0) ‘‘→’’ qL0 ‘’ ⌜ qL0 ⌝)).
+  (** FIXME: This seems a bit fishy... *)
+  Axiom box_quote_app_quote
+  : forall Γ T,
+      box' Γ (‘□’
+               ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ⌜ T ⌝))))
+      -> box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝))).
+
+  Axiom box_quote_app_quote_inv
+  : forall Γ T,
+      box' Γ (‘□’ ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ ⌜ ⌜ T ⌝ ⌝)))
+      -> box' Γ (‘□’
+                  ‘’ (‘App’ ‘’ ⌜‘□’ ⌝ ‘’ (‘App’ ‘’ ⌜T ⌝ ‘’ (‘App’ ‘’ ⌜ ‘quote’ ⌝ ‘’ ⌜ T ⌝)))).
 End PretermReflectionTypingRules.
 
 Module Type PostL_Assumptions (LC : LobExtendedContext) (Export PP : PretermPrimitives LC) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP).
@@ -323,7 +270,7 @@ Module Type PostL_Assumptions (LC : LobExtendedContext) (Export PP : PretermPrim
     Axiom qQuote
     : forall T,
         let A := (‘□’ ‘’ T)%preterm in
-        box' ε (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
+        box' Γ (A ‘→’ (‘□’ ‘’ (⌜ A ⌝))).
 
     Axiom qbApp
     : forall A' B',
@@ -366,13 +313,13 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
     Notation "‘L’" := qL.
   End L.
 
-  Module PostL (Export PP : PretermPrimitives LC) (Export PL : PreL LC PP) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP) (Export PRTR : PretermReflectionTypingRules LC PP PRP TR) (Import LA : PostL_Assumptions LC PP PRP TR).
+  Module PostL (Export PP : PretermPrimitives LC) (Export PL : PreL LC PP) (Export PRP : PretermReflectionPrimitives LC) (Export TR : TypingRules LC PP) (Export PRTR : PretermReflectionTypingRules LC PP PRP TR) (LA : PostL_Assumptions LC PP PRP TR).
     Module L' := L PP PL PRP TR PRTR.
     Include L'.
 
     Module M <: Lob1'.PostL PP PL L'.
 
-      (*Hint Rewrite convertible__qtApp__closed convertible__capture_avoiding_subst_0__tApp convertible__quote__closed convertible__quote__app convertible__capture_avoiding_subst_0__tVar0 convertible__qquote__closed convertible__capture_avoiding_subst_0__qtProd convertible__quote__qtProd convertible_beta_app_lambda : convdb.
+      Hint Rewrite convertible__qtApp__closed convertible__capture_avoiding_subst_0__tApp convertible__quote__closed convertible__quote__app convertible__capture_avoiding_subst_0__tVar0 convertible__qquote__closed convertible__capture_avoiding_subst_0__qtProd convertible__quote__qtProd convertible_beta_app_lambda : convdb.
 
       Local Ltac set_evars :=
         repeat match goal with
@@ -397,14 +344,29 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
                    | _ => progress rewrite_strat repeat (topdown repeat (hints convdb))
                  (*| _ => progress rewrite ?convertible__capture_avoiding_subst_0__tApp, ?convertible__qtApp__closed, ?convertible__quote__closed, ?convertible__quote__app, ?convertible__capture_avoiding_subst_0__tVar0, ?convertible__qquote__closed, ?convertible__capture_avoiding_subst_0__qtProd, ?convertible__quote__qtProd, ?convertible_beta_app_lambda*)
                  end;
-          subst_body.*)
+          subst_body.
 
 
 
       Definition Conv : □ (‘□’ ‘’ ⌜ L ⌝) -> □ (‘□’ ‘’ ‘L’).
       Proof.
-        unfold L, qL.
-        refine (fun box_L => box_beta_under_app_inv (subst_distr_qtProd_under_app_inv (box_qtProd_qcompose (box_qtProd_qcompose (subst_distr_tApp_pre_inv (quote_closed_app_misc_inv (quote_closed_qapp_app_misc_inv (quote_triple_tApp (quote_distr_tProd (box_box_qtProd (qQuote _ ‘’ quote_qquote)%wtt)))))) (quote_distr_tProd box_L)) quote_closed_app_inv))); shelve_unifiable.
+        unfold box, L, qL.
+        do_shelve
+          ltac:(refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L')).
+        { unfold L0, qL0; conv_rewrite.
+          reflexivity. }
+        { clear.
+          unfold L0, qL0.
+          intro box_L.
+          eapply box'_respectful.
+          { conv_rewrite.
+            reflexivity. }
+          { revert box_L.
+            match goal with
+              | [ |- context[quote (quote ?X)] ] => generalize X; intro T
+            end.
+            apply box_qtProd_dom_precompose.
+            apply box_quote_app_quote. } }
       Defined.
 
       Definition Conv2 : □ L -> □ (‘□’ ‘’ ‘L’ ‘→’ ‘X’)
@@ -415,13 +377,6 @@ Module Lob2 (LC : LobExtendedContext) (Import LH : LobHypotheses LC).
       : box' Γ (‘□’ ‘’ ‘L’) -> box' Γ (‘□’ ‘’ (⌜‘□’ ‘’ ‘L’ ⌝ ‘‘→’’ ⌜ ‘X’ ⌝)).
       Proof.
         unfold qL.
-        unfold qL0 at 1.
-        refine (fun box_L => _ (box_qtProd_qcompose (subst_distr_qtProd_under_app (box_beta_under_app box_L)) quote_closed_app)); shelve_unifiable.
-        Focus 2.
-        refine quote_closed_app.
-        pose @.
-        pose @box_beta_under_app_inv.
- ( (box_qtProd_qcompose (box_qtProd_qcompose (subst_distr_tApp_pre_inv (quote_closed_app_misc_inv (quote_closed_qapp_app_misc_inv (quote_triple_tApp (quote_distr_tProd (box_box_qtProd (qQuote _ ‘’ quote_qquote)%wtt)))))) (quote_distr_tProd box_L)) _inv))); shelve_unifiable.
         do_shelve
           ltac:(refine (fun box_L => let box_L' := box'_respectful _ box_L in _ box_L')).
         { unfold L0, qL0; conv_rewrite.
