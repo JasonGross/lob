@@ -51,14 +51,15 @@ vo_closure = $(if $1,$(call vo_closure,$(sort $(filter-out $1 $2,$(call read_dep
 SORT_COQPROJECT = sed 's,[^/]*/,~&,g' | env LC_COLLATE=C sort | sed 's,~,,g'
 
 update-_CoqProject:
-	(echo '-R . Lob'; echo '-arg -no-native-compiler'; find . -name "*.v" | sed 's,^\./,,g' | $(SORT_COQPROJECT)) > _CoqProject
+	(echo '-R . Lob'; echo '-arg -no-native-compiler'; find . -name "*.v" | $(SORT_COQPROJECT)) > _CoqProject
 
 $(filter-out $(VOFILES),$(call vo_closure,$(VOFILES))): FORCE
 	@ echo
 	@ echo 'error: $@ is missing from _CoqProject.'
 	@ echo 'error: Please run `make update-_CoqProject`.'
-	@ echo
 	@ echo '_CoqProject contents: $(VOFILES)'
+	@ echo 'All files : $(call vo_closure,$(VOFILES))'
+	@ echo
 	@ false
 
 coq: $(VOFILES)
