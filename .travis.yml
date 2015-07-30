@@ -14,8 +14,9 @@ cache:
 addons:
   apt:
     sources:
+     - ppa:avsm/ppa
+    packages:
      - opam
-#    packages:
 #    - haskell-platform
 #    - cabal-install
 
