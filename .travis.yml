@@ -20,8 +20,8 @@ addons:
 env:
  matrix:
   - AGDA="2.4.2.3"  INTERNAL_COQ=""     AXIOMATIZATION=""    TARGETS="agda"
-#  - AGDA=""         INTERNAL_COQ="yes"  AXIOMATIZATION=""    TARGETS="coq"
-  - AGDA=""         INTERNAL_COQ=""     AXIOMATIZATION="yes" TARGETS="clean" # TARGETS="coq coq-axiomatization"
+  - AGDA=""         INTERNAL_COQ="yes"  AXIOMATIZATION=""    TARGETS="coq"
+  - AGDA=""         INTERNAL_COQ=""     AXIOMATIZATION="yes" TARGETS="coq-axiomatization"
 
 install:
  - export PATH="$HOME/cache/.cabal-sandbox/bin:$HOME/.cabal/bin:$PATH"
@@ -30,10 +30,8 @@ install:
  - cat $HOME/.cabal/config
  - if [ ! -z "$AGDA" -a ! -d "$HOME/cache/.cabal-sandbox" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
  - if [ ! -z "$AGDA" ]; then cabal update; fi
-# - if [ ! -z "$AGDA" ]; then cabal install cabal-install; fi
  - if [ ! -z "$AGDA" ]; then cabal install alex; fi
  - if [ ! -z "$AGDA" ]; then cabal install happy; fi # https://github.com/SublimeHaskell/SublimeHaskell/issues/184
-# - if [ ! -z "$AGDA" ]; then cabal install haskell-src-exts; fi
  - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install Agda-$AGDA); fi
 
 
