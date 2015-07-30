@@ -1,20 +1,19 @@
+{-# OPTIONS --without-K #-}
 module well-typed-quoted-syntax-defs where
 open import common
 open import well-typed-syntax
 open import well-typed-initial-context
 open import well-typed-syntax-helpers
+open import well-typed-syntax-helpers-postulates
 open import well-typed-syntax-context-helpers
 
 postulate cheat : ∀ {T : Set} → T
 
-mutual
-  abstract
+abstract
+  mutual
     ⌜_⌝c : Context → Term {Γ = ε} ‘Context’
     ⌜ ε₀ ⌝c = ‘ε₀’
     ⌜ Γ ▻ x ⌝c = S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ x ⌝T)
-{-    ⌜ ε₀ ⌝c = ‘ε₀’
-    ⌜ Γ ▻Typ Γ₁ ⌝c = ‘_▻Typ_’ ‘'’ₐ ⌜ Γ₁ ⌝c ‘'’ₐ ⌜ Γ₁ ⌝c
-    ⌜ Γ ▻ x ⌝c = S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ x ⌝T)-}
 
     ⌜_⌝T : ∀ {Γ} → Typ Γ → □ (‘Typ’ ‘’ ⌜ Γ ⌝c)
     ⌜ x₁ ‘’ x₂ ⌝T = cheat
@@ -27,10 +26,12 @@ mutual
     ⌜ ‘Set’ ⌝T = cheat
     ⌜ El x ⌝T = cheat
     ⌜ x ‘→’ x₁ ⌝T = cheat
-    ⌜ ‘Σ'’ x x₁ ⌝T = cheat
+    ⌜ ‘Σ'’ {Γ} x x₁ ⌝T = S₁₀W (S₂₁₀W (S₁₀∀ (S∀ (‘‘Σ'’’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ x ⌝T) ‘’ₐ S₀₁₀W1W1' ⌜ x₁ ⌝T))
 
     ⌜_⌝t : ∀ {Γ} {A : Typ Γ} → Term {Γ = Γ} A → □ (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T)
     ⌜ x ⌝t = cheat
+
+
 
 ‘context-extend’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’)} (W (W ‘Context’))
 ‘context-extend’ = un‘λ'∙’ (un‘λ∙’ ‘_▻_’)

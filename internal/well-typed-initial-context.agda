@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module well-typed-initial-context where
 open import well-typed-syntax
 open import well-typed-syntax-helpers
@@ -38,6 +39,9 @@ abstract
 
   ‘_▻_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’)
   ‘_▻_’ = well-typed-initial-context-internal.‘_▻_’
+
+  ‘‘Σ'’’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ W ‘Typ’)
+  ‘‘Σ'’’ = well-typed-initial-context-internal.‘‘Σ'’’
 
 Typε⇓ : Typ ε → Set well-typed-syntax-interpreter.max-level
 Typε⇓ T = well-typed-syntax-interpreter-full.Typε⇓ (transfer-Typ T)

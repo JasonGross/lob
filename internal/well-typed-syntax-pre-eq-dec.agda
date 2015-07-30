@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module well-typed-syntax-pre-eq-dec where
 open import well-typed-syntax
 open import common

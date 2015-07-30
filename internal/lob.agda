@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module lob where
 open import common
 open import well-typed-syntax

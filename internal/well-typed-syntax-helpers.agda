@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module well-typed-syntax-helpers where
 open import common
 open import well-typed-syntax
@@ -265,7 +266,6 @@ WS₀₀W1' : ∀ {Γ T' B A} {b : Term {Γ} B} {a : Term {Γ ▻ B} (W A)} {T :
       → Term {Γ ▻ T'} (W (T ‘’ (substTyp-weakenTyp (a ‘t’ b))))
       → Term {Γ ▻ T'} (W (W1 T ‘’ a ‘’ b))
 WS₀₀W1' = weakenTyp-substTyp-substTyp-weakenTyp1-inv
-
 
 substTyp-substTyp-weakenTyp1-inv-arr : ∀ {Γ B A}
          {b : Term {Γ} B}

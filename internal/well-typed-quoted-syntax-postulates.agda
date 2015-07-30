@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module well-typed-quoted-syntax-postulates where
 open import common
 open import well-typed-syntax

@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module well-typed-syntax-interpreter where
 open import common public
 open import well-typed-syntax

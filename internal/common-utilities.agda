@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module common-utilities where
 open import common
 

@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K #-}
 module well-typed-initial-context-internal where
 open import well-typed-syntax
 open import well-typed-syntax-helpers
