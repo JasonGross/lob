@@ -71,26 +71,53 @@ pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 ‘‘Σ'’’p₅     : Term (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→’ W1 (W1 ‘Typ’p₅) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₅) ‘→'’ W ‘Typ’p₅)
 ‘‘Σ'’’p₅     = weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-weakenTyp ‘VAR₀’
 
+εp₆ : Context
+εp₆ = εp₅
+  ▻ (‘Context’p₅ ‘→’ ‘Typ’p₅ ‘→’ W1 (W1 ‘Typ’p₅) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₅) ‘→'’ ‘Term’p₅ ‘→'’ W ‘Typ’p₅) {- _‘’_ -}
+‘Context’p₆ : Typ εp₆
+‘Context’p₆ = W ‘Context’p₅
+‘Typ’p₆     : Typ (εp₆ ▻ ‘Context’p₆)
+‘Typ’p₆     = W1 ‘Typ’p₅
+‘Term’p₆    : Typ (εp₆ ▻ ‘Context’p₆ ▻ ‘Typ’p₆)
+‘Term’p₆    = W2 ‘Term’p₅
+‘ε₀’p₆       : Term ‘Context’p₆
+‘ε₀’p₆       = w ‘ε₀’p₅
+‘_▻_’p₆     : Term (‘Context’p₆ ‘→’ ‘Typ’p₆ ‘→'’ W ‘Context’p₆)
+‘_▻_’p₆     = w∀→₂ ‘_▻_’p₅
+‘‘Σ'’’p₆     : Term (‘Context’p₆ ‘→’ ‘Typ’p₆ ‘→’ W1 (W1 ‘Typ’p₆) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₆) ‘→'’ W ‘Typ’p₆)
+‘‘Σ'’’p₆     = w∀∀‘’→ ‘‘Σ'’’p₅
+‘_‘’_’p₆       : Term (‘Context’p₆ ‘→’ ‘Typ’p₆ ‘→’ W1 (W1 ‘Typ’p₆) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₆) ‘→'’ ‘Term’p₆ ‘→'’ W ‘Typ’p₆)
+‘_‘’_’p₆       = weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp ‘VAR₀’
+
+
+
+--  ‘context-pick-if’ : ∀ {P : Typ (ε ▻ ‘Context’)}
+--           (dummy : Term (P ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c)) →
+--      □ (‘Context’ ‘→’ P ‘→'’ W (P ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
+
 ε : Context
-ε = εp₅
+ε = εp₆
 
 ‘Context’ : Typ ε
-‘Context’ = ‘Context’p₅
+‘Context’ = ‘Context’p₆
 
 ‘Typ’ : Typ (ε ▻ ‘Context’)
-‘Typ’ = ‘Typ’p₅
+‘Typ’ = ‘Typ’p₆
 
 ‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’)
-‘Term’ = ‘Term’p₅
+‘Term’ = ‘Term’p₆
 
 ‘ε₀’ : Term ‘Context’
-‘ε₀’ = ‘ε₀’p₅
+‘ε₀’ = ‘ε₀’p₆
 
 --‘_▻Typ_’ : Term (‘Context’ ‘→'’ ‘Context’ ‘→'’ ‘Context’)
---‘_▻Typ_’ = ‘_▻Typ_’p₅
+--‘_▻Typ_’ = ‘_▻Typ_’p₆
 
 ‘_▻_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’)
-‘_▻_’ = ‘_▻_’p₅
+‘_▻_’ = ‘_▻_’p₆
 
 ‘‘Σ'’’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ W ‘Typ’)
-‘‘Σ'’’ = ‘‘Σ'’’p₅
+‘‘Σ'’’ = ‘‘Σ'’’p₆
+
+‘_‘’_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ ‘Term’ ‘→'’ W ‘Typ’)
+‘_‘’_’ = ‘_‘’_’p₆

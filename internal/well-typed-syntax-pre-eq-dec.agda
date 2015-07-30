@@ -44,6 +44,8 @@ mutual
   ≟'-term-refl (substTyp1-tProd x₁) = lift-≟-1-refl substTyp1-tProd (_ ≟'-term _) (≟'-term-refl x₁)
   ≟'-term-refl (weakenTyp1-tProd x) = lift-≟-1-refl weakenTyp1-tProd (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp2-tProd-nd x) = lift-≟-1-refl weakenTyp2-tProd-nd (_ ≟'-term _) (≟'-term-refl x)
+  ≟'-term-refl (weakenTyp-weakenTyp2-tProd-nd x) = lift-≟-1-refl weakenTyp-weakenTyp2-tProd-nd (_ ≟'-term _) (≟'-term-refl x)
+  ≟'-term-refl (weakenTyp-weakenTyp-weakenTyp2-weakenTyp x) = lift-≟-1-refl weakenTyp-weakenTyp-weakenTyp2-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (substTyp2-tProd x₁) = lift-≟-1-refl substTyp2-tProd (_ ≟'-term _) (≟'-term-refl x₁)
   ≟'-term-refl (substTyp1-substTyp-weakenTyp-inv x₂) = lift-≟-1-refl substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x₂)
   ≟'-term-refl (substTyp1-substTyp-weakenTyp {T = T} {b = b} x₂) = lift-≟-3-refl

@@ -179,6 +179,8 @@ weakenProd-Prod-Prod-nd : ∀ {Γ A B C D E} →
 weakenProd-Prod-Prod-nd {Γ} {A} {B} {C} {D} {E} x = weakenTyp-tProd-tProd-tProd-nd (w x)
 w∀∀→ = weakenProd-Prod-Prod-nd
 
+WWW2W : ∀ {Γ A B C D E R} → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D ▻ E} (W (W (W2 (W R)))) → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D ▻ E} (W (W (W (W1 R))))
+WWW2W = weakenTyp-weakenTyp-weakenTyp2-weakenTyp
 
 weakenTyp-tProd-tProd-nd-nd : ∀ {Γ A B C D} →
     Term {Γ = Γ ▻ D} (W (A ‘→’ B ‘→'’ W C))

@@ -13,7 +13,6 @@ postulate
     → Term {Γ} (A ‘’ S₁₀WW (S∀ (b ‘’ₐ c) ‘’ₐ d))
     → Term {Γ} (W1 (W1 A) ‘’ (un‘λ'∙’ (un‘λ∙’ b)) ‘’₁ c ‘’ d)
 
-
 weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-weakenTyp : ∀ {Γ X Y A B f x C}
   → Term {Γ ▻ X} (W (A ‘→’ B ‘→’ W1 (W1 {Γ} {A} {Y} f) ‘’ un‘λ'∙’ (un‘λ∙’ x) ‘→'’ W C))
   → Term {Γ ▻ X} (W A ‘→’ W1 B ‘→’ W1 (W1 (W1 f)) ‘’ un‘λ'∙’ (un‘λ∙’ (w∀→₂ x)) ‘→'’ W (W1 C))
@@ -36,6 +35,36 @@ weaken-tProd-tProd-tProd-substTyp-tProd-nd-weakenTyp : ∀ {Γ X Y A B f x C}
 weaken-tProd-tProd-tProd-substTyp-tProd-nd-weakenTyp t = weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-weakenTyp (w t)
 
 w∀∀‘’→ = weaken-tProd-tProd-tProd-substTyp-tProd-nd-weakenTyp
+
+
+weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp : ∀ {Γ X Y A B f x C R}
+  → Term {Γ ▻ X} (W (A ‘→’ B ‘→’ W1 (W1 {Γ} {A} {Y} f) ‘’ un‘λ'∙’ (un‘λ∙’ x) ‘→'’ C ‘→'’ W R))
+  → Term {Γ ▻ X} (W A ‘→’ W1 B ‘→’ W1 (W1 (W1 f)) ‘’ un‘λ'∙’ (un‘λ∙’ (w∀→₂ x)) ‘→'’ W2 C ‘→'’ W (W1 R))
+weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp {Γ} {X} {Y} {A} {B} {f} {x} {C} {R} t
+  = ‘λ∙’
+      (‘λ∙’
+       (‘λ'∙’
+        (weakenTyp-tProd-nd-inv
+         (‘λ'∙’ (WWW2W
+                   (SW
+                    (w→
+                     (weakenTyp-weakenTyp2-tProd-nd
+                      (SW
+                       (w→
+                        (weakenTyp2-tProd-nd
+                         (SW1V
+                          (w∀ (weakenTyp1-tProd (SW1V (w∀ (weakenTyp-tProd t) ‘’ₐ ‘VAR₀’)))
+                           ‘’ₐ ‘VAR₀’)))
+                        ‘’ₐ SWW1W1W1w∀→₂ ‘VAR₀’)))
+                     ‘’ₐ ‘VAR₀’)))))))
+
+weaken-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp : ∀ {Γ X Y A B f x C R}
+  → Term {Γ} (A ‘→’ B ‘→’ W1 (W1 {Γ} {A} {Y} f) ‘’ un‘λ'∙’ (un‘λ∙’ x) ‘→'’ C ‘→'’ W R)
+  → Term {Γ ▻ X} (W A ‘→’ W1 B ‘→’ W1 (W1 (W1 f)) ‘’ un‘λ'∙’ (un‘λ∙’ (w∀→₂ x)) ‘→'’ W2 C ‘→'’ W (W1 R))
+weaken-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp t = weakenTyp-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp (w t)
+
+w∀∀‘’→→ = weaken-tProd-tProd-tProd-substTyp-tProd-nd-tProd-nd-weakenTyp
+
 
 S₀₁₀W1W1' : ∀ {Γ C D B c d A} {b : Term {Γ} (C ‘→’ D ‘→'’ W B)}
   → Term {Γ} (A ‘’ S₁₀WW (S∀ (b ‘’ₐ c) ‘’ₐ d))

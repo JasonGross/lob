@@ -43,6 +43,9 @@ abstract
   ‘‘Σ'’’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ W ‘Typ’)
   ‘‘Σ'’’ = well-typed-initial-context-internal.‘‘Σ'’’
 
+  ‘_‘’_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ ‘Term’ ‘→'’ W ‘Typ’)
+  ‘_‘’_’ = well-typed-initial-context-internal.‘_‘’_’
+
 Typε⇓ : Typ ε → Set well-typed-syntax-interpreter.max-level
 Typε⇓ T = well-typed-syntax-interpreter-full.Typε⇓ (transfer-Typ T)
 

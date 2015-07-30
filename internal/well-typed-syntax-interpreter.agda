@@ -46,6 +46,8 @@ mutual
   Term⇓ (substTyp1-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp1-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp2-tProd-nd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
+  Term⇓ (weakenTyp-weakenTyp2-tProd-nd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
+  Term⇓ (weakenTyp-weakenTyp-weakenTyp2-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (substTyp2-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (substTyp1-substTyp-weakenTyp-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (substTyp1-substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓

@@ -36,8 +36,16 @@ _▻'_ : (Γ⇓ : Lifted {_} {max-level} Context') → (T⇓ : Lifted {_} {max-l
   → Lifted {_} {max-level} (Typ' Γ⇓)
 ‘Σ'’' (lift Γ) (lift T) (lift P) = lift (‘Σ'’ {Γ} T P)
 
+_‘’'_ : (Γ⇓ : Lifted {_} {max-level} Context')
+  → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓))
+  → Lifted {_} {max-level} (Typ' (Γ⇓ ▻' T⇓))
+  → Lifted {_} {max-level} (Term' Γ⇓ T⇓)
+  → Lifted {_} {max-level} (Typ' Γ⇓)
+_‘’'_ (lift Γ) (lift A) (lift T) (lift a) = lift (T ‘’ a)
+
+
 Contextε⇓ : Context⇓ ε
-Contextε⇓ = tt , Context' , Typ' , Term' , ε₀' , _▻'_ , ‘Σ'’' -- , {!!} , {!!}
+Contextε⇓ = tt , Context' , Typ' , Term' , ε₀' , _▻'_ , ‘Σ'’' , _‘’'_ -- , {!!} , {!!}
 
 Typε⇓ : Typ ε → Set max-level
 Typε⇓ T = Typ⇓ T Contextε⇓
