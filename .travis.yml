@@ -19,7 +19,7 @@ addons:
 
 env:
  matrix:
-  - AGDA="2.4.2.3"  COQ="yes" TARGETS="agda"
+  - AGDA="2.4.2.3"  COQ=""    TARGETS="agda"
   - AGDA="2.4.2.3"  COQ="yes" TARGETS="coq"
   - AGDA="2.4.2.3"  COQ="yes" TARGETS="coq-axiomatization"
 
