@@ -31,6 +31,15 @@ abstract
     ⌜_⌝t : ∀ {Γ} {A : Typ Γ} → Term {Γ = Γ} A → □ (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T)
     ⌜ x ⌝t = cheat
 
+  distr⌜▻⌝ : ∀ {Γ a}
+    → Term (‘Typ’ ‘’ ⌜ Γ ▻ a ⌝c)
+    → Term (‘Typ’ ‘’ S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ a ⌝T))
+  distr⌜▻⌝ x = x
+
+  distr⌜‘Σ'’⌝ : ∀ {ℓ Γ a b} (P : □ (‘Typ’ ‘’ ⌜ Γ ⌝c) → Set ℓ)
+    → P (S₁₀W (S₂₁₀W (S₁₀∀ (S∀ (‘‘Σ'’’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ a ⌝T) ‘’ₐ S₀₁₀W1W1' (distr⌜▻⌝ ⌜ b ⌝T))))
+    → P ⌜ ‘Σ'’ {Γ} a b ⌝T
+  distr⌜‘Σ'’⌝ P x = x
 
 
 ‘context-extend’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’)} (W (W ‘Context’))
