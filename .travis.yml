@@ -37,18 +37,18 @@ install:
 
 before_script:
  - uname -a
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam init --auto-setup; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam update; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam repo add coq-core-dev https://coq.inria.fr/opam/core-dev || true; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam repo add coq-released https://coq.inria.fr/opam/released || true; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then eval `opam config env`; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam list -a; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then coqc -v || true; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then echo | coqtop || true; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam install -y -j4 -v coq.8.5~beta1; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam list -a; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam install -y -j4 -v coq:template-coq.1.0.0~beta2; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then opam list -a; fi
- - if [ ! -z "1$AXIOMATIZATION$INTERNAL_COQ" ]; then eval `opam config env`; fi
+ - if [ ! -z "$COQ" ]; then opam init --auto-setup; fi
+ - if [ ! -z "$COQ" ]; then opam update; fi
+ - if [ ! -z "$COQ" ]; then opam repo add coq-core-dev https://coq.inria.fr/opam/core-dev || true; fi
+ - if [ ! -z "$COQ" ]; then opam repo add coq-released https://coq.inria.fr/opam/released || true; fi
+ - if [ ! -z "$COQ" ]; then eval `opam config env`; fi
+ - if [ ! -z "$COQ" ]; then opam list -a; fi
+ - if [ ! -z "$COQ" ]; then coqc -v || true; fi
+ - if [ ! -z "$COQ" ]; then echo | coqtop || true; fi
+ - if [ ! -z "$COQ" ]; then opam install -y -j4 -v coq.8.5~beta1; fi
+ - if [ ! -z "$COQ" ]; then opam list -a; fi
+ - if [ ! -z "$COQ" ]; then opam install -y -j4 -v coq:template-coq.1.0.0~beta2; fi
+ - if [ ! -z "$COQ" ]; then opam list -a; fi
+ - if [ ! -z "$COQ" ]; then eval `opam config env`; fi
 
 script: make $TARGETS
