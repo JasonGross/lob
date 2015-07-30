@@ -12,8 +12,9 @@ cache:
 
 addons:
   apt:
-    packages:
-    - opam
+    source:
+     - opam
+#    packages:
 #    - haskell-platform
 #    - cabal-install
 
