@@ -50,5 +50,6 @@ before_script:
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam list -a; fi
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam install -j4 -v coq:template-coq.1.0.0~beta2; fi
  - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then opam list -a; fi
+ - if [ ! -z "$AXIOMATIZATION$INTERNAL_COQ" ]; then eval `opam config env`; fi
 
 script: false
