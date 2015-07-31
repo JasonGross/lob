@@ -45,25 +45,20 @@ Makefile.coq: Makefile _CoqProject
 # dependencies, sort to remove duplicates, then make a recursive call
 # with the deduplicated newly found dependencies.  When $1 becomes
 # empty, the result is $2.
-read_deps = $(if $(wildcard $1),$(filter %.vo,$(shell sed -n 's/^[^:]*: // p' $1)))
+read_deps = $(if $(wildcard $1),$(filter %.vo,$(shell sed -n 's/^[^:]*: // p' $1 | sed s',\./,,g')))
 vo_closure = $(if $1,$(call vo_closure,$(sort $(filter-out $1 $2,$(call read_deps,$(1:.vo=.v.d)))),$1 $2),$2)
 
 SORT_COQPROJECT = sed 's,[^/]*/,~&,g' | env LC_COLLATE=C sort | sed 's,~,,g'
 
 update-_CoqProject:
-	(echo '-R . Lob'; echo '-arg -no-native-compiler'; find . -name "*.v" | $(SORT_COQPROJECT)) > _CoqProject
+	(echo '-R . Lob'; echo '-arg -no-native-compiler'; find . -name "*.v" | sed 's,^\./,,g' | $(SORT_COQPROJECT)) > _CoqProject
 
 $(filter-out $(VOFILES),$(call vo_closure,$(VOFILES))): FORCE
 	@ echo
 	@ echo 'error: $@ is missing from _CoqProject.'
 	@ echo 'error: Please run `make update-_CoqProject`.'
-	@ echo '_CoqProject contents: $(VOFILES)'
-	@ echo 'All files : $(call vo_closure,$(VOFILES))'
-	@ cat Makefile.coq
-	@ echo
-	@ echo 'error: $@ is missing from _CoqProject.'
-	@ echo 'error: Please run `make update-_CoqProject`.'
-	@ echo
+	$(QECHO) '_CoqProject contents: $(VOFILES)'
+	$(QECHO) 'All files : $(call vo_closure,$(VOFILES))'
 	@ false
 
 coq: $(VOFILES)

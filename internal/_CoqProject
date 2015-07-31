@@ -1,13 +1,13 @@
 -R . Lob
 -arg -no-native-compiler
-./Notations.v
-./TermOperations.v
-./quote_term.v
-./conversion.v
-./conversion_quote.v
-./LobsTheoremStatement.v
-./LobsTheoremProof.v
-./LobsTheoremPreProof.v
-./WellTypedLobsTheoremStatement.v
-./WellTypedLobsTheoremPreProof.v
-./WellTypedLobsTheoremPreProofMin.v
+Notations.v
+TermOperations.v
+quote_term.v
+conversion.v
+conversion_quote.v
+LobsTheoremStatement.v
+LobsTheoremProof.v
+LobsTheoremPreProof.v
+WellTypedLobsTheoremStatement.v
+WellTypedLobsTheoremPreProof.v
+WellTypedLobsTheoremPreProofMin.v
