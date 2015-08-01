@@ -51,11 +51,14 @@ mutual
   Term⇓ (substTyp2-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (substTyp1-substTyp-weakenTyp-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (substTyp1-substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
+  Term⇓ (substTyp2-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (substTyp2-substTyp1-substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-substTyp2-substTyp1-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp2-weakenTyp1 t) Γ⇓ = Term⇓ t Γ⇓
+  Term⇓ (weakenTyp2-weakenTyp1-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-weakenTyp2-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
+  Term⇓ (weakenTyp-weakenTyp2-weakenTyp-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp1-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp1-weakenTyp-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp1-weakenTyp1-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
@@ -71,6 +74,8 @@ mutual
   Term⇓ (substTyp2-substTyp-substTyp-weakenTyp1-weakenTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (substTyp1-substTyp-weakenTyp2-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-weakenTyp1-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
+  Term⇓ (beta-under-subst t) Γ⇓ = Term⇓ t Γ⇓
+  Term⇓ (beta-under-subst-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x
   Term⇓ ‘proj₂'’ (Γ⇓ , (x , p)) = p
   Term⇓ ‘existT'’ Γ⇓ x p = x , p

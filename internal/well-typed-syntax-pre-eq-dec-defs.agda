@@ -62,11 +62,14 @@ mutual
   substTyp2-tProd x₁ ≟'-term substTyp2-tProd y = lift-≟-1 substTyp2-tProd (_ ≟'-term _)
   substTyp1-substTyp-weakenTyp-inv x₂ ≟'-term substTyp1-substTyp-weakenTyp-inv y = lift-≟-1 substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _)
   substTyp1-substTyp-weakenTyp x₂ ≟'-term substTyp1-substTyp-weakenTyp y = lift-≟-3 (λ T b → substTyp1-substTyp-weakenTyp {T = T} {b = b}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
+  substTyp2-weakenTyp x₁ ≟'-term substTyp2-weakenTyp y = lift-≟-1 substTyp2-weakenTyp (_ ≟'-term _)
   weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv x₃ ≟'-term weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv y = lift-≟-1 weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _)
   substTyp2-substTyp1-substTyp-weakenTyp x₃ ≟'-term substTyp2-substTyp1-substTyp-weakenTyp y = lift-≟-3 (λ C c → substTyp2-substTyp1-substTyp-weakenTyp {C = C} {c = c}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
   weakenTyp-substTyp2-substTyp1-substTyp-tProd x₃ ≟'-term weakenTyp-substTyp2-substTyp1-substTyp-tProd y = lift-≟-1 weakenTyp-substTyp2-substTyp1-substTyp-tProd (_ ≟'-term _)
   weakenTyp2-weakenTyp1 x ≟'-term weakenTyp2-weakenTyp1 y = lift-≟-1 weakenTyp2-weakenTyp1 (_ ≟'-term _)
+  weakenTyp2-weakenTyp1-inv x ≟'-term weakenTyp2-weakenTyp1-inv y = lift-≟-1 weakenTyp2-weakenTyp1-inv (_ ≟'-term _)
   weakenTyp-weakenTyp2-weakenTyp x ≟'-term weakenTyp-weakenTyp2-weakenTyp y = lift-≟-1 weakenTyp-weakenTyp2-weakenTyp (_ ≟'-term _)
+  weakenTyp-weakenTyp2-weakenTyp-inv x ≟'-term weakenTyp-weakenTyp2-weakenTyp-inv y = lift-≟-1 weakenTyp-weakenTyp2-weakenTyp-inv (_ ≟'-term _)
   weakenTyp1-weakenTyp x ≟'-term weakenTyp1-weakenTyp y = lift-≟-1 weakenTyp1-weakenTyp (_ ≟'-term _)
   weakenTyp1-weakenTyp-inv x ≟'-term weakenTyp1-weakenTyp-inv y = lift-≟-1 weakenTyp1-weakenTyp-inv (_ ≟'-term _)
   weakenTyp1-weakenTyp1-weakenTyp x ≟'-term weakenTyp1-weakenTyp1-weakenTyp y = lift-≟-1 weakenTyp1-weakenTyp1-weakenTyp (_ ≟'-term _)
@@ -83,6 +86,8 @@ mutual
     = lift-≟-5 (λ C B b c → substTyp2-substTyp-substTyp-weakenTyp1-weakenTyp-weakenTyp {C = C} {B = B} {b = b} {c = c}) (_ ≟'-typ _) (λ p → _ ≟'-typ _) (λ p q → _ ≟'-term _) (λ p q r → _ ≟'-term _) (λ p q r s → _ ≟'-term _)
   substTyp1-substTyp-weakenTyp2-weakenTyp x₂ ≟'-term substTyp1-substTyp-weakenTyp2-weakenTyp y = lift-≟-3 (λ B b → substTyp1-substTyp-weakenTyp2-weakenTyp {B = B} {b = b}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
   weakenTyp-weakenTyp1-weakenTyp x ≟'-term weakenTyp-weakenTyp1-weakenTyp x' = lift-≟-1 weakenTyp-weakenTyp1-weakenTyp (_ ≟'-term _)
+  beta-under-subst x ≟'-term beta-under-subst x' = lift-≟-1 beta-under-subst (_ ≟'-term _)
+  beta-under-subst-inv x ≟'-term beta-under-subst-inv x' = lift-≟-1 beta-under-subst-inv (_ ≟'-term _)
   ‘proj₁'’ ≟'-term ‘proj₁'’ = just refl
   ‘proj₂'’ ≟'-term ‘proj₂'’ = just refl
   ‘existT'’ ≟'-term ‘existT'’ = just refl
@@ -107,11 +112,14 @@ mutual
   substTyp2-tProd x₁ ≟'-term y = nothing
   substTyp1-substTyp-weakenTyp-inv x₂ ≟'-term y = nothing
   substTyp1-substTyp-weakenTyp x₂ ≟'-term y = nothing
+  substTyp2-weakenTyp x₁ ≟'-term y = nothing
   weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv x₃ ≟'-term y = nothing
   substTyp2-substTyp1-substTyp-weakenTyp x₃ ≟'-term y = nothing
   weakenTyp-substTyp2-substTyp1-substTyp-tProd x₃ ≟'-term y = nothing
   weakenTyp2-weakenTyp1 x ≟'-term y = nothing
+  weakenTyp2-weakenTyp1-inv x ≟'-term y = nothing
   weakenTyp-weakenTyp2-weakenTyp x ≟'-term y = nothing
+  weakenTyp-weakenTyp2-weakenTyp-inv x ≟'-term y = nothing
   weakenTyp1-weakenTyp x ≟'-term y = nothing
   weakenTyp1-weakenTyp-inv x ≟'-term y = nothing
   weakenTyp1-weakenTyp1-weakenTyp x ≟'-term y = nothing
@@ -127,6 +135,8 @@ mutual
   substTyp2-substTyp-substTyp-weakenTyp1-weakenTyp-weakenTyp x₃ ≟'-term y = nothing
   substTyp1-substTyp-weakenTyp2-weakenTyp x₂ ≟'-term y = nothing
   weakenTyp-weakenTyp1-weakenTyp x ≟'-term y = nothing
+  beta-under-subst x ≟'-term y = nothing
+  beta-under-subst-inv x ≟'-term y = nothing
   ‘proj₁'’ ≟'-term y = nothing
   ‘proj₂'’ ≟'-term y = nothing
   ‘existT'’ ≟'-term y = nothing

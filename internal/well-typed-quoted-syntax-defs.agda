@@ -16,16 +16,16 @@ abstract
     ⌜ Γ ▻ x ⌝c = S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ x ⌝T)
 
     ⌜_⌝T : ∀ {Γ} → Typ Γ → □ (‘Typ’ ‘’ ⌜ Γ ⌝c)
-    ⌜ x₁ ‘’ x₂ ⌝T = cheat
+    ⌜ _‘’_ {Γ} {A} T x ⌝T = S₂₁₀WW (S₁₀∀ (S→ (S∀→ (‘_‘’_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ A ⌝T) ‘'’ₐ S₀₁₀W1W1' ⌜ T ⌝T) ‘’ₐ ⌜ x ⌝t)
     ⌜ x₂ ‘’₁ a ⌝T = cheat
     ⌜ x₃ ‘’₂ a ⌝T = cheat
     ⌜ x₄ ‘’₃ a ⌝T = cheat
-    ⌜ W x₁ ⌝T = cheat
+    ⌜ W {Γ} {A} T ⌝T = S₀₁₀W1W1 (S₁₀W (S∀ (S∀→ (‘W’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ A ⌝T) ‘’ₐ S₁₀W' ⌜ T ⌝T))
     ⌜ W1 x₂ ⌝T = cheat
     ⌜ W2 x₃ ⌝T = cheat
     ⌜ ‘Set’ ⌝T = cheat
     ⌜ El x ⌝T = cheat
-    ⌜ x ‘→’ x₁ ⌝T = cheat
+    ⌜ _‘→’_ {Γ} A B ⌝T = S₁₀W (S→ (S∀→ (‘_‘→’_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ A ⌝T) ‘'’ₐ S₀₁₀W1W1' ⌜ B ⌝T)
     ⌜ ‘Σ'’ {Γ} x x₁ ⌝T = S₁₀W (S₂₁₀W (S₁₀∀ (S∀ (‘‘Σ'’’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ x ⌝T) ‘’ₐ S₀₁₀W1W1' ⌜ x₁ ⌝T))
 
     ⌜_⌝t : ∀ {Γ} {A : Typ Γ} → Term {Γ = Γ} A → □ (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T)

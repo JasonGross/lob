@@ -8,12 +8,8 @@ open import well-typed-syntax-context-helpers
 open import well-typed-quoted-syntax-defs public
 
 infixl 3 _‘‘’’_
-infixr 1 _‘‘→'’’_
 
 postulate
-  ‘tProd-nd’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’)} (W (W ‘Typ’))
--- ‘tProd-nd’ = {!!}
-
   ‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
 -- ‘quote-sigma’ = {!!}
 
@@ -23,24 +19,6 @@ postulate
   ‘context-pick-if’ : ∀ {P : Typ (ε ▻ ‘Context’)}
            (dummy : Term (P ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c)) →
       □ (‘Context’ ‘→’ P ‘→'’ W (P ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
-
-
-
-  beta-under-subst : ∀ {A B B'}
-           {g : □ (A ‘→'’ B)}
-           {x : □ A} →
-      □ (B' ‘’ SW (w→ g ‘'’ₐ ‘VAR₀’ ‘t’ x))
-      → □ (B' ‘’ (g ‘'’ₐ x))
-
-  beta-under-subst-inv : ∀ {A B B'}
-           {g : □ (A ‘→'’ B)}
-           {x : □ A} →
-      □ (B' ‘’ (g ‘'’ₐ x))
-      → □ (B' ‘’ SW (w→ g ‘'’ₐ ‘VAR₀’ ‘t’ x))
-
-
-_‘‘→'’’_ : ∀ {Γ} → (A : □ (‘Typ’ ‘’ Γ)) → (B : □ (‘Typ’ ‘’ Γ)) → □ (‘Typ’ ‘’ Γ)
-_‘‘→'’’_ {Γ = Γ} A B = (S₂₁₀WW (‘tProd-nd’ ‘t’₂ Γ ‘t’₁ A ‘t’ S₁₀W' B))
 
 postulate
   Wquote-distr-qcontext-extend : ∀ {Γ T T'}
@@ -184,8 +162,7 @@ postulate
           (((‘λ'∙’ (⌜W‘▻’⌝ f) ‘'’ₐ x) ‘‘’’ y)
              ‘‘→'’’ ((⌜‘▻’⌝ (SW (f ‘t’ x))) ‘‘’’ y)))
 
-β = beta-under-subst
-β' = beta-under-subst-inv
+
 
 
 postulate

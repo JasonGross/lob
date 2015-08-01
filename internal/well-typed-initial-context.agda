@@ -46,6 +46,12 @@ abstract
   ‘_‘’_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ ‘Term’ ‘→'’ W ‘Typ’)
   ‘_‘’_’ = well-typed-initial-context-internal.‘_‘’_’
 
+  ‘_‘→’_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ W ‘Typ’)
+  ‘_‘→’_’ = well-typed-initial-context-internal.‘_‘→’_’
+
+  ‘W’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W ‘Typ’ ‘→'’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’))
+  ‘W’ = well-typed-initial-context-internal.‘W’
+
 Typε⇓ : Typ ε → Set well-typed-syntax-interpreter.max-level
 Typε⇓ T = well-typed-syntax-interpreter-full.Typε⇓ (transfer-Typ T)
 

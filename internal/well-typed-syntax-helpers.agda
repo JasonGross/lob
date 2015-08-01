@@ -79,6 +79,8 @@ S₁₀W' = substTyp1-substTyp-weakenTyp-inv
 S₁₀W : ∀ {Γ C T A} {a : Term {Γ} C} {b : Term {Γ} (T ‘’ a)} → Term {Γ} (W A ‘’₁ a ‘’ b) → Term {Γ} (A ‘’ a)
 S₁₀W = substTyp1-substTyp-weakenTyp
 
+S₂W' : ∀ {Γ A B C T} {a : Term {Γ} A} → Term {Γ ▻ B ‘’ a ▻ C ‘’₁ a} (W T ‘’₂ a) → Term {Γ ▻ B ‘’ a ▻ C ‘’₁ a} (W (T ‘’₁ a))
+S₂W' = substTyp2-weakenTyp
 
 substTyp1-substTyp-weakenTyp-weakenTyp : ∀ {Γ T A} {B : Typ (Γ ▻ A)}
     → {a : Term {Γ = Γ} A}
@@ -119,8 +121,14 @@ S₂₁₀WW = substTyp2-substTyp1-substTyp-weakenTyp-weakenTyp
 W2W1 : ∀ {Γ A B C D} → Term {Γ ▻ A ▻ W B ▻ W1 C} (W2 (W D)) → Term {Γ ▻ A ▻ W B ▻ W1 C} (W (W1 D))
 W2W1 = weakenTyp2-weakenTyp1
 
+W2W1' : ∀ {Γ A B C D} → Term {Γ ▻ A ▻ W B ▻ W1 C} (W (W1 D)) → Term {Γ ▻ A ▻ W B ▻ W1 C} (W2 (W D))
+W2W1' = weakenTyp2-weakenTyp1-inv
+
 WW2W : ∀ {Γ A B C D E} → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D} (W (W2 (W E))) → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D} (W (W (W1 E)))
 WW2W = weakenTyp-weakenTyp2-weakenTyp
+
+WW2W' : ∀ {Γ A B C D E} → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D} (W (W (W1 E))) → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D} (W (W2 (W E)))
+WW2W' = weakenTyp-weakenTyp2-weakenTyp-inv
 
 W1W : ∀ {Γ A B C} → Term {Γ ▻ A ▻ W B} (W1 (W C)) → Term {Γ ▻ A ▻ W B} (W (W C))
 W1W = weakenTyp1-weakenTyp
@@ -240,11 +248,35 @@ substTyp-weakenTyp1 {a = a} x = S₁W1 (W1S₁W (w1 x) ‘t’₁ a)
 
 S₁W = substTyp-weakenTyp1
 
+substTyp-tProd-nd : ∀ {Γ T A B} {a : Term {Γ = Γ} T} →
+                         Term {Γ = Γ} ((A ‘→'’ B) ‘’ a)
+                         → Term {Γ = Γ} (_‘→'’_ {Γ = Γ} (A ‘’ a) (B ‘’ a))
+substTyp-tProd-nd {Γ} {T} {A} {B} {a} x = ‘λ'∙’ (S₁W (un‘λ∙’ (S∀ x)))
+
+S→ = substTyp-tProd-nd
+
 _‘∘’_ : ∀ {Γ A B C}
     → Term {Γ = Γ} (A ‘→'’ B)
     → Term {Γ = Γ} (B ‘→'’ C)
     → Term {Γ = Γ} (A ‘→'’ C)
 g ‘∘’ f = ‘λ∙’ (w→ f ‘'’ₐ (w→ g ‘'’ₐ ‘VAR₀’))
+
+substTyp1-tProd-nd : ∀ {Γ T T' A B} {a : Term {Γ} T} → Term {Γ ▻ T' ‘’ a} ((A ‘→'’ B) ‘’₁ a) → Term {Γ ▻ T' ‘’ a} ((A ‘’₁ a) ‘→'’ (B ‘’₁ a))
+substTyp1-tProd-nd t = ‘λ'∙’ (S₂W' (un‘λ∙’ (S₁∀ t)))
+
+S₁→ : ∀ {Γ T T' A B} {a : Term {Γ} T} → Term {Γ ▻ T' ‘’ a} ((A ‘→'’ B) ‘’₁ a) → Term {Γ ▻ T' ‘’ a} ((A ‘’₁ a) ‘→'’ (B ‘’₁ a))
+S₁→ = substTyp1-tProd-nd
+
+
+
+substTyp-tProd-tProd-nd : ∀ {Γ T A B C}
+         {a : Term T} →
+    Term {Γ = Γ} ((A ‘→’ B ‘→'’ C) ‘’ a)
+    → Term {Γ = Γ} ((A ‘’ a) ‘→’ (B ‘’₁ a) ‘→'’ (C ‘’₁ a))
+substTyp-tProd-tProd-nd x = ‘λ∙’
+                              (‘λ'∙’ (SW1V (w∀ (S₁→ (SW1V (w∀ (S∀ x) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’)))
+
+S∀→ = substTyp-tProd-tProd-nd
 
 substTyp-tProd-nd-tProd-nd : ∀ {Γ T A B C}
          {a : Term T} →
@@ -369,3 +401,16 @@ S₁₀W2W : ∀ {Γ T' A B T} {a : Term {Γ ▻ T'} (W A)} {b : Term {Γ ▻ T'
       → Term {Γ ▻ T'} (W2 (W T) ‘’₁ a ‘’ b)
       → Term {Γ ▻ T'} (W1 T ‘’ a)
 S₁₀W2W = substTyp1-substTyp-weakenTyp2-weakenTyp
+
+β : ∀ {Γ A B B'}
+  {g : Term {Γ} (A ‘→'’ B)}
+  {x : Term {Γ} A}
+  → Term {Γ} (B' ‘’ SW (w→ g ‘'’ₐ ‘VAR₀’ ‘t’ x))
+  → Term {Γ} (B' ‘’ (g ‘'’ₐ x))
+β = beta-under-subst
+β' : ∀ {Γ A B B'}
+  {g : Term {Γ} (A ‘→'’ B)}
+  {x : Term {Γ} A}
+  → Term {Γ} (B' ‘’ (g ‘'’ₐ x))
+  → Term {Γ} (B' ‘’ SW (w→ g ‘'’ₐ ‘VAR₀’ ‘t’ x))
+β' = beta-under-subst-inv
