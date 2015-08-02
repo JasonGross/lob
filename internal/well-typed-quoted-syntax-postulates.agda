@@ -65,6 +65,11 @@ postulate
         ‘→'’ ‘□’ ‘’ ⌜ H ‘→'’ X ⌝T)
 -- quote-typ-undistr-tProd-nd = {!!}
 
+  quote-typ-distr-tProd-nd : ∀ {H X} →
+    □ (‘□’ ‘’ ⌜ H ‘→'’ X ⌝T
+        ‘→'’ ‘□’ ‘’ (⌜ H ⌝T ‘‘→'’’ ⌜ X ⌝T))
+-- quote-typ-distr-tProd-nd = {!!}
+
   ‘‘fcomp-nd’’ : ∀ {A B C} →
     □ (‘□’ ‘’ (A ‘‘→'’’ C)
         ‘→'’ ‘□’ ‘’ (C ‘‘→'’’ B)
@@ -89,12 +94,6 @@ postulate
          ‘’ ((a ‘'’ₐ (b ‘'’ₐ v) ‘'’ₐ (c ‘'’ₐ v))
                ‘‘→'’’ (SW ((w→→ a ‘'’ₐ (w→ b ‘'’ₐ ‘VAR₀’) ‘'’ₐ (w→ c ‘'’ₐ ‘VAR₀’) ‘t’ v))))))
 -- qsubstTerm-qtApp-nd-qtApp-nd-undistr = {!!}
-
-  quote-typ-distr-tProd-nd : ∀ {H X} →
-    □ (‘□’ ‘’ ⌜ H ‘→'’ X ⌝T
-        ‘→'’ ‘□’ ‘’ (⌜ H ⌝T ‘‘→'’’ ⌜ X ⌝T))
--- quote-typ-distr-tProd-nd = {!!}
-
 
 postulate
 
@@ -170,22 +169,26 @@ postulate
                                 (w1 (SW1V (w∀ f ‘’ₐ ‘VAR₀’)))
                                 ‘t’ (w→ g ‘'’ₐ ‘VAR₀’)) ‘’ₐ h)) ‘t’ x)) ‘‘’’ y)))
 
-  qexistT-iota-inv : ∀ {T A P}
-           {x : □ A}
-           {p : □ (P ‘’ x)}
-           {f}
-           {y : □ (‘□’ ‘’ ⌜ T ⌝T)} →
+  qexistT-iota-inv : ∀
+           {x : □ ‘Context’}
+           {p : □ (‘Typ’ ‘’ x)}
+           {f : Term
+                  (‘Context’ ‘→’
+                   ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c)))}
+           {y : □ (‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)} →
       □ (‘□’ ‘’
           ((⌜‘▻’⌝ (S₁₀WW (S∀ (f ‘’ₐ x) ‘’ₐ p)) ‘‘’’ y)
              ‘‘→'’’
              (⌜‘▻’⌝ (S₁₀WW (S∀ (f ‘’ₐ (‘proj₁’ ‘'’ₐ ‘existT’ x p)) ‘’ₐ β (S₀₀W1 (‘proj₂’ ‘t’ ‘existT’ x p)))) ‘‘’’ y)))
 
 
-  qexistT-iota : ∀ {T A P}
-           {x : □ A}
-           {p : □ (P ‘’ x)}
-           {f}
-           {y : □ (‘□’ ‘’ ⌜ T ⌝T)} →
+  qexistT-iota : ∀
+           {x : □ ‘Context’}
+           {p : □ (‘Typ’ ‘’ x)}
+           {f : Term
+                  (‘Context’ ‘→’
+                   ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c)))}
+           {y : □ (‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)} →
       □ (‘□’ ‘’
           ((⌜‘▻’⌝ (S₁₀WW (S∀ (f ‘’ₐ (‘proj₁’ ‘'’ₐ ‘existT’ x p)) ‘’ₐ β (S₀₀W1 (‘proj₂’ ‘t’ ‘existT’ x p)))) ‘‘’’ y)
              ‘‘→'’’ (⌜‘▻’⌝ (S₁₀WW (S∀ (f ‘’ₐ x) ‘’ₐ p)) ‘‘’’ y)))
