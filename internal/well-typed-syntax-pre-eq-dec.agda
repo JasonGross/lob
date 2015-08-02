@@ -42,6 +42,7 @@ mutual
   ≟'-term-refl (weakenTyp-tProd-inv x) = lift-≟-1-refl weakenTyp-tProd-inv (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp-weakenTyp-tProd x) = lift-≟-1-refl weakenTyp-weakenTyp-tProd (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (substTyp1-tProd x₁) = lift-≟-1-refl substTyp1-tProd (_ ≟'-term _) (≟'-term-refl x₁)
+  ≟'-term-refl (weakenTyp-substTyp1-tProd-nd x₁) = lift-≟-1-refl weakenTyp-substTyp1-tProd-nd (_ ≟'-term _) (≟'-term-refl x₁)
   ≟'-term-refl (weakenTyp1-tProd x) = lift-≟-1-refl weakenTyp1-tProd (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp2-tProd-nd x) = lift-≟-1-refl weakenTyp2-tProd-nd (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp-weakenTyp2-tProd-nd x) = lift-≟-1-refl weakenTyp-weakenTyp2-tProd-nd (_ ≟'-term _) (≟'-term-refl x)
@@ -51,7 +52,11 @@ mutual
   ≟'-term-refl (substTyp1-substTyp-weakenTyp {T = T} {b = b} x₂) = lift-≟-3-refl
                                                      (λ T b → substTyp1-substTyp-weakenTyp {T = T} {b = b}) (_ ≟'-typ _)
                                                      (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl T) (≟'-term-refl b) (≟'-term-refl x₂)
-  ≟'-term-refl (substTyp2-weakenTyp x₁) = lift-≟-1-refl substTyp2-weakenTyp (_ ≟'-term _) (≟'-term-refl x₁)
+  ≟'-term-refl (weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv x₂) = lift-≟-1-refl weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x₂)
+  ≟'-term-refl (weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp {T = T} {b = b} x₂) = lift-≟-3-refl
+                                                     (λ T b → weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp {T = T} {b = b}) (_ ≟'-typ _)
+                                                     (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl T) (≟'-term-refl b) (≟'-term-refl x₂)
+  ≟'-term-refl (substTyp2-weakenTyp-inv x₁) = lift-≟-1-refl substTyp2-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x₁)
   ≟'-term-refl (weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv x₃) = lift-≟-1-refl weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x₃)
   ≟'-term-refl (substTyp2-substTyp1-substTyp-weakenTyp {C = C} {c = c} x₃) = lift-≟-3-refl
                                                                (λ C c → substTyp2-substTyp1-substTyp-weakenTyp {C = C} {c = c})

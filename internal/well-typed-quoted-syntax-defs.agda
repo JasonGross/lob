@@ -7,6 +7,8 @@ open import well-typed-syntax-helpers
 open import well-typed-syntax-helpers-postulates
 open import well-typed-syntax-context-helpers
 
+infixl 3 _‘‘’’_
+
 postulate cheat : ∀ {T : Set} → T
 
 abstract
@@ -46,10 +48,25 @@ abstract
 ‘context-extend’ = un‘λ'∙’ (un‘λ∙’ ‘_▻_’)
 
 _‘▻’_ : (Γ : □ ‘Context’) → □ (‘Typ’ ‘’ Γ) → □ ‘Context’
-Γ ‘▻’ x = (S₁₀WW (‘context-extend’ ‘t’₁ Γ ‘t’ x))
+Γ ‘▻’ x = (S₁₀WW (S∀ (‘_▻_’ ‘’ₐ Γ) ‘’ₐ x))
 
 ‘ε’ : Term {Γ = ε} ‘Context’
 ‘ε’ = ⌜ ε ⌝c
 
 ‘□’ : Typ (ε ▻ ‘Typ’ ‘’ ‘ε’)
 ‘□’ = ‘Term’ ‘’₁ ‘ε’
+
+‘substTyp’ : ∀ {Γ} {A : Term {ε} (‘Typ’ ‘’ Γ)} →
+  □ (‘Typ’ ‘’ (Γ ‘▻’ A)
+      ‘→'’ ‘Term’ ‘’₁ Γ ‘’ A
+      ‘→'’ ‘Typ’ ‘’ Γ)
+‘substTyp’ {Γ} {A} = ‘λ'∙’
+                       (weakenTyp-tProd-nd-inv
+                        (‘λ'∙’
+                         (WWS₁₀W (un‘λ'∙’ (w→→ (S→→ (S∀→→ (‘_‘’_’ ‘’ₐ Γ) ‘’ₐ A)) ‘'’ₐ WS₀₁₀W1W1' ‘VAR₀’)))))
+
+_‘‘’’_ : ∀ {Γ} {A : □ (‘Typ’ ‘’ Γ)}
+  → □ (‘Typ’ ‘’ (Γ ‘▻’ A))
+  → □ (‘Term’ ‘’₁ Γ ‘’ A)
+  → □ (‘Typ’ ‘’ Γ)
+f ‘‘’’ x = (‘substTyp’ ‘'’ₐ f ‘'’ₐ x)

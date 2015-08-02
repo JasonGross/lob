@@ -7,8 +7,6 @@ open import well-typed-syntax-helpers
 open import well-typed-syntax-context-helpers
 open import well-typed-quoted-syntax-defs public
 
-infixl 3 _‘‘’’_
-
 postulate
   ‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
 -- ‘quote-sigma’ = {!!}
@@ -27,12 +25,6 @@ postulate
   Wquote-undistr-qcontext-extend : ∀ {Γ T T'}
       → Term {ε ▻ T'} (W (‘Typ’ ‘’ (⌜ Γ ⌝c ‘▻’ ⌜ T ⌝T)))
       → Term {ε ▻ T'} (W (‘Typ’ ‘’ ⌜ Γ ▻ T ⌝c))
-
-  ‘substTyp’ : ∀ {Γ} {A : □ (‘Typ’ ‘’ Γ)} →
-    □ (‘Typ’ ‘’ (Γ ‘▻’ A)
-        ‘→'’ ‘Term’ ‘’₁ Γ ‘’ A
-        ‘→'’ ‘Typ’ ‘’ Γ)
--- ‘substTyp’ = {!!}
 
   qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW : ∀ {T' C B}
          {b : Term {Γ = ε} (B ‘’ ‘ε’)}
@@ -93,12 +85,6 @@ postulate
         ‘→'’ ‘□’ ‘’ (⌜ H ⌝T ‘‘→'’’ ⌜ X ⌝T))
 -- quote-typ-distr-tProd-nd = {!!}
 
-
-_‘‘’’_ : ∀ {Γ} {A : □ (‘Typ’ ‘’ Γ)}
-  → □ (‘Typ’ ‘’ (Γ ‘▻’ A))
-  → □ (‘Term’ ‘’₁ Γ ‘’ A)
-  → □ (‘Typ’ ‘’ Γ)
-f ‘‘’’ x = (‘substTyp’ ‘'’ₐ f ‘'’ₐ x)
 
 ⌜W‘▻’⌝ = Wquote-distr-qcontext-extend
 ⌜W‘◅’⌝ = Wquote-undistr-qcontext-extend

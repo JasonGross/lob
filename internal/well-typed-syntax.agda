@@ -43,6 +43,7 @@ mutual
     weakenTyp-tProd-inv : ∀ {Γ A B C} → Term {Γ = Γ ▻ C} (W A ‘→’ W1 B) → Term {Γ = Γ ▻ C} (W (A ‘→’ B))
     weakenTyp-weakenTyp-tProd : ∀ {Γ A B C D} → Term {Γ ▻ C ▻ D} (W (W (A ‘→’ B))) → Term {Γ ▻ C ▻ D} (W (W A ‘→’ W1 B))
     substTyp1-tProd : ∀ {Γ T T' A B} {a : Term {Γ} T} → Term {Γ ▻ T' ‘’ a} ((A ‘→’ B) ‘’₁ a) → Term {Γ ▻ T' ‘’ a} ((A ‘’₁ a) ‘→’ (B ‘’₂ a))
+    weakenTyp-substTyp1-tProd-nd : ∀ {Γ T T' A B} {a : Term {Γ} T} {C} → Term {Γ ▻ T' ‘’ a ▻ C} (W ((A ‘→’ W B) ‘’₁ a)) → Term {Γ ▻ T' ‘’ a ▻ C} (W (A ‘’₁ a) ‘→’ W (W (B ‘’₁ a)))
     weakenTyp1-tProd : ∀ {Γ C D A B} → Term {Γ ▻ C ▻ W D} (W1 (A ‘→’ B)) → Term {Γ ▻ C ▻ W D} (W1 A ‘→’ W2 B)
     weakenTyp2-tProd-nd : ∀ {Γ C D E A B} → Term {Γ ▻ C ▻ W D ▻ W1 E} (W2 (A ‘→’ W B)) → Term {Γ ▻ C ▻ W D ▻ W1 E} (W2 A ‘→’ W (W2 B))
     weakenTyp-weakenTyp2-tProd-nd : ∀ {Γ C D E F A B} → Term {Γ ▻ C ▻ W D ▻ W1 E ▻ F} (W (W2 (A ‘→’ W B))) → Term {Γ ▻ C ▻ W D ▻ W1 E ▻ F} (W (W2 A) ‘→’ W (W (W2 B)))
@@ -50,7 +51,9 @@ mutual
     substTyp2-tProd : ∀ {Γ T T' T'' A B} {a : Term {Γ} T} → Term {Γ ▻ T' ‘’ a ▻ T'' ‘’₁ a} ((A ‘→’ B) ‘’₂ a) → Term {Γ ▻ T' ‘’ a ▻ T'' ‘’₁ a} ((A ‘’₂ a) ‘→’ (B ‘’₃ a))
     substTyp1-substTyp-weakenTyp-inv : ∀ {Γ C T A} {a : Term {Γ} C} {b : Term {Γ} (T ‘’ a)} → Term {Γ} (A ‘’ a) → Term {Γ} (W A ‘’₁ a ‘’ b)
     substTyp1-substTyp-weakenTyp : ∀ {Γ C T A} {a : Term {Γ} C} {b : Term {Γ} (T ‘’ a)} → Term {Γ} (W A ‘’₁ a ‘’ b) → Term {Γ} (A ‘’ a)
-    substTyp2-weakenTyp : ∀ {Γ A B C T} {a : Term {Γ} A} → Term {Γ ▻ B ‘’ a ▻ C ‘’₁ a} (W T ‘’₂ a) → Term {Γ ▻ B ‘’ a ▻ C ‘’₁ a} (W (T ‘’₁ a))
+    weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv : ∀ {Γ C T A D E} {a : Term {Γ} C} {b : Term {Γ} (T ‘’ a)} → Term {Γ ▻ D ▻ E} (W (W (A ‘’ a))) → Term {Γ ▻ D ▻ E} (W (W (W A ‘’₁ a ‘’ b)))
+    weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp : ∀ {Γ C T A D E} {a : Term {Γ} C} {b : Term {Γ} (T ‘’ a)} → Term {Γ ▻ D ▻ E} (W (W (W A ‘’₁ a ‘’ b))) → Term {Γ ▻ D ▻ E} (W (W (A ‘’ a)))
+    substTyp2-weakenTyp-inv : ∀ {Γ A B C T} {a : Term {Γ} A} → Term {Γ ▻ B ‘’ a ▻ C ‘’₁ a} (W T ‘’₂ a) → Term {Γ ▻ B ‘’ a ▻ C ‘’₁ a} (W (T ‘’₁ a))
     weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv : ∀ {Γ A B C T T'} {a : Term {Γ} A} {b : Term {Γ} (B ‘’ a)} {c : Term {Γ} (C ‘’₁ a ‘’ b)}
       → Term {Γ ▻ T'} (W (T ‘’₁ a ‘’ b))
       → Term {Γ ▻ T'} (W (W T ‘’₂ a ‘’₁ b ‘’ c))
