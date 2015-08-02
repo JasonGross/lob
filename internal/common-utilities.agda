@@ -2,14 +2,14 @@
 module common-utilities where
 open import common
 
-lift-≟-1 : {A B : Set} → (f : A → B) → {x : A} → {y : A} → Maybe (x ≡ y) → Maybe (f x ≡ f y)
+lift-≟-1 : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′} → (f : A → B) → {x : A} → {y : A} → Maybe (x ≡ y) → Maybe (f x ≡ f y)
 lift-≟-1 f (just refl) = just refl
 lift-≟-1 f nothing = nothing
 
-lift-≟-1-refl : ∀ {A B} f {x} p → p ≡ just refl → lift-≟-1 {A} {B} f {x} {x} p ≡ just refl
+lift-≟-1-refl : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′} f {x} p → p ≡ just refl → lift-≟-1 {ℓ} {ℓ′} {A} {B} f {x} {x} p ≡ just refl
 lift-≟-1-refl f ._ refl = refl
 
-lift-≟-2-helper : ∀ {A : Set} {B : A → Set} {C} {f : (x : A) → B x → C} {x : A} {y y' : B x} → Maybe (y ≡ y') → Maybe (f x y ≡ f x y')
+lift-≟-2-helper : ∀ {A : Set} {B : A → Set} {C : Set} {f : (x : A) → B x → C} {x : A} {y y' : B x} → Maybe (y ≡ y') → Maybe (f x y ≡ f x y')
 lift-≟-2-helper (just refl) = just refl
 lift-≟-2-helper nothing = nothing
 

@@ -52,6 +52,9 @@ abstract
   ‘W’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W ‘Typ’ ‘→'’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’))
   ‘W’ = well-typed-initial-context-internal.‘W’
 
+  ‘context-pick-if'’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’ ‘→’ W1 ‘Typ’ ‘→'’ W ‘Typ’)
+  ‘context-pick-if'’ = well-typed-initial-context-internal.‘context-pick-if’
+
 Typε⇓ : Typ ε → Set well-typed-syntax-interpreter.max-level
 Typε⇓ T = well-typed-syntax-interpreter-full.Typε⇓ (transfer-Typ T)
 

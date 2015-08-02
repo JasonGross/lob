@@ -4,6 +4,7 @@ open import common public
 open import well-typed-syntax
 open import well-typed-syntax-interpreter
 open import well-typed-initial-context-internal
+open import well-typed-syntax-context-pre-helpers
 
 lift→ : ∀ {ℓ ℓ′ ℓ′′ A} {R : Set ℓ′′} → (A → R) → (Lifted {ℓ} {ℓ′} A → R)
 lift→ f (lift x) = f x
@@ -55,9 +56,16 @@ W' : (Γ⇓ : Lifted {_} {max-level} Context')
   → Lifted {_} {max-level} (Typ' (Γ⇓ ▻' T⇓))
 W' (lift Γ) (lift A) (lift B) = lift (W B)
 
+context-pick-if' : (Γ⇓ : Lifted {_} {max-level} Context')
+  → (dummy⇓ : Lifted {_} {max-level} (Typ' Γ⇓))
+  → (Γ'⇓ : Lifted {_} {max-level} Context')
+  → (v⇓ : Lifted {_} {max-level} (Typ' Γ'⇓))
+  → Lifted {_} {max-level} (Typ' Γ⇓)
+context-pick-if' (lift Γ) dummy⇓ (lift Γ') v⇓ = context-pick-if-gen {P = λ Γ' → Lifted (Typ Γ')} {Γ} {Γ'} dummy⇓ v⇓
+
 
 Contextε⇓ : Context⇓ ε
-Contextε⇓ = tt , Context' , Typ' , Term' , ε₀' , _▻'_ , ‘Σ'’' , _‘’'_ , _‘→’'_ , W' -- , {!!} , {!!}
+Contextε⇓ = tt , Context' , Typ' , Term' , ε₀' , _▻'_ , ‘Σ'’' , _‘’'_ , _‘→’'_ , W' , context-pick-if'
 
 Typε⇓ : Typ ε → Set max-level
 Typε⇓ T = Typ⇓ T Contextε⇓

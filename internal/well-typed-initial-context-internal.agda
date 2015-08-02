@@ -131,36 +131,59 @@ pattern ‘Context’p₀ = El (WSet ‘VAR₀’)
 ‘W’p₈       : Term (‘Context’p₈ ‘→’ ‘Typ’p₈ ‘→’ W ‘Typ’p₈ ‘→'’ W1 (W1 ‘Typ’p₈) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₈))
 ‘W’p₈       = weakenTyp-tProd-tProd-tProd-weakenTyp-substTyp-tProd-nd ‘VAR₀’
 
---  ‘context-pick-if’ : ∀ {P : Typ (ε ▻ ‘Context’)}
---           (dummy : Term (P ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c)) →
---      □ (‘Context’ ‘→’ P ‘→'’ W (P ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
+εp₉ : Context
+εp₉ = εp₈
+  ▻ (‘Context’p₈ ‘→’ ‘Typ’p₈ ‘→'’ W ‘Context’p₈ ‘→’ W1 ‘Typ’p₈ ‘→'’ W ‘Typ’p₈) {- context-pick-if -}
+‘Context’p₉         : Typ εp₉
+‘Context’p₉         = W ‘Context’p₈
+‘Typ’p₉             : Typ (εp₉ ▻ ‘Context’p₉)
+‘Typ’p₉             = W1 ‘Typ’p₈
+‘Term’p₉            : Typ (εp₉ ▻ ‘Context’p₉ ▻ ‘Typ’p₉)
+‘Term’p₉            = W2 ‘Term’p₈
+‘ε₀’p₉               : Term ‘Context’p₉
+‘ε₀’p₉               = w ‘ε₀’p₈
+‘_▻_’p₉             : Term (‘Context’p₉ ‘→’ ‘Typ’p₉ ‘→'’ W ‘Context’p₉)
+‘_▻_’p₉             = w∀→₂ ‘_▻_’p₈
+‘‘Σ'’’p₉             : Term (‘Context’p₉ ‘→’ ‘Typ’p₉ ‘→’ W1 (W1 ‘Typ’p₉) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₉) ‘→'’ W ‘Typ’p₉)
+‘‘Σ'’’p₉             = w∀∀‘’→ ‘‘Σ'’’p₈
+‘_‘’_’p₉             : Term (‘Context’p₉ ‘→’ ‘Typ’p₉ ‘→’ W1 (W1 ‘Typ’p₉) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₉) ‘→'’ ‘Term’p₉ ‘→'’ W ‘Typ’p₉)
+‘_‘’_’p₉             = w∀∀‘’→→ ‘_‘’_’p₈
+‘_‘→’_’p₉            : Term (‘Context’p₉ ‘→’ ‘Typ’p₉ ‘→’ W1 (W1 ‘Typ’p₉) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₉) ‘→'’ W ‘Typ’p₉)
+‘_‘→’_’p₉            = w∀∀‘’→ ‘_‘→’_’p₈
+‘W’p₉               : Term (‘Context’p₉ ‘→’ ‘Typ’p₉ ‘→’ W ‘Typ’p₉ ‘→'’ W1 (W1 ‘Typ’p₉) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’p₉))
+‘W’p₉               = w∀∀→‘’ ‘W’p₈
+‘context-pick-if’p₉ : Term (‘Context’p₉ ‘→’ ‘Typ’p₉ ‘→'’ W ‘Context’p₉ ‘→’ W1 ‘Typ’p₉ ‘→'’ W ‘Typ’p₉)
+‘context-pick-if’p₉ = weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp ‘VAR₀’
 
 ε : Context
-ε = εp₈
+ε = εp₉
 
 ‘Context’ : Typ ε
-‘Context’ = ‘Context’p₈
+‘Context’ = ‘Context’p₉
 
 ‘Typ’ : Typ (ε ▻ ‘Context’)
-‘Typ’ = ‘Typ’p₈
+‘Typ’ = ‘Typ’p₉
 
 ‘Term’ : Typ (ε ▻ ‘Context’ ▻ ‘Typ’)
-‘Term’ = ‘Term’p₈
+‘Term’ = ‘Term’p₉
 
 ‘ε₀’ : Term ‘Context’
-‘ε₀’ = ‘ε₀’p₈
+‘ε₀’ = ‘ε₀’p₉
 
 ‘_▻_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’)
-‘_▻_’ = ‘_▻_’p₈
+‘_▻_’ = ‘_▻_’p₉
 
 ‘‘Σ'’’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ W ‘Typ’)
-‘‘Σ'’’ = ‘‘Σ'’’p₈
+‘‘Σ'’’ = ‘‘Σ'’’p₉
 
 ‘_‘’_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ ‘Term’ ‘→'’ W ‘Typ’)
-‘_‘’_’ = ‘_‘’_’p₈
+‘_‘’_’ = ‘_‘’_’p₉
 
 ‘_‘→’_’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’) ‘→'’ W ‘Typ’)
-‘_‘→’_’ = ‘_‘→’_’p₈
+‘_‘→’_’ = ‘_‘→’_’p₉
 
 ‘W’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→’ W ‘Typ’ ‘→'’ W1 (W1 ‘Typ’) ‘’ un‘λ'∙’ (un‘λ∙’ ‘_▻_’))
-‘W’ = ‘W’p₈
+‘W’ = ‘W’p₉
+
+‘context-pick-if’ : Term (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’ ‘→’ W1 ‘Typ’ ‘→'’ W ‘Typ’)
+‘context-pick-if’ = ‘context-pick-if’p₉

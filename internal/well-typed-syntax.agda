@@ -111,6 +111,9 @@ mutual
       → Term {Γ ▻ T'} (W2 (W T) ‘’₁ a ‘’ b)
       → Term {Γ ▻ T'} (W1 T ‘’ a)
     weakenTyp-weakenTyp1-weakenTyp : ∀ {Γ A B C D} → Term {Γ ▻ A ▻ W B ▻ W1 C} (W (W1 (W D))) → Term {Γ ▻ A ▻ W B ▻ W1 C} (W (W (W D)))
+    weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp : ∀ {Γ A B C D E X}
+      → Term {Γ ▻ X} (W (A ‘→’ B ‘→’ W (W C ‘→’ W1 D ‘→’ W (W E))))
+      → Term {Γ ▻ X} (W A ‘→’ W1 B ‘→’ W (W (W C) ‘→’ W1 (W1 D) ‘→’ W (W (W1 E))))
     beta-under-subst : ∀ {Γ A B B'} {g : Term {Γ} (A ‘→’ W B)} {x : Term {Γ} A}
       → Term (B' ‘’ substTyp-weakenTyp (‘λ∙’ (substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w g))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’)) ‘’ₐ x))
       → Term (B' ‘’ substTyp-weakenTyp (g ‘’ₐ x))

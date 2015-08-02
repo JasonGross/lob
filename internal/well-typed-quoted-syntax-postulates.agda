@@ -15,12 +15,6 @@ postulate
   ‘quote-term’ : ∀ {A : Term (‘Typ’ ‘’ ‘ε’)} → □ (‘□’ ‘’ A ‘→'’ ‘□’ ‘’ ⌜ ‘□’ ‘’ A ⌝T)
 -- ‘quote-term’ = {!!}
 
-  ‘context-pick-if'’ : □ (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’ ‘→’ W1 ‘Typ’ ‘→'’ W ‘Typ’)
-
-‘context-pick-if’ : ∀ (dummy : Term (‘Typ’ ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c))
-  → □ (‘Context’ ‘→’ ‘Typ’ ‘→'’ W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
-‘context-pick-if’ dummy = S→W∀W1→W (‘context-pick-if'’ ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘'’ₐ dummy
-
 ‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
 ‘quote-sigma’ = distr⌜‘Σ'’⌝ (λ ⌜‘Σ’‘Context’‘Typ’⌝T → □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜‘Σ’‘Context’‘Typ’⌝T)) ‘quote-sigma'’
 

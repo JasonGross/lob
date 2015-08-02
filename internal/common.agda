@@ -76,11 +76,11 @@ data _⊎_ (A : Set) (B : Set) : Set where
   inj₁ : (x : A) → A ⊎ B
   inj₂ : (y : B) → A ⊎ B
 
-data _≡_ {A : Set} (x : A) : A → Set where
+data _≡_ {ℓ} {A : Set ℓ} (x : A) : A → Set ℓ where
   refl : x ≡ x
 
-_≢_ : {A : Set} → A → A → Set
-x ≢ y = x ≡ y → ⊥
+_≢_ : ∀ {ℓ} {A : Set ℓ} → A → A → Set ℓ
+x ≢ y = x ≡ y → ⊥ {lzero}
 
 dec-eq-on : {A : Set} → (x : A) → (y : A) → Set
 dec-eq-on x y = (x ≡ y) ⊎ (x ≢ y)

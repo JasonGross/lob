@@ -82,6 +82,11 @@ weakenProd : ∀ {Γ A B C} →
 weakenProd {Γ} {A} {B} {C} x = weakenTyp-tProd (w x)
 w∀ = weakenProd
 
+weakenProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp : ∀ {Γ A B C D E X}
+      → Term {Γ} (A ‘→’ B ‘→'’ W C ‘→’ W1 D ‘→'’ W E)
+      → Term {Γ ▻ X} (W A ‘→’ W1 B ‘→'’ W (W C) ‘→’ W1 (W1 D) ‘→'’ W (W1 E))
+weakenProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp x = weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp (w x)
+
 w1 : ∀ {Γ A B C} → Term {Γ = Γ ▻ B} C → Term {Γ = Γ ▻ A ▻ W {Γ = Γ} {A = A} B} (W1 {Γ = Γ} {A = A} {B = B} C)
 w1 x = un‘λ∙’ (weakenTyp-tProd (w (‘λ∙’ x)))
 

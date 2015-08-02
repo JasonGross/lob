@@ -92,6 +92,7 @@ mutual
   Term⇓ (substTyp2-substTyp-substTyp-weakenTyp1-weakenTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (substTyp1-substTyp-weakenTyp2-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-weakenTyp1-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
+  Term⇓ (weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (beta-under-subst t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (beta-under-subst-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x

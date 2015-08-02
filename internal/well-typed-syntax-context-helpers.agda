@@ -3,8 +3,8 @@ module well-typed-syntax-context-helpers where
 open import common
 open import well-typed-syntax
 open import well-typed-syntax-helpers
-open import well-typed-syntax-eq-dec
 open import well-typed-initial-context
+open import well-typed-syntax-context-pre-helpers
 
 infixr 1 _‘‘→'’’_
 
@@ -23,31 +23,16 @@ infixr 1 _‘‘→'’’_
 ‘existT’ : ∀ {T P} (x : Term T) (p : Term (P ‘’ x)) → Term (‘Σ’ T P)
 ‘existT’ {T} {P} x p = S₁₀WW (S∀ (‘existT'’ ‘’ₐ x) ‘’ₐ p)
 
-context-pick-if-helper : ∀ {P : Context → Set}
-         {Γ : Context}
-         {Γ' : Context}
-         (p : dec-eq-on Γ Γ')
-         (dummy : P Γ')
-         (val : P Γ) →
-    P Γ'
-context-pick-if-helper (inj₁ refl) dummy val = val
-context-pick-if-helper (inj₂ y) dummy val = dummy
-
-context-pick-if-helper-refl : ∀ {P Γ p dummy val} → inj₁ refl ≡ p →
-    context-pick-if-helper {P} {Γ} {Γ} p dummy val ≡ val
-context-pick-if-helper-refl refl = refl
-
-
 context-pick-if : ∀ {P : Context → Set}
          {Γ : Context}
          (dummy : P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’))
          (val : P Γ) →
     P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
-context-pick-if {P} {Γ} dummy val = context-pick-if-helper {P} {Γ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (_ ≟-ctx _) dummy val
+context-pick-if {P} {Γ} dummy val = context-pick-if-gen {P = P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} {Γ} dummy val
 
 context-pick-if-refl : ∀ {P dummy val} →
     context-pick-if {P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} dummy val ≡ val
-context-pick-if-refl {P} {dummy} {val} = context-pick-if-helper-refl {P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} {_ ≟-ctx _} {dummy} {val} (sym (≟-ctx-refl _))
+context-pick-if-refl {P} {dummy} {val} = context-pick-if-gen-refl {P = P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} {dummy} {val}
 
 ‘tProd-nd’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’)} (W (W ‘Typ’))
 ‘tProd-nd’ = w→ (un‘λ∙’ (un‘λ∙’ ‘_‘→’_’)) ‘'’ₐ un‘λ'∙’ (un‘λ∙’ (un‘λ∙’ ‘W’))
