@@ -33,16 +33,20 @@ abstract
     ⌜_⌝t : ∀ {Γ} {A : Typ Γ} → Term {Γ = Γ} A → □ (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T)
     ⌜ x ⌝t = cheat
 
-  distr⌜▻⌝ : ∀ {Γ a}
-    → Term (‘Typ’ ‘’ ⌜ Γ ▻ a ⌝c)
-    → Term (‘Typ’ ‘’ S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ a ⌝T))
-  distr⌜▻⌝ x = x
+  distrP⌜▻⌝ : ∀ {Γ a ℓ} (P : □ ‘Context’ → Set ℓ)
+    → P ⌜ Γ ▻ a ⌝c
+    → P (S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ a ⌝T))
+  distrP⌜▻⌝ P x = x
 
   distr⌜‘Σ'’⌝ : ∀ {ℓ Γ a b} (P : □ (‘Typ’ ‘’ ⌜ Γ ⌝c) → Set ℓ)
-    → P (S₁₀W (S₂₁₀W (S₁₀∀ (S∀ (‘‘Σ'’’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ a ⌝T) ‘’ₐ S₀₁₀W1W1' (distr⌜▻⌝ ⌜ b ⌝T))))
+    → P (S₁₀W (S₂₁₀W (S₁₀∀ (S∀ (‘‘Σ'’’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ a ⌝T) ‘’ₐ S₀₁₀W1W1' (distrP⌜▻⌝ (λ Γ▻a → Term (‘Typ’ ‘’ Γ▻a)) ⌜ b ⌝T))))
     → P ⌜ ‘Σ'’ {Γ} a b ⌝T
   distr⌜‘Σ'’⌝ P x = x
 
+distr⌜▻⌝ : ∀ {Γ a}
+  → Term (‘Typ’ ‘’ ⌜ Γ ▻ a ⌝c)
+  → Term (‘Typ’ ‘’ S₁₀WW (S∀ (‘_▻_’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ a ⌝T))
+distr⌜▻⌝ = distrP⌜▻⌝ (λ Γ▻a → Term (‘Typ’ ‘’ Γ▻a))
 
 ‘context-extend’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’)} (W (W ‘Context’))
 ‘context-extend’ = un‘λ'∙’ (un‘λ∙’ ‘_▻_’)
@@ -70,3 +74,6 @@ _‘‘’’_ : ∀ {Γ} {A : □ (‘Typ’ ‘’ Γ)}
   → □ (‘Term’ ‘’₁ Γ ‘’ A)
   → □ (‘Typ’ ‘’ Γ)
 f ‘‘’’ x = (‘substTyp’ ‘'’ₐ f ‘'’ₐ x)
+
+‘‘Σ’’ : ∀ {Γ} (A : □ (‘Typ’ ‘’ Γ)) (B : □ (‘Typ’ ‘’ (Γ ‘▻’ A))) → □ (‘Typ’ ‘’ Γ)
+‘‘Σ’’ {Γ} A B = S₁₀W (S₂₁₀W (S₁₀∀ (S∀ (‘‘Σ'’’ ‘’ₐ Γ) ‘’ₐ A) ‘’ₐ S₀₁₀W1W1' B))
