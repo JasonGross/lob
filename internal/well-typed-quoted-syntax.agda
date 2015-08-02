@@ -47,7 +47,7 @@ g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
 ‘cast’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘Typ’ ‘’ (‘ε’ ‘▻’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))
 ‘cast’ = ‘λ'∙’ (⌜W‘▻’⌝ (SW1W (S₁₀W2W (substTyp-tProd (weakenTyp1-tProd (w1
                                                                           (SW1V
-                                                                           (w∀ (‘context-pick-if’ {‘Typ’} ⌜ W (‘Typ’ ‘’ ‘ε’) ⌝T) ‘’ₐ ‘VAR₀’))) ‘t’ (w→ ‘proj₁’ ‘'’ₐ ‘VAR₀’)) ‘’ₐ ‘proj₂’ ))))
+                                                                           (w∀ (‘context-pick-if’ ⌜ W (‘Typ’ ‘’ ‘ε’) ⌝T) ‘’ₐ ‘VAR₀’))) ‘t’ (w→ ‘proj₁’ ‘'’ₐ ‘VAR₀’)) ‘’ₐ ‘proj₂’ ))))
 
 
 ‘cast-refl’ : ∀ {T : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} →

@@ -12,32 +12,33 @@ postulate
   ‘quote-sigma'’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ (‘‘Σ’’ ⌜ ‘Context’ ⌝T (distr⌜▻⌝ ⌜ ‘Typ’ ⌝T)))
 -- ‘quote-sigma’ = {!!}
 
-  ‘quote-term’ : ∀ {A} → □ (‘□’ ‘’ A ‘→'’ ‘□’ ‘’ ⌜ ‘□’ ‘’ A ⌝T)
+  ‘quote-term’ : ∀ {A : Term (‘Typ’ ‘’ ‘ε’)} → □ (‘□’ ‘’ A ‘→'’ ‘□’ ‘’ ⌜ ‘□’ ‘’ A ⌝T)
 -- ‘quote-term’ = {!!}
 
-  ‘context-pick-if’ : ∀ {P : Typ (ε ▻ ‘Context’)}
-           (dummy : Term (P ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c)) →
-      □ (‘Context’ ‘→’ P ‘→'’ W (P ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
+  ‘context-pick-if'’ : □ (‘Context’ ‘→’ ‘Typ’ ‘→'’ W ‘Context’ ‘→’ W1 ‘Typ’ ‘→'’ W ‘Typ’)
 
+‘context-pick-if’ : ∀ (dummy : Term (‘Typ’ ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c))
+  → □ (‘Context’ ‘→’ ‘Typ’ ‘→'’ W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
+‘context-pick-if’ dummy = S→W∀W1→W (‘context-pick-if'’ ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘'’ₐ dummy
+
+‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
+‘quote-sigma’ = distr⌜‘Σ'’⌝ (λ ⌜‘Σ’‘Context’‘Typ’⌝T → □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜‘Σ’‘Context’‘Typ’⌝T)) ‘quote-sigma'’
 
 postulate
   ‘context-pick-if’-refl-inv : ∀ {T dummy qqs} →
       □ (‘□’ ‘’
           ((⌜‘▻’⌝ ⌜ T ⌝T ‘‘’’ qqs)
              ‘‘→'’’
-             (⌜‘▻’⌝ (S₁₀WW (substTyp-tProd (‘context-pick-if’ {‘Typ’} dummy ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
+             (⌜‘▻’⌝ (S₁₀WW (substTyp-tProd (‘context-pick-if’ dummy ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
                 ‘‘’’ qqs)))
   ‘context-pick-if’-refl : ∀ {T dummy qqs} →
       □ (‘□’ ‘’
-          ((⌜‘▻’⌝ (S₁₀WW (substTyp-tProd (‘context-pick-if’ {‘Typ’} dummy ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
+          ((⌜‘▻’⌝ (S₁₀WW (substTyp-tProd (‘context-pick-if’ dummy ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
               ‘‘’’ qqs)
              ‘‘→'’’
              (⌜‘▻’⌝ ⌜ T ⌝T ‘‘’’ qqs)))
 
 
-
-‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
-‘quote-sigma’ = distr⌜‘Σ'’⌝ (λ ⌜‘Σ’‘Context’‘Typ’⌝T → □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜‘Σ’‘Context’‘Typ’⌝T)) ‘quote-sigma'’
 
 postulate
 

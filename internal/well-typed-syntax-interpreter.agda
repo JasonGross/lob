@@ -6,6 +6,16 @@ open import well-typed-syntax
 max-level : Level
 max-level = lsuc lzero
 
+{-mutual
+  Context-max-level : Context → Level
+  Typ-max-level : {Γ : Context} → Typ Γ → Level
+  Term-max-level : {Γ : Context} → {T : Typ Γ} → Term T → Level
+
+  Context-max-level ε₀ = lzero
+  Context-max-level (Γ ▻ x) = {!!}
+  Typ-max-level T = {!!}
+  Term-max-level t = {!!}-}
+
 mutual
   Context⇓ : (Γ : Context) → Set (lsuc max-level)
   Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
@@ -38,6 +48,8 @@ mutual
   Term⇓ (WWSet T) Γ⇓ = Term⇓ T Γ⇓
   Term⇓ (WWWSet T) Γ⇓ = Term⇓ T Γ⇓
   Term⇓ (substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
+  Term⇓ (weakenTyp-substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
+  Term⇓ (weakenTyp-weakenTyp-substTyp-weakenTyp-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (substTyp-weakenTyp1-VAR₀ t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
@@ -45,8 +57,11 @@ mutual
   Term⇓ (weakenTyp-weakenTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (substTyp1-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp-substTyp1-tProd-nd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
+  Term⇓ (weakenTyp1-substTyp1-tProd-nd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp1-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
+  Term⇓ (weakenTyp1-tProd-inv t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp2-tProd-nd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
+  Term⇓ (substTyp-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp-weakenTyp2-tProd-nd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp-weakenTyp-weakenTyp2-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (substTyp2-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
