@@ -104,7 +104,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   lob : □ ‘X’
   lob = fromH h' ‘'’ₐ ⌜ h' ⌝t
     where
-      f' : Term (W (‘□’ ‘’ S₂₁₀WW (‘tProd-nd’ ‘t’₂ ‘ε’ ‘t’₁ ⌜ ‘□’ ‘’ ‘H0’ ⌝T ‘t’ S₁₀W' ⌜ ‘X’ ⌝T)))
+      f' : Term {ε ▻ ‘□’ ‘’ ‘H0’} (W (‘□’ ‘’ (⌜ ‘□’ ‘’ ‘H0’ ⌝T ‘‘→'’’ ⌜ ‘X’ ⌝T)))
       f' = Conv0 {‘H0’} {‘X’} (SW1W (w∀ ‘fromH’ ‘’ₐ ‘VAR₀’))
 
       x : Term {ε ▻ ‘□’ ‘’ ‘H0’} (W (‘□’ ‘’ ⌜ ‘H’ ⌝T))
