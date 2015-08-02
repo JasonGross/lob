@@ -205,8 +205,7 @@ Module WithContext (Ctx : Contexts).
     Proof.
       intros Γ A B H [a Ha].
       exists a.
-      eapply has_type_conv_subst; try eassumption.
-      Show.
+      eapply has_type_conv_subst; try eassumption; exact H.
     Defined.
 
     Global Instance convertible_refl : forall {Γ}, Reflexive (convertible Γ) := conv_refl.
