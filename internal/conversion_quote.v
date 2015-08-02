@@ -342,7 +342,7 @@ Section quote_has_type.
           specialize (has_type__quote_term__dtyp nil).
           specialize (has_type__quote_term__dbod nil).
           simpl in *.
-          t_has_type.
+          t_has_type;
           match goal with
             | [ |- convertible _ (Ast.tSort (Ast.sType 1)) (Ast.tSort Ast.sSet) ]
               => admit'
