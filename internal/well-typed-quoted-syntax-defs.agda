@@ -3,7 +3,6 @@ module well-typed-quoted-syntax-defs where
 open import common
 open import well-typed-syntax
 open import well-typed-syntax-helpers
-open import well-typed-syntax-helpers-postulates
 open import well-typed-syntax-context-helpers
 
 infixl 3 _‘‘’’_
