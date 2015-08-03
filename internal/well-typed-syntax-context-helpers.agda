@@ -3,7 +3,6 @@ module well-typed-syntax-context-helpers where
 open import common
 open import well-typed-syntax
 open import well-typed-syntax-helpers
-open import well-typed-initial-context
 open import well-typed-syntax-context-pre-helpers
 
 infixr 1 _‘‘→'’’_
@@ -33,9 +32,6 @@ context-pick-if {P} {Γ} dummy val = context-pick-if-gen {P = P} {ε ▻ ‘Σ�
 context-pick-if-refl : ∀ {P dummy val} →
     context-pick-if {P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} dummy val ≡ val
 context-pick-if-refl {P} {dummy} {val} = context-pick-if-gen-refl {P = P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} {dummy} {val}
-
-‘tProd-nd’ : Term {Γ = (ε ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’)} (W (W ‘Typ’))
-‘tProd-nd’ = w→ (un‘λ∙’ (un‘λ∙’ ‘_‘→’_’)) ‘'’ₐ un‘λ'∙’ (un‘λ∙’ (un‘λ∙’ ‘W’))
 
 _‘‘→'’’_ : ∀ {Γ} → (A : □ (‘Typ’ ‘’ Γ)) → (B : □ (‘Typ’ ‘’ Γ)) → □ (‘Typ’ ‘’ Γ)
 _‘‘→'’’_ {Γ = Γ} A B = (S₂₁₀WW (‘tProd-nd’ ‘t’₂ Γ ‘t’₁ A ‘t’ S₁₀W' B))

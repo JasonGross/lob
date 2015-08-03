@@ -3,7 +3,6 @@ module well-typed-syntax-interpreter-full where
 open import common public
 open import well-typed-syntax
 open import well-typed-syntax-interpreter
-open import well-typed-initial-context-internal
 open import well-typed-syntax-context-pre-helpers
 
 lift→ : ∀ {ℓ ℓ′ ℓ′′ A} {R : Set ℓ′′} → (A → R) → (Lifted {ℓ} {ℓ′} A → R)
@@ -65,7 +64,7 @@ context-pick-if' (lift Γ) dummy⇓ (lift Γ') v⇓ = context-pick-if-gen {P = �
 
 
 Contextε⇓ : Context⇓ ε
-Contextε⇓ = tt , Context' , Typ' , Term' , ε₀' , _▻'_ , ‘Σ'’' , _‘’'_ , _‘→’'_ , W' , context-pick-if'
+Contextε⇓ = tt -- , Context' , Typ' , Term' , ε₀' , _▻'_ , ‘Σ'’' , _‘’'_ , _‘→’'_ , W' , context-pick-if'
 
 Typε⇓ : Typ ε → Set max-level
 Typε⇓ T = Typ⇓ T Contextε⇓

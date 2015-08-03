@@ -2,6 +2,8 @@
 module well-typed-syntax-interpreter where
 open import common public
 open import well-typed-syntax
+open import well-typed-syntax-helpers
+open import well-typed-syntax-context-pre-helpers
 
 max-level : Level
 max-level = lsuc lzero
@@ -35,6 +37,9 @@ mutual
   Typ⇓ (W2 T₃) (((Γ⇓ , A⇓) , B⇓) , C⇓) = Typ⇓ T₃ ((Γ⇓ , B⇓) , C⇓)
   Typ⇓ (T ‘→’ T₁) Γ⇓ = (T⇓ : Typ⇓ T Γ⇓) → Typ⇓ T₁ (Γ⇓ , T⇓)
   Typ⇓ ‘Set’ Γ⇓ = Set
+  Typ⇓ ‘Context’ Γ⇓ = Lifted Context
+  Typ⇓ ‘Typ’ (Γ⇓ , lift Γ) = Lifted (Typ Γ)
+  Typ⇓ ‘Term’ (Γ⇓ , lift Γ , lift T) = Lifted (Term T)
   Typ⇓ (El T) Γ⇓ = Lifted (Term⇓ T Γ⇓)
   --Typ⇓ (WT₂ T₂) (Γ⇓ , A⇓) = Typ⇓ T₂ ((Γ⇓ , {!!}) , {!!}) -- (((Γ⇓ , A⇓) , B⇓) , C⇓ ) = Typ⇓ T₂ ((Γ⇓ , B⇓) , (C⇓))
   Typ⇓ (‘Σ'’ T T₁) Γ⇓ = Σ (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
@@ -44,6 +49,14 @@ mutual
   Term⇓ (‘λ∙’ t) Γ⇓ T⇓ = Term⇓ t (Γ⇓ , T⇓)
   Term⇓ (t ‘’ₐ t₁) Γ⇓ = Term⇓ t Γ⇓ (Term⇓ t₁ Γ⇓)
   Term⇓ ‘VAR₀’ (Γ⇓ , A⇓) = A⇓
+  Term⇓ (⌜ Γ ⌝c) Γ⇓ = lift Γ
+  Term⇓ (⌜ T ⌝T) Γ⇓ = lift T
+  Term⇓ (⌜ t ⌝t) Γ⇓ = lift t
+  Term⇓ ‘quote-term’ Γ⇓ (lift T⇓) = lift ⌜ T⇓ ⌝t
+  Term⇓ ‘quote-sigma’ Γ⇓ (lift Γ , lift T) = lift (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ T ⌝T))
+  Term⇓ ‘substTyp’ Γ⇓ (lift f) (lift x) = lift (f ‘’ x)
+  Term⇓ ‘tProd-nd’ (Γ⇓ , lift Γ , lift A , lift B) = lift (A ‘→’ W B)
+  Term⇓ ‘context-pick-if'’ Γ⇓ (lift Γ) (lift dummy) (lift Γ') (lift val) = lift (context-pick-if-gen {P = Typ} {Γ} {Γ'} dummy val)
   Term⇓ (WSet T) Γ⇓ = Term⇓ T Γ⇓
   Term⇓ (WWSet T) Γ⇓ = Term⇓ T Γ⇓
   Term⇓ (WWWSet T) Γ⇓ = Term⇓ T Γ⇓

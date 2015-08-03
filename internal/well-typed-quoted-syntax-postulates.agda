@@ -2,35 +2,24 @@
 module well-typed-quoted-syntax-postulates where
 open import common
 open import well-typed-syntax
-open import well-typed-initial-context
 open import well-typed-syntax-helpers
 open import well-typed-syntax-context-helpers
 open import well-typed-quoted-syntax-defs public
 open import well-typed-quoted-syntax-pre-helpers public
 
 postulate
-  ‘quote-sigma'’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ (‘‘Σ’’ ⌜ ‘Context’ ⌝T (distr⌜▻⌝ ⌜ ‘Typ’ ⌝T)))
--- ‘quote-sigma’ = {!!}
-
-  ‘quote-term’ : ∀ {A : Term (‘Typ’ ‘’ ‘ε’)} → □ (‘□’ ‘’ A ‘→'’ ‘□’ ‘’ ⌜ ‘□’ ‘’ A ⌝T)
--- ‘quote-term’ = {!!}
-
-‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
-‘quote-sigma’ = distr⌜‘Σ'’⌝ (λ ⌜‘Σ’‘Context’‘Typ’⌝T → □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜‘Σ’‘Context’‘Typ’⌝T)) ‘quote-sigma'’
-
-postulate
   ‘context-pick-if’-refl-inv : ∀ {T dummy qqs} →
       □ (‘□’ ‘’
-          ((⌜‘▻’⌝ ⌜ T ⌝T ‘‘’’ qqs)
+          ((⌜ T ⌝T ‘‘’’ ⌜ qqs ⌝t)
              ‘‘→'’’
-             (⌜‘▻’⌝ (S₁₀WW (substTyp-tProd (‘context-pick-if’ dummy ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
-                ‘‘’’ qqs)))
+             ((S₁₀WW (substTyp-tProd (‘context-pick-if’ ⌜ dummy ⌝T ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
+                ‘‘’’ ⌜ qqs ⌝t)))
   ‘context-pick-if’-refl : ∀ {T dummy qqs} →
       □ (‘□’ ‘’
-          ((⌜‘▻’⌝ (S₁₀WW (substTyp-tProd (‘context-pick-if’ dummy ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
-              ‘‘’’ qqs)
+          (((S₁₀WW (substTyp-tProd (‘context-pick-if’ ⌜ dummy ⌝T ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
+              ‘‘’’ ⌜ qqs ⌝t)
              ‘‘→'’’
-             (⌜‘▻’⌝ ⌜ T ⌝T ‘‘’’ qqs)))
+             (⌜ T ⌝T ‘‘’’ ⌜ qqs ⌝t)))
 
 
 
@@ -99,10 +88,10 @@ postulate
 
   quote-distr-substTyp : ∀ {B A} {b : □ B} →
       □ (‘□’ ‘’
-          (⌜ A ‘’ b ⌝T ‘‘→'’’ ⌜‘▻’⌝ ⌜ A ⌝T ‘‘’’ ⌜ b ⌝t))
+          (⌜ A ‘’ b ⌝T ‘‘→'’’ ⌜ A ⌝T ‘‘’’ ⌜ b ⌝t))
   quote-undistr-substTyp : ∀ {B A} {b : □ B} →
       □ (‘□’ ‘’
-          (⌜‘▻’⌝ ⌜ A ⌝T ‘‘’’ ⌜ b ⌝t ‘‘→'’’ ⌜ A ‘’ b ⌝T))
+          (⌜ A ⌝T ‘‘’’ ⌜ b ⌝t ‘‘→'’’ ⌜ A ‘’ b ⌝T))
 
   qquote-term-under-app : ∀ {f} {t : □ (‘Σ’ ‘Context’ ‘Typ’)} →
       □ (‘□’ ‘’
@@ -117,16 +106,16 @@ postulate
            {x : □ A}
            {y : □ (‘□’ ‘’ ⌜ T ⌝T)} →
       □ (‘□’ ‘’
-          (((⌜‘▻’⌝ (SW (f ‘t’ x))) ‘‘’’ y)
-             ‘‘→'’’ ((‘λ'∙’ (⌜W‘▻’⌝ f) ‘'’ₐ x) ‘‘’’ y)))
+          ((((SW (f ‘t’ x))) ‘‘’’ y)
+             ‘‘→'’’ ((‘λ'∙’ f ‘'’ₐ x) ‘‘’’ y)))
 
   qbeta-nd : ∀ {T A}
            {f : Term {ε ▻ A} (W (‘Typ’ ‘’ ⌜ ε ▻ T ⌝c))}
            {x : □ A}
            {y : □ (‘□’ ‘’ ⌜ T ⌝T)} →
       □ (‘□’ ‘’
-          (((‘λ'∙’ (⌜W‘▻’⌝ f) ‘'’ₐ x) ‘‘’’ y)
-             ‘‘→'’’ ((⌜‘▻’⌝ (SW (f ‘t’ x))) ‘‘’’ y)))
+          (((‘λ'∙’ f ‘'’ₐ x) ‘‘’’ y)
+             ‘‘→'’’ ((SW (f ‘t’ x)) ‘‘’’ y)))
 
 
 
@@ -139,15 +128,13 @@ postulate
            {x : □ (‘Σ’ B B')}
            {y : □ (‘□’ ‘’ ⌜ T ⌝T)} →
       □ (‘□’ ‘’
-          ((⌜‘▻’⌝
-              (SW
+          (((SW
                  (SW1W
                     (S₁₀W2W
                        (S∀ (weakenTyp1-tProd
                               (w1 (SW1V (w∀ f ‘’ₐ ‘VAR₀’)))
                               ‘t’ (w→ g ‘'’ₐ ‘VAR₀’)) ‘’ₐ h)) ‘t’ x)) ‘‘’’ y)
-             ‘‘→'’’ ((⌜‘▻’⌝
-                        (S₁₀WW
+             ‘‘→'’’ (((S₁₀WW
                            (S∀ (f ‘’ₐ (g ‘'’ₐ x)) ‘’ₐ β (S₀₀W1 (h ‘t’ x))))) ‘‘’’ y)))
 
   substTerm-undistr-stuff : ∀ {B B' T}
@@ -157,12 +144,10 @@ postulate
            {x : □ (‘Σ’ B B')}
            {y : □ (‘□’ ‘’ ⌜ T ⌝T)} →
       □ (‘□’ ‘’
-          (((⌜‘▻’⌝
-               (S₁₀WW
+          ((((S₁₀WW
                   (S∀ (f ‘’ₐ (g ‘'’ₐ x)) ‘’ₐ β (S₀₀W1 (h ‘t’ x))))) ‘‘’’ y)
              ‘‘→'’’
-             (⌜‘▻’⌝
-                (SW
+             ((SW
                    (SW1W
                       (S₁₀W2W
                          (S∀ (weakenTyp1-tProd
@@ -177,9 +162,9 @@ postulate
                    ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c)))}
            {y : □ (‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)} →
       □ (‘□’ ‘’
-          ((⌜‘▻’⌝ (S₁₀WW (S∀ (f ‘’ₐ x) ‘’ₐ p)) ‘‘’’ y)
+          (((S₁₀WW (S∀ (f ‘’ₐ x) ‘’ₐ p)) ‘‘’’ y)
              ‘‘→'’’
-             (⌜‘▻’⌝ (S₁₀WW (S∀ (f ‘’ₐ (‘proj₁’ ‘'’ₐ ‘existT’ x p)) ‘’ₐ β (S₀₀W1 (‘proj₂’ ‘t’ ‘existT’ x p)))) ‘‘’’ y)))
+             ((S₁₀WW (S∀ (f ‘’ₐ (‘proj₁’ ‘'’ₐ ‘existT’ x p)) ‘’ₐ β (S₀₀W1 (‘proj₂’ ‘t’ ‘existT’ x p)))) ‘‘’’ y)))
 
 
   qexistT-iota : ∀
@@ -190,5 +175,5 @@ postulate
                    ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c)))}
            {y : □ (‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)} →
       □ (‘□’ ‘’
-          ((⌜‘▻’⌝ (S₁₀WW (S∀ (f ‘’ₐ (‘proj₁’ ‘'’ₐ ‘existT’ x p)) ‘’ₐ β (S₀₀W1 (‘proj₂’ ‘t’ ‘existT’ x p)))) ‘‘’’ y)
-             ‘‘→'’’ (⌜‘▻’⌝ (S₁₀WW (S∀ (f ‘’ₐ x) ‘’ₐ p)) ‘‘’’ y)))
+          (((S₁₀WW (S∀ (f ‘’ₐ (‘proj₁’ ‘'’ₐ ‘existT’ x p)) ‘’ₐ β (S₀₀W1 (‘proj₂’ ‘t’ ‘existT’ x p)))) ‘‘’’ y)
+             ‘‘→'’’ ((S₁₀WW (S∀ (f ‘’ₐ x) ‘’ₐ p)) ‘‘’’ y)))

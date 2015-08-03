@@ -26,6 +26,9 @@ mutual
     ‘Set’ : ∀ {Γ} → Typ Γ
     El : ∀ {Γ} → Term {Γ} ‘Set’ → Typ Γ
     ‘Σ'’ : ∀ {Γ} (T : Typ Γ) → Typ (Γ ▻ T) → Typ Γ
+    ‘Context’ : ∀ {Γ} → Typ Γ
+    ‘Typ’ : ∀ {Γ} → Typ (Γ ▻ ‘Context’)
+    ‘Term’ : ∀ {Γ} → Typ (Γ ▻ ‘Context’ ▻ ‘Typ’)
 
 
   data Term : ∀ {Γ} → Typ Γ → Set where
@@ -33,6 +36,17 @@ mutual
     ‘λ∙’ : ∀ {Γ A B} → Term {Γ = (Γ ▻ A)} B → Term {Γ} (A ‘→’ B)
     _‘’ₐ_ : ∀ {Γ A B} → (f : Term {Γ} (A ‘→’ B)) → (x : Term {Γ} A) → Term {Γ} (B ‘’ x)
     ‘VAR₀’ : ∀ {Γ T} → Term {Γ = Γ ▻ T} (W T)
+    ⌜_⌝c : ∀ {Γ} → Context → Term {Γ} ‘Context’
+    ⌜_⌝T : ∀ {Γ Γ'} → Typ Γ' → Term {Γ} (‘Typ’ ‘’ ⌜ Γ' ⌝c)
+    ⌜_⌝t : ∀ {Γ Γ'} {T : Typ Γ'} → Term T → Term {Γ} (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ T ⌝T)
+    ‘quote-term’ : ∀ {Γ Γ'} {A : Typ Γ'} → Term {Γ} (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ A ⌝T ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ ‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ A ⌝T ⌝T))
+    ‘quote-sigma’ : ∀ {Γ Γ'} → Term {Γ} (‘Σ'’ ‘Context’ ‘Typ’ ‘→’ W (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ ‘Σ'’ ‘Context’ ‘Typ’ ⌝T))
+    ‘substTyp’ : ∀ {Γ' Γ} {A : Typ Γ}
+      → Term {Γ'} (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c
+                  ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T
+                  ‘→’ W (‘Typ’ ‘’ ⌜ Γ ⌝c)))
+    ‘tProd-nd’ : ∀ {Γ} → Term {Γ ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’} (W (W ‘Typ’))
+    ‘context-pick-if'’ : ∀ {Γ} → Term {Γ} (‘Context’ ‘→’ ‘Typ’ ‘→’ W (W ‘Context’ ‘→’ W1 ‘Typ’ ‘→’ W (W ‘Typ’)))
     -- Ty : ∀ {Γ} → Typ Γ → Term {Γ} ‘Set’
     WSet : ∀ {Γ A} → Term {Γ ▻ A} (W ‘Set’) → Term {Γ ▻ A} ‘Set’
     WWSet : ∀ {Γ A B} → Term {Γ ▻ A ▻ B} (W (W ‘Set’)) → Term {Γ ▻ A ▻ B} ‘Set’
@@ -123,3 +137,5 @@ mutual
     ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ'’ T P ‘→’ W T)
     ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ'’ T P} (W1 P ‘’ substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
     ‘existT'’ : ∀ {Γ T P} → Term (T ‘→’ P ‘→’ W (W (‘Σ'’ {Γ} T P)))
+
+ε = ε₀

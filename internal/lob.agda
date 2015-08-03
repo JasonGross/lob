@@ -2,14 +2,14 @@
 module lob where
 open import common
 open import well-typed-syntax
-open import well-typed-initial-context
 open import well-typed-quoted-syntax
+open import well-typed-syntax-interpreter-full
 
 module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ ⌜ ‘X’ ⌝T)} (W ‘X’)) where
   X : Set _
   X = Typε⇓ ‘X’
 
-  f'' : (x : Typε⇓ (‘□’ ‘’ ⌜ ‘X’ ⌝T)) → Typε▻⇓ (W ‘X’) x
+  f'' : (x : Typε⇓ (‘□’ ‘’ ⌜ ‘X’ ⌝T)) → Typε▻⇓ {‘□’ ‘’ ⌜ ‘X’ ⌝T} (W ‘X’) x
   f'' = Termε▻⇓ ‘f’
 
   {-f : □ ‘X’ → X
@@ -31,7 +31,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   qh : Term {Γ = (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} (W (‘Typ’ ‘’ ‘ε’))
   qh = w→→ ‘substTyp’ ‘'’ₐ f' ‘'’ₐ x
     where
-      f' : Term (W (‘Typ’ ‘’ (‘ε’ ‘▻’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)))
+      f' : Term (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
       f' = w→ ‘cast’ ‘'’ₐ ‘VAR₀’
 
       x : Term (W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))

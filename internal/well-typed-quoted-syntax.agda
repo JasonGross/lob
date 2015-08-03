@@ -2,7 +2,6 @@
 module well-typed-quoted-syntax where
 open import common
 open import well-typed-syntax
-open import well-typed-initial-context
 open import well-typed-syntax-helpers public
 open import well-typed-syntax-context-helpers public
 open import well-typed-quoted-syntax-postulates public
@@ -44,8 +43,8 @@ g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
 ‘s←←’ = qsubstTerm-qtApp-nd-qtApp-nd-undistr
 
 
-‘cast’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘Typ’ ‘’ (‘ε’ ‘▻’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))
-‘cast’ = ‘λ'∙’ (⌜W‘▻’⌝ (SW1W (S₁₀W2W (substTyp-tProd (weakenTyp1-tProd (w1
+‘cast’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c)
+‘cast’ = ‘λ'∙’ ((SW1W (S₁₀W2W (substTyp-tProd (weakenTyp1-tProd (w1
                                                                           (SW1V
                                                                            (w∀ (‘context-pick-if’ ⌜ W (‘Typ’ ‘’ ‘ε’) ⌝T) ‘’ₐ ‘VAR₀’))) ‘t’ (w→ ‘proj₁’ ‘'’ₐ ‘VAR₀’)) ‘’ₐ ‘proj₂’ ))))
 
@@ -72,16 +71,3 @@ Conv0 : ∀ {qH0 qX} →
              (W
                 (‘□’ ‘’ (⌜ ‘□’ ‘’ qH0 ⌝T ‘‘→'’’ ⌜ qX ⌝T)))
 Conv0 {qH0} {qX} x = w→ quote-typ-distr-tProd-nd ‘'’ₐ x
-
-{-‘quote-sigma’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
-‘quote-sigma’ = ‘λ'∙’ {!!}
-  where helper : Term {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W (‘Σ’ ‘Context’ ‘Typ’))
-        helper = SW1W (S₁₀W (S∀ (w∀→ ‘existT'’ ‘’ₐ {!!}) ‘’ₐ {!!})) --
-
-        helper'' : Term
-                     (‘Term’ ‘’₁ ⌜ ε ▻ {!!} ⌝c ‘’ ⌜ W ‘Context’ ‘→’ W1 ‘Typ’ ‘→'’ W1 (W (‘Σ’ ‘Context’ ‘Typ’)) ⌝T)
-        helper'' = ⌜ w∀→ ‘existT'’ ⌝t
-
-        helper' : Term {ε} (‘□’ ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T)
-        helper' = {!!}
--}
