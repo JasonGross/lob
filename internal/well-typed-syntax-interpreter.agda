@@ -111,3 +111,9 @@ mutual
   Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x
   Term⇓ ‘proj₂'’ (Γ⇓ , (x , p)) = p
   Term⇓ ‘existT'’ Γ⇓ x p = x , p
+  Term⇓ (‘context-pick-if’-refl-inv {A} {T} {dummy} {qqs}) Γ⇓ = lift (helper (context-pick-if-gen-refl {P = Typ}))
+    where helper : ∀ {A} → A ≡ T → Term (T ‘’ qqs ‘→’ W (A ‘’ qqs))
+          helper refl = ‘λ∙’ ‘VAR₀’
+  Term⇓ (‘context-pick-if’-refl {A} {T} {dummy} {qqs}) Γ⇓ = lift (helper (context-pick-if-gen-refl {P = Typ}))
+    where helper : ∀ {A} → A ≡ T → Term (A ‘’ qqs ‘→’ W (T ‘’ qqs))
+          helper refl = ‘λ∙’ ‘VAR₀’

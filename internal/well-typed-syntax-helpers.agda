@@ -351,12 +351,6 @@ substTyp-tProd-nd-tProd-tProd-nd x = ‘λ'∙’ (weakenTyp-tProd-inv (‘λ∙
 
 S→∀→ = substTyp-tProd-nd-tProd-tProd-nd
 
-S→W∀W1→W : ∀ {Γ T A B C D}
-         {a : Term T}
-    → Term {Γ} ((A ‘→'’ W B ‘→’ W1 C ‘→'’ W D) ‘’ a)
-    → Term {Γ} ((A ‘’ a) ‘→'’ B ‘→’ C ‘→'’ W (D ‘’ a))
-S→W∀W1→W = substTyp-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp
-
 substTyp-tProd-nd-tProd-nd : ∀ {Γ T A B C}
          {a : Term T} →
     Term {Γ} ((A ‘→'’ B ‘→'’ C) ‘’ a)

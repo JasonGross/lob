@@ -114,6 +114,8 @@ mutual
   ‘proj₁'’ ≟'-term ‘proj₁'’ = just refl
   ‘proj₂'’ ≟'-term ‘proj₂'’ = just refl
   ‘existT'’ ≟'-term ‘existT'’ = just refl
+  ‘context-pick-if’-refl-inv ≟'-term ‘context-pick-if’-refl-inv = just refl
+  ‘context-pick-if’-refl ≟'-term ‘context-pick-if’-refl = just refl
   w x ≟'-term y = nothing
   ‘λ∙’ x ≟'-term y = nothing
   (x ‘’ₐ x₁) ≟'-term y = nothing
@@ -180,3 +182,5 @@ mutual
   ‘proj₁'’ ≟'-term y = nothing
   ‘proj₂'’ ≟'-term y = nothing
   ‘existT'’ ≟'-term y = nothing
+  ‘context-pick-if’-refl-inv ≟'-term y = nothing
+  ‘context-pick-if’-refl ≟'-term y = nothing

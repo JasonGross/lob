@@ -126,3 +126,5 @@ mutual
   ≟'-term-refl ‘proj₁'’ = refl
   ≟'-term-refl ‘proj₂'’ = refl
   ≟'-term-refl ‘existT'’ = refl
+  ≟'-term-refl ‘context-pick-if’-refl-inv = refl
+  ≟'-term-refl ‘context-pick-if’-refl = refl
