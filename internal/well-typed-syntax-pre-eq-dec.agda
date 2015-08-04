@@ -104,3 +104,4 @@ mutual
   ≟'-term-refl ‘proj₁'’ = refl
   ≟'-term-refl ‘proj₂'’ = refl
   ≟'-term-refl ‘existT'’ = refl
+  ≟'-term-refl ‘cast-refl’₀ = refl

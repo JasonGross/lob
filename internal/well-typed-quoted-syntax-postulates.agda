@@ -85,16 +85,9 @@ postulate
 
 postulate
 
-  quote-distr-substTyp : ∀ {B A} {b : □ B} →
-      □ (‘□’ ‘’
-          (⌜ A ‘’ b ⌝T ‘‘→'’’ ⌜ A ⌝T ‘‘’’ ⌜ b ⌝t))
   quote-undistr-substTyp : ∀ {B A} {b : □ B} →
       □ (‘□’ ‘’
           (⌜ A ⌝T ‘‘’’ ⌜ b ⌝t ‘‘→'’’ ⌜ A ‘’ b ⌝T))
-
-  qquote-term-under-app : ∀ {f} {t : □ (‘Σ’ ‘Context’ ‘Typ’)} →
-      □ (‘□’ ‘’
-          (f ‘‘’’ ⌜ t ⌝t ‘‘→'’’ f ‘‘’’ (‘quote-sigma’ ‘'’ₐ t)))
 
   qquote-term-under-app-inv : ∀ {f} {t : □ (‘Σ’ ‘Context’ ‘Typ’)} →
       □ (‘□’ ‘’

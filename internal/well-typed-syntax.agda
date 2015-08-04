@@ -109,3 +109,125 @@ mutual
     ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ'’ T P ‘→’ W T)
     ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ'’ T P} (W1 P ‘’ substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
     ‘existT'’ : ∀ {Γ T P} → Term (T ‘→’ P ‘→’ W (W (‘Σ'’ {Γ} T P)))
+    ‘cast-refl’₀ : {T : Typ (ε ▻ ‘Σ'’ ‘Context’ ‘Typ’)} → {- normal form of ∀ {T : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} →
+    □ (‘□’ ‘’
+        ((⌜ T ‘’ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T) ⌝T)
+           ‘‘→'’’
+           (‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)
+             ‘‘’’ (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T))))) -}
+      Term {ε}
+      (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
+       substTyp1-substTyp-weakenTyp
+       (substTyp2-substTyp1-substTyp-weakenTyp
+        (‘λ∙’
+         (substTyp-weakenTyp1-VAR₀
+          (weakenTyp-tProd
+           (w
+            (substTyp-weakenTyp
+             (‘λ∙’
+              (weakenTyp-substTyp-tProd
+               (w
+                (‘λ∙’
+                 (‘λ∙’
+                  (substTyp-weakenTyp1-VAR₀
+                   (weakenTyp-tProd
+                    (w
+                     (substTyp1-tProd
+                      (substTyp-weakenTyp1-VAR₀
+                       (weakenTyp-tProd
+                        (w
+                         (substTyp-weakenTyp
+                          (‘λ∙’
+                           (weakenTyp-substTyp-tProd
+                            (w (‘λ∙’ (‘λ∙’ (‘λ∙’ ‘tProd-nd’)) ‘’ₐ ⌜ ε ⌝c)))
+                           ‘’ₐ ⌜ ε ⌝c)))
+                        ‘’ₐ ‘VAR₀’))))
+                    ‘’ₐ ‘VAR₀’)))
+                 ‘’ₐ
+                 ⌜
+                 T ‘’
+                 substTyp-weakenTyp
+                 (substTyp1-substTyp-weakenTyp
+                  (substTyp-weakenTyp
+                   (‘λ∙’
+                    (weakenTyp-substTyp-tProd
+                     (w (‘existT'’ ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c)))
+                    ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c)
+                   ‘’ₐ ⌜ T ⌝T))
+                 ⌝T)))
+              ‘’ₐ
+              ⌜
+              T ‘’
+              substTyp-weakenTyp
+              (substTyp1-substTyp-weakenTyp
+               (substTyp-weakenTyp
+                (‘λ∙’
+                 (weakenTyp-substTyp-tProd
+                  (w (‘existT'’ ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c)))
+                 ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c)
+                ‘’ₐ ⌜ T ⌝T))
+              ⌝T)))
+           ‘’ₐ ‘VAR₀’))
+         ‘’ₐ
+         substTyp1-substTyp-weakenTyp-inv
+         (substTyp-weakenTyp
+          (substTyp-weakenTyp
+           (‘substTyp’ ‘’ₐ
+            substTyp-weakenTyp
+            (‘λ∙’
+             (substTyp-weakenTyp1-weakenTyp
+              (substTyp1-substTyp-weakenTyp2-weakenTyp
+               (substTyp-weakenTyp
+                (‘λ∙’
+                 (weakenTyp-substTyp-tProd
+                  (w
+                   (‘λ∙’
+                    (weakenTyp1-tProd
+                     (substTyp-weakenTyp1-VAR₀
+                      (weakenTyp-tProd
+                       (w
+                        (weakenTyp-tProd
+                         (w
+                          (‘λ∙’
+                           (substTyp-weakenTyp1-VAR₀
+                            (weakenTyp-tProd
+                             (w
+                              (substTyp-weakenTyp
+                               (‘context-pick-if'’ ‘’ₐ ⌜ W (‘Typ’ ‘’ ⌜ ε ⌝c) ⌝T)))
+                             ‘’ₐ ‘VAR₀’))))))
+                       ‘’ₐ ‘VAR₀’)))
+                    ‘’ₐ
+                    substTyp-weakenTyp
+                    (‘λ∙’
+                     (weakenTyp1-weakenTyp
+                      (substTyp-weakenTyp1-VAR₀
+                       (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’)))
+                     ‘’ₐ ‘VAR₀’))))
+                 ‘’ₐ
+                 substTyp-weakenTyp
+                 (‘λ∙’
+                  (weakenTyp1-weakenTyp
+                   (substTyp-weakenTyp1-VAR₀
+                    (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’)))
+                  ‘’ₐ ‘VAR₀’))
+                ‘’ₐ ‘proj₂'’)))
+             ‘’ₐ
+             substTyp-weakenTyp
+             (substTyp1-substTyp-weakenTyp
+              (substTyp-weakenTyp
+               (‘λ∙’
+                (weakenTyp-substTyp-tProd
+                 (w (‘existT'’ ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c)))
+                ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c)
+               ‘’ₐ ⌜ T ⌝T))))
+           ‘’ₐ
+           substTyp-weakenTyp
+           (‘quote-sigma’ ‘’ₐ
+            substTyp-weakenTyp
+            (substTyp1-substTyp-weakenTyp
+             (substTyp-weakenTyp
+              (‘λ∙’
+               (weakenTyp-substTyp-tProd
+                (w (‘existT'’ ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c)))
+               ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c)
+              ‘’ₐ ⌜ T ⌝T))))))))

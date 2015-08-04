@@ -12,12 +12,10 @@ infixr 2 _‘‘∘’’_
 ‘β’ = qbeta-nd
 ‘β'’ = qbeta-nd-inv
 
-⌜⌜⌝⌝ = qquote-term-under-app
 ⌜⌜⌝⌝' = qquote-term-under-app-inv
 
 
 
-⌜‘’⌝ = quote-distr-substTyp
 ⌜‘’⌝' = quote-undistr-substTyp
 
 
@@ -58,7 +56,7 @@ g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
            ‘‘→'’’
            (‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)
              ‘‘’’ (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))))
-‘cast-refl’ = ‘β'’ ‘‘∘’’ substTerm-undistr-stuff ‘‘∘’’ qexistT-iota-inv ‘‘∘’’ ⌜⌜⌝⌝ ‘‘∘’’ ‘context-pick-if’-refl-inv ‘‘∘’’ ⌜‘’⌝
+‘cast-refl’ = ‘cast-refl’₀
 
 ‘cast-refl'’ : ∀ {T} →
     □ (‘□’ ‘’
