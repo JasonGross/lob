@@ -9,7 +9,7 @@ open import well-typed-syntax-pre-eq-dec-defs
 {-# NON_TERMINATING #-}
 mutual
   ≟'-ctx-refl : ∀ x → (x ≟'-ctx x) ≡ just refl
-  ≟'-ctx-refl ε₀ = refl
+  ≟'-ctx-refl ε = refl
   ≟'-ctx-refl (x ▻ x₁) = lift-≟-2-refl _▻_ (_ ≟'-ctx _) (λ p → _ ≟'-typ _) (≟'-ctx-refl x) (≟'-typ-refl _)
 
   ≟'-typ-refl : ∀ {Γ} (x : Typ Γ) → (x ≟'-typ x) ≡ just refl

@@ -24,8 +24,8 @@ Typ' = lift→ Typ
 Term' : (Γ⇓ : Lifted {_} {max-level} Context') → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓)) → Set₀
 Term' = lift→→ (λ Γ → Term {Γ})
 
-ε₀' : Lifted {_} {max-level} Context'
-ε₀' = lift ε₀
+ε' : Lifted {_} {max-level} Context'
+ε' = lift ε
 
 _▻'_ : (Γ⇓ : Lifted {_} {max-level} Context') → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓)) → Lifted {_} {max-level} Context'
 Γ⇓ ▻' T⇓ = lift (lift→→ _▻_ Γ⇓ T⇓)
@@ -64,7 +64,7 @@ context-pick-if' (lift Γ) dummy⇓ (lift Γ') v⇓ = context-pick-if-gen {P = �
 
 
 Contextε⇓ : Context⇓ ε
-Contextε⇓ = tt -- , Context' , Typ' , Term' , ε₀' , _▻'_ , ‘Σ'’' , _‘’'_ , _‘→’'_ , W' , context-pick-if'
+Contextε⇓ = tt -- , Context' , Typ' , Term' , ε' , _▻'_ , ‘Σ'’' , _‘’'_ , _‘→’'_ , W' , context-pick-if'
 
 Typε⇓ : Typ ε → Set max-level
 Typε⇓ T = Typ⇓ T Contextε⇓

@@ -5,9 +5,9 @@ open import common-utilities
 
 mutual
   _≟'-ctx_ : (x : Context) → (y : Context) → Maybe (x ≡ y)
-  ε₀ ≟'-ctx ε₀ = just refl
+  ε ≟'-ctx ε = just refl
   (x ▻ x₁) ≟'-ctx (y ▻ y₁) = lift-≟-2 _▻_ (x ≟'-ctx y) (λ p → _ ≟'-typ _)
-  ε₀ ≟'-ctx _ = nothing
+  ε ≟'-ctx _ = nothing
   (x ▻ x₁) ≟'-ctx _ = nothing
 
   _≟'-typ_ : {Γ : Context} → (x : Typ Γ) → (y : Typ Γ) → Maybe (x ≡ y)

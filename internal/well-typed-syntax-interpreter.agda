@@ -23,7 +23,7 @@ mutual
   Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
   Context⇓-helper₀ : (Γ : Context) → (Γ' : Context⇓ Γ) → (T₁ : Typ Γ) → Typ⇓ T₁ Γ' → Context⇓ (Γ ▻ T₁)
 
-  Context⇓ ε₀ = ⊤
+  Context⇓ ε = ⊤
   Context⇓ (Γ ▻ T) = Σ (λ (Γ' : Context⇓ Γ) → Typ⇓ T Γ')
 
   Context⇓-helper₀ Γ Γ⇓ T₁ T₁⇓ = Γ⇓ , T₁⇓
