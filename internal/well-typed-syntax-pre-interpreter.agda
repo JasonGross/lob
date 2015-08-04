@@ -56,8 +56,8 @@ module inner
     Term⇓ (⌜ T ⌝T) Γ⇓ = lift T
     Term⇓ (⌜ t ⌝t) Γ⇓ = lift t
     Term⇓ ‘quote-term’ Γ⇓ (lift T⇓) = lift ⌜ T⇓ ⌝t
-    Term⇓ ‘quote-sigma’ Γ⇓ (lift Γ , lift T) = lift (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ T ⌝T))
-    Term⇓ ‘substTyp’ Γ⇓ (lift f) (lift x) = lift (f ‘’ x)
+    Term⇓ ‘quote-sigma’ Γ⇓ (Γ⇓' , T⇓) = lift (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ lower Γ⇓' ⌝c) ‘’ₐ ⌜ lower T⇓ ⌝T))
+    Term⇓ ‘substTyp’ Γ⇓ f⇓ x⇓ = lift (lower f⇓ ‘’ lower x⇓)
     Term⇓ ‘tProd-nd’ (_ , _ , A⇓ , B⇓) = lift (lower A⇓ ‘→’ W (lower B⇓))
     Term⇓ ‘context-pick-if'’ Γ⇓ (lift dummy) (lift Γ') (lift val) = lift (context-pick-if-gen {P = Typ} {_} {Γ'} dummy val)
     Term⇓ (substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
@@ -95,3 +95,15 @@ module inner
     Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x
     Term⇓ ‘proj₂'’ (Γ⇓ , (x , p)) = p
     Term⇓ ‘existT'’ Γ⇓ x p = x , p
+    Term⇓ (qquote-term-under-app' {f} {t}) Γ⇓ = {!!}
+    --Term⇓ (‘‘Σ’’-η-under-app {f} {t}) Γ⇓ = lift (‘Σ’-η-under-app {lower (Term⇓ f Γ⇓)} {t})
+    --Term⇓ (‘Σ’-η-under-app {f} {t}) Γ⇓ T⇓ = T⇓
+
+helper1 : ∀ {Γ} (f : Typ (Γ ▻ ‘Σ'’ ‘Context’ ‘Typ’)) (t : Term (‘Σ'’ ‘Context’ ‘Typ’))
+  → Term {Γ} (f ‘’ t ‘→’ W (f ‘’ S₁₀WW (S∀ (‘existT'’ ‘’ₐ (‘proj₁'’ ‘'’ₐ t)) ‘’ₐ β (S₀₀W1 (‘proj₂'’ ‘t’ t)))))
+helper1 f t = {!!}
+
+helper : ∀ {Γ} (f : Typ (Γ ▻ ‘Σ'’ ‘Context’ ‘Typ’)) (t : Term (‘Σ'’ ‘Context’ ‘Typ’)) (t' : Σ (λ v → Typ v))
+  → Term {Γ} (f ‘’ S₁₀WW (S∀ (‘existT'’ ‘’ₐ (‘proj₁'’ ‘'’ₐ t)) ‘’ₐ β (S₀₀W1 (‘proj₂'’ ‘t’ t)))
+             ‘→'’ (f ‘’ S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ Σ.proj₁ t' ⌝c) ‘’ₐ ⌜ Σ.proj₂ t' ⌝T)))
+helper f t t' = {!!}
