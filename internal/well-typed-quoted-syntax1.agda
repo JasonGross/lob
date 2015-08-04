@@ -9,27 +9,6 @@ open import well-typed-quoted-syntax-defs public
 
 infixr 2 _‘‘∘’’_
 
-_‘‘∘’’_ : ∀ {A B C}
-    → □ (‘□’ ‘’ (C ‘‘→'’’ B))
-    → □ (‘□’ ‘’ (A ‘‘→'’’ C))
-    → □ (‘□’ ‘’ (A ‘‘→'’’ B))
-g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
-
-
-
-
---postulate
---  ‘‘Σ’’-η-under-app : ∀ {f} {t : □ (‘Σ’ ‘Context’ ‘Typ’)} →
---          □ (‘□’ ‘’
---              (f ‘‘’’ ⌜ t ⌝t ‘‘→'’’ f ‘‘’’ ⌜ S₁₀WW (S∀ (‘existT'’ ‘’ₐ (‘proj₁'’ ‘'’ₐ t)) ‘’ₐ β (S₀₀W1 (‘proj₂'’ ‘t’ t))) ⌝t))
-
-qquote-term-under-app : ∀ {f} {t : □ (‘Σ’ ‘Context’ ‘Typ’)} →
-          □ (‘□’ ‘’
-              (f ‘‘’’ ⌜ t ⌝t ‘‘→'’’ f ‘‘’’ (‘quote-sigma’ ‘'’ₐ t)))
-qquote-term-under-app {f} {t} = qquote-term-under-app' ‘‘∘’’ ‘‘Σ’’-η-under-app
-
-
-
 ‘β’ = qbeta-nd
 ‘β'’ = qbeta-nd-inv
 
@@ -51,6 +30,12 @@ quote-sigma (Γ , v) = ‘existT’ ⌜ Γ ⌝c ⌜ v ⌝T
 ⌜→'⌝ = quote-typ-distr-tProd-nd
 
 ⌜←'⌝ = quote-typ-undistr-tProd-nd
+
+_‘‘∘’’_ : ∀ {A B C}
+    → □ (‘□’ ‘’ (C ‘‘→'’’ B))
+    → □ (‘□’ ‘’ (A ‘‘→'’’ C))
+    → □ (‘□’ ‘’ (A ‘‘→'’’ B))
+g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
 
 ‘ssw1’ = qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW
 
