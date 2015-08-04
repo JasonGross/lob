@@ -91,9 +91,6 @@ mutual
   ‘proj₁'’ ≟'-term ‘proj₁'’ = just refl
   ‘proj₂'’ ≟'-term ‘proj₂'’ = just refl
   ‘existT'’ ≟'-term ‘existT'’ = just refl
-  roundabout-proj₁ x ≟'-term roundabout-proj₁ y = lift-≟-1 roundabout-proj₁ (_ ≟'-term _)
-  roundabout-proj₂ x ≟'-term roundabout-proj₂ .x = just refl
-  roundabout-‘Σ’-η ≟'-term roundabout-‘Σ’-η = just refl
   w x ≟'-term y = nothing
   ‘λ∙’ x ≟'-term y = nothing
   (x ‘’ₐ x₁) ≟'-term y = nothing
@@ -141,6 +138,3 @@ mutual
   ‘proj₁'’ ≟'-term y = nothing
   ‘proj₂'’ ≟'-term y = nothing
   ‘existT'’ ≟'-term y = nothing
-  roundabout-proj₁ x ≟'-term y = nothing
-  roundabout-proj₂ x ≟'-term y = nothing
-  roundabout-‘Σ’-η ≟'-term y = nothing
