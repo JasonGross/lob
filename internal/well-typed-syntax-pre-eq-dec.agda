@@ -106,3 +106,4 @@ mutual
   ≟'-term-refl ‘existT'’ = refl
   ≟'-term-refl ‘context-pick-if’-refl-inv = refl
   ≟'-term-refl ‘context-pick-if’-refl = refl
+  ≟'-term-refl ‘tApp-nd’ = refl

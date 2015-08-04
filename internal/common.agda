@@ -36,6 +36,9 @@ if false then t else f = f
 data Lifted {a b} (A : Set a) : Set (b ⊔ a) where
   lift : A → Lifted A
 
+lower : ∀ {a b A} → Lifted {a} {b} A → A
+lower (lift x) = x
+
 data Maybe {ℓ : Level} (A : Set ℓ) : Set ℓ where
   just    : (x : A) → Maybe A
   nothing : Maybe A

@@ -238,3 +238,41 @@ mutual
        substTyp1-substTyp-weakenTyp-inv
        (substTyp-weakenTyp
         (substTyp-weakenTyp (‘substTyp’ ‘’ₐ ⌜ T ⌝T) ‘’ₐ ⌜ qqs ⌝t)))))
+    ‘tApp-nd’ : {Γ : Term {ε} ‘Context’} {A B : Term (‘Typ’ ‘’ Γ)} →
+  {- normal form of ∀ {Γ} {A : □ (‘Typ’ ‘’ Γ)} {B : □ (‘Typ’ ‘’ Γ)} →
+    □ (‘Term’ ‘’₁ Γ ‘’ (A ‘‘→'’’ B)
+        ‘→'’ ‘Term’ ‘’₁ Γ ‘’ A
+        ‘→'’ ‘Term’ ‘’₁ Γ ‘’ B) -}
+      Term
+      (‘Term’ ‘’₁ Γ ‘’
+     substTyp1-substTyp-weakenTyp
+     (substTyp2-substTyp1-substTyp-weakenTyp
+      (‘λ∙’
+       (substTyp-weakenTyp1-VAR₀
+        (weakenTyp-tProd
+         (w
+          (substTyp-weakenTyp
+           (‘λ∙’
+            (weakenTyp-substTyp-tProd
+             (w
+              (‘λ∙’
+               (‘λ∙’
+                (substTyp-weakenTyp1-VAR₀
+                 (weakenTyp-tProd
+                  (w
+                   (substTyp1-tProd
+                    (substTyp-weakenTyp1-VAR₀
+                     (weakenTyp-tProd
+                      (w
+                       (substTyp-weakenTyp
+                        (‘λ∙’
+                         (weakenTyp-substTyp-tProd
+                          (w (‘λ∙’ (‘λ∙’ (‘λ∙’ ‘tProd-nd’)) ‘’ₐ Γ)))
+                         ‘’ₐ Γ)))
+                      ‘’ₐ ‘VAR₀’))))
+                  ‘’ₐ ‘VAR₀’)))
+               ‘’ₐ A)))
+            ‘’ₐ A)))
+         ‘’ₐ ‘VAR₀’))
+       ‘’ₐ substTyp1-substTyp-weakenTyp-inv B))
+     ‘→’ W (‘Term’ ‘’₁ Γ ‘’ A ‘→’ W (‘Term’ ‘’₁ Γ ‘’ B)))
