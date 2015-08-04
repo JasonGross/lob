@@ -21,11 +21,9 @@ mutual
   ≟'-typ-refl (W x₁) = lift-≟-1-refl W (_ ≟'-typ _) (≟'-typ-refl x₁)
   ≟'-typ-refl (W1 x₂) = lift-≟-1-refl W1 (_ ≟'-typ _) (≟'-typ-refl x₂)
   ≟'-typ-refl (W2 x₃) = lift-≟-1-refl W2 (_ ≟'-typ _) (≟'-typ-refl x₃)
-  ≟'-typ-refl ‘Set’ = refl
   ≟'-typ-refl ‘Context’ = refl
   ≟'-typ-refl ‘Typ’ = refl
   ≟'-typ-refl ‘Term’ = refl
-  ≟'-typ-refl (El y) = lift-≟-1-refl El (_ ≟'-term _) (≟'-term-refl y)
   ≟'-typ-refl (x ‘→’ x₁) = lift-≟-2-refl _‘→’_ (_ ≟'-typ _) (λ p → _ ≟'-typ _) (≟'-typ-refl x) (≟'-typ-refl x₁)
   ≟'-typ-refl (‘Σ'’ x x₁) = lift-≟-2-refl ‘Σ'’ (_ ≟'-typ _) (λ p → _ ≟'-typ _) (≟'-typ-refl x) (≟'-typ-refl x₁)
 
@@ -42,8 +40,6 @@ mutual
   ≟'-term-refl (⌜ x ⌝c) = lift-≟-1-refl ⌜_⌝c (_ ≟'-ctx _) (≟'-ctx-refl x)
   ≟'-term-refl (⌜ x ⌝T) = lift-≟-1-refl ⌜_⌝T (_ ≟'-typ _) (≟'-typ-refl x)
   ≟'-term-refl (⌜ x ⌝t) = lift-≟-1-refl ⌜_⌝t (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (WSet x) = lift-≟-1-refl WSet (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (WWSet x) = lift-≟-1-refl WWSet (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (substTyp-weakenTyp {A = A} {a = a} x₁) = lift-≟-3-refl (λ A a → substTyp-weakenTyp {A = A} {a = a})
                                            (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl A) (≟'-term-refl (transport Term refl a)) (≟'-term-refl x₁)
   ≟'-term-refl (weakenTyp-weakenTyp-substTyp-weakenTyp-inv x₁) = lift-≟-1-refl weakenTyp-weakenTyp-substTyp-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x₁)
@@ -74,7 +70,6 @@ mutual
   ≟'-term-refl (weakenTyp-substTyp2-substTyp1-substTyp-tProd x₃) = lift-≟-1-refl weakenTyp-substTyp2-substTyp1-substTyp-tProd (_ ≟'-term _) (≟'-term-refl x₃)
   ≟'-term-refl (weakenTyp2-weakenTyp1 x) = lift-≟-1-refl weakenTyp2-weakenTyp1 (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp2-weakenTyp1-inv x) = lift-≟-1-refl weakenTyp2-weakenTyp1-inv (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (weakenTyp-weakenTyp2-weakenTyp x) = lift-≟-1-refl weakenTyp-weakenTyp2-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp x) = lift-≟-1-refl weakenTyp1-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp-inv x) = lift-≟-1-refl weakenTyp1-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp1-weakenTyp x) = lift-≟-1-refl weakenTyp1-weakenTyp1-weakenTyp (_ ≟'-term _) (≟'-term-refl x)

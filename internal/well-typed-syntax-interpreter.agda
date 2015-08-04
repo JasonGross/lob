@@ -36,12 +36,9 @@ mutual
   Typ⇓ (W1 T₂) ((Γ⇓ , A⇓) , B⇓) = Typ⇓ T₂ (Γ⇓ , B⇓)
   Typ⇓ (W2 T₃) (((Γ⇓ , A⇓) , B⇓) , C⇓) = Typ⇓ T₃ ((Γ⇓ , B⇓) , C⇓)
   Typ⇓ (T ‘→’ T₁) Γ⇓ = (T⇓ : Typ⇓ T Γ⇓) → Typ⇓ T₁ (Γ⇓ , T⇓)
-  Typ⇓ ‘Set’ Γ⇓ = Set
   Typ⇓ ‘Context’ Γ⇓ = Lifted Context
   Typ⇓ ‘Typ’ (Γ⇓ , lift Γ) = Lifted (Typ Γ)
   Typ⇓ ‘Term’ (Γ⇓ , lift Γ , lift T) = Lifted (Term T)
-  Typ⇓ (El T) Γ⇓ = Lifted (Term⇓ T Γ⇓)
-  --Typ⇓ (WT₂ T₂) (Γ⇓ , A⇓) = Typ⇓ T₂ ((Γ⇓ , {!!}) , {!!}) -- (((Γ⇓ , A⇓) , B⇓) , C⇓ ) = Typ⇓ T₂ ((Γ⇓ , B⇓) , (C⇓))
   Typ⇓ (‘Σ'’ T T₁) Γ⇓ = Σ (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
 
   Term⇓ : ∀ {Γ : Context} {T : Typ Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Typ⇓ T Γ⇓
@@ -57,8 +54,6 @@ mutual
   Term⇓ ‘substTyp’ Γ⇓ (lift f) (lift x) = lift (f ‘’ x)
   Term⇓ ‘tProd-nd’ (Γ⇓ , lift Γ , lift A , lift B) = lift (A ‘→’ W B)
   Term⇓ ‘context-pick-if'’ Γ⇓ (lift dummy) (lift Γ') (lift val) = lift (context-pick-if-gen {P = Typ} {_} {Γ'} dummy val)
-  Term⇓ (WSet T) Γ⇓ = Term⇓ T Γ⇓
-  Term⇓ (WWSet T) Γ⇓ = Term⇓ T Γ⇓
   Term⇓ (substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-weakenTyp-substTyp-weakenTyp-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
@@ -82,7 +77,6 @@ mutual
   Term⇓ (weakenTyp-substTyp2-substTyp1-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
   Term⇓ (weakenTyp2-weakenTyp1 t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp2-weakenTyp1-inv t) Γ⇓ = Term⇓ t Γ⇓
-  Term⇓ (weakenTyp-weakenTyp2-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp1-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp1-weakenTyp-inv t) Γ⇓ = Term⇓ t Γ⇓
   Term⇓ (weakenTyp1-weakenTyp1-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
