@@ -109,3 +109,6 @@ mutual
     ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ'’ T P ‘→’ W T)
     ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ'’ T P} (W1 P ‘’ substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
     ‘existT'’ : ∀ {Γ T P} → Term (T ‘→’ P ‘→’ W (W (‘Σ'’ {Γ} T P)))
+    roundabout-proj₁ : ∀ {Γ} → Term {Γ} (‘Σ'’ ‘Context’ ‘Typ’) → Term {Γ} ‘Context’
+    roundabout-proj₂ : ∀ {Γ} → (x : Term {Γ} (‘Σ'’ ‘Context’ ‘Typ’)) → Term {Γ} (‘Typ’ ‘’ roundabout-proj₁ x)
+    roundabout-‘Σ’-η : ∀ {f} {t : Term {ε} (‘Σ'’ ‘Context’ ‘Typ’)} → Term {ε} (f ‘’ t ‘→’ W (f ‘’ substTyp-weakenTyp (substTyp1-substTyp-weakenTyp (substTyp-weakenTyp (‘λ∙’ (weakenTyp-substTyp-tProd (w (‘existT'’ ‘’ₐ roundabout-proj₁ t))) ‘’ₐ roundabout-proj₁ t) ‘’ₐ roundabout-proj₂ t)))) -- normal form of ∀ {f} {t : Term {ε} (‘Σ'’ ‘Context’ ‘Typ’)} → Term {ε} (f ‘’ t ‘→’ W (f ‘’ (S₁₀WW (S∀ (‘existT'’ ‘’ₐ (roundabout-proj₁ t)) ‘’ₐ roundabout-proj₂ t))))

@@ -104,3 +104,6 @@ mutual
   ≟'-term-refl ‘proj₁'’ = refl
   ≟'-term-refl ‘proj₂'’ = refl
   ≟'-term-refl ‘existT'’ = refl
+  ≟'-term-refl (roundabout-proj₁ x) = lift-≟-1-refl roundabout-proj₁ (_ ≟'-term _) (≟'-term-refl x)
+  ≟'-term-refl (roundabout-proj₂ x) = refl
+  ≟'-term-refl roundabout-‘Σ’-η = refl

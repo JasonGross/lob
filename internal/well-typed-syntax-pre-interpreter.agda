@@ -95,3 +95,6 @@ module inner
     Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x
     Term⇓ ‘proj₂'’ (Γ⇓ , (x , p)) = p
     Term⇓ ‘existT'’ Γ⇓ x p = x , p
+    Term⇓ (roundabout-proj₁ x) Γ⇓ = Σ.proj₁ (Term⇓ x Γ⇓)
+    Term⇓ (roundabout-proj₂ x) Γ⇓ = Σ.proj₂ (Term⇓ x Γ⇓)
+    Term⇓ roundabout-‘Σ’-η Γ⇓ T⇓ = T⇓
