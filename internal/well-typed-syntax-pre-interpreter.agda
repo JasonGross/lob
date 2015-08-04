@@ -91,4 +91,3 @@ module inner
     Term⇓ (‘context-pick-if’-refl {A} {T} {dummy} {qqs}) Γ⇓ = lift (helper (context-pick-if-gen-refl {P = Typ}))
       where helper : ∀ {A} → A ≡ T → Term (A ‘’ qqs ‘→’ W (T ‘’ qqs))
             helper refl = ‘λ∙’ ‘VAR₀’
-    Term⇓ ‘tApp-nd’ Γ⇓ (lift f) (lift x) = lift (f ‘'’ₐ x)

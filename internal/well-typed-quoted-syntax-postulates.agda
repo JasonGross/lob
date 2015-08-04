@@ -27,6 +27,12 @@ postulate
         ‘→'’ ‘□’ ‘’ (SW (S₂₀₀W1WW (w1 (d ‘t’ S₁W' (w b)) ‘t’ c) ‘t’ e)))
 -- qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW-inv = {!!}
 
+  ‘tApp-nd’ : ∀ {Γ} {A : □ (‘Typ’ ‘’ Γ)} {B : □ (‘Typ’ ‘’ Γ)} →
+    □ (‘Term’ ‘’₁ Γ ‘’ (A ‘‘→'’’ B)
+        ‘→'’ ‘Term’ ‘’₁ Γ ‘’ A
+        ‘→'’ ‘Term’ ‘’₁ Γ ‘’ B)
+-- ‘tApp-nd’ = {!!}
+
   quote-typ-undistr-tProd-nd : ∀ {H X} →
     □ (‘□’ ‘’ (⌜ H ⌝T ‘‘→'’’ ⌜ X ⌝T)
         ‘→'’ ‘□’ ‘’ ⌜ H ‘→'’ X ⌝T)

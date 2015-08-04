@@ -93,7 +93,6 @@ mutual
   ‘existT'’ ≟'-term ‘existT'’ = just refl
   ‘context-pick-if’-refl-inv ≟'-term ‘context-pick-if’-refl-inv = just refl
   ‘context-pick-if’-refl ≟'-term ‘context-pick-if’-refl = just refl
-  ‘tApp-nd’ ≟'-term ‘tApp-nd’ = just refl
   w x ≟'-term y = nothing
   ‘λ∙’ x ≟'-term y = nothing
   (x ‘’ₐ x₁) ≟'-term y = nothing
@@ -143,4 +142,3 @@ mutual
   ‘existT'’ ≟'-term y = nothing
   ‘context-pick-if’-refl-inv ≟'-term y = nothing
   ‘context-pick-if’-refl ≟'-term y = nothing
-  ‘tApp-nd’ ≟'-term y = nothing
