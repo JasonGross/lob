@@ -6,6 +6,21 @@ open import well-typed-syntax-helpers
 open import well-typed-syntax-context-helpers
 open import well-typed-quoted-syntax-defs public
 
+postulate
+  ‘context-pick-if’-refl-inv : ∀ {A T dummy qqs} →
+      □ (‘□’ ‘’
+          ((⌜ T ⌝T ‘‘’’ ⌜ qqs ⌝t)
+             ‘‘→'’’
+             ((S₁₀WW (substTyp-tProd (‘context-pick-if'’ {ε} {ε ▻ A} ‘'’ₐ ⌜ dummy ⌝T ‘’ₐ ⌜ ε ▻ A ⌝c) ‘’ₐ ⌜ T ⌝T))
+                ‘‘’’ ⌜ qqs ⌝t)))
+  ‘context-pick-if’-refl : ∀ {A T dummy qqs} →
+      □ (‘□’ ‘’
+          ((S₁₀WW (substTyp-tProd (‘context-pick-if'’ {ε} {ε ▻ A} ‘'’ₐ ⌜ dummy ⌝T ‘’ₐ ⌜ ε ▻ A ⌝c) ‘’ₐ ⌜ T ⌝T)
+              ‘‘’’ ⌜ qqs ⌝t)
+             ‘‘→'’’
+             (⌜ T ⌝T ‘‘’’ ⌜ qqs ⌝t)))
+
+
 
 postulate
 
