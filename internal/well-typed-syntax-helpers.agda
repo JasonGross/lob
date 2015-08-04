@@ -137,9 +137,6 @@ W2W1 = weakenTyp2-weakenTyp1
 W2W1' : ∀ {Γ A B C D} → Term {Γ ▻ A ▻ W B ▻ W1 C} (W (W1 D)) → Term {Γ ▻ A ▻ W B ▻ W1 C} (W2 (W D))
 W2W1' = weakenTyp2-weakenTyp1-inv
 
-WW2W : ∀ {Γ A B C D E} → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D} (W (W2 (W E))) → Term {Γ ▻ A ▻ W B ▻ W1 C ▻ D} (W (W (W1 E)))
-WW2W = weakenTyp-weakenTyp2-weakenTyp
-
 W1W : ∀ {Γ A B C} → Term {Γ ▻ A ▻ W B} (W1 (W C)) → Term {Γ ▻ A ▻ W B} (W (W C))
 W1W = weakenTyp1-weakenTyp
 
