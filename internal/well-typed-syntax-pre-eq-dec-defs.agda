@@ -61,9 +61,7 @@ mutual
   ‘context-pick-if'’ ≟'-term ‘context-pick-if'’ = just refl
   WSet x ≟'-term WSet y = lift-≟-1 WSet (_ ≟'-term _)
   WWSet x ≟'-term WWSet y = lift-≟-1 WWSet (_ ≟'-term _)
-  WWWSet x ≟'-term WWWSet y = lift-≟-1 WWWSet (_ ≟'-term _)
   substTyp-weakenTyp x₁ ≟'-term substTyp-weakenTyp y = lift-≟-3 (λ A a → substTyp-weakenTyp {A = A} {a = a}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
-  weakenTyp-substTyp-weakenTyp x₁ ≟'-term weakenTyp-substTyp-weakenTyp y = lift-≟-3 (λ A a → weakenTyp-substTyp-weakenTyp {A = A} {a = a}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
   weakenTyp-weakenTyp-substTyp-weakenTyp-inv x₁ ≟'-term weakenTyp-weakenTyp-substTyp-weakenTyp-inv y = lift-≟-1 weakenTyp-weakenTyp-substTyp-weakenTyp-inv (_ ≟'-term _)
   weakenTyp-substTyp-tProd x₁ ≟'-term weakenTyp-substTyp-tProd y = lift-≟-1 weakenTyp-substTyp-tProd (_ ≟'-term _)
   substTyp-weakenTyp1-VAR₀ x ≟'-term substTyp-weakenTyp1-VAR₀ y = lift-≟-1 substTyp-weakenTyp1-VAR₀ (_ ≟'-term _)
@@ -76,13 +74,9 @@ mutual
   weakenTyp1-tProd x ≟'-term weakenTyp1-tProd y = lift-≟-1 weakenTyp1-tProd (_ ≟'-term _)
   weakenTyp1-tProd-inv x ≟'-term weakenTyp1-tProd-inv y = lift-≟-1 weakenTyp1-tProd-inv (_ ≟'-term _)
   weakenTyp2-tProd-nd x ≟'-term weakenTyp2-tProd-nd y = lift-≟-1 weakenTyp2-tProd-nd (_ ≟'-term _)
-  substTyp-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp x ≟'-term substTyp-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp y = lift-≟-1 substTyp-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp (_ ≟'-term _)
-  weakenTyp-weakenTyp2-tProd-nd x ≟'-term weakenTyp-weakenTyp2-tProd-nd y = lift-≟-1 weakenTyp-weakenTyp2-tProd-nd (_ ≟'-term _)
-  weakenTyp-weakenTyp-weakenTyp2-weakenTyp x ≟'-term weakenTyp-weakenTyp-weakenTyp2-weakenTyp y = lift-≟-1 weakenTyp-weakenTyp-weakenTyp2-weakenTyp (_ ≟'-term _)
   substTyp2-tProd x₁ ≟'-term substTyp2-tProd y = lift-≟-1 substTyp2-tProd (_ ≟'-term _)
   substTyp1-substTyp-weakenTyp-inv x₂ ≟'-term substTyp1-substTyp-weakenTyp-inv y = lift-≟-1 substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _)
   substTyp1-substTyp-weakenTyp x₂ ≟'-term substTyp1-substTyp-weakenTyp y = lift-≟-3 (λ T b → substTyp1-substTyp-weakenTyp {T = T} {b = b}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
-  weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv x₂ ≟'-term weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv y = lift-≟-1 weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _)
   weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp x₂ ≟'-term weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp y = lift-≟-3 (λ T b → weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp {T = T} {b = b}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
   substTyp2-weakenTyp-inv x₁ ≟'-term substTyp2-weakenTyp-inv y = lift-≟-1 substTyp2-weakenTyp-inv (_ ≟'-term _)
   weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv x₃ ≟'-term weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv y = lift-≟-1 weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _)
@@ -91,7 +85,6 @@ mutual
   weakenTyp2-weakenTyp1 x ≟'-term weakenTyp2-weakenTyp1 y = lift-≟-1 weakenTyp2-weakenTyp1 (_ ≟'-term _)
   weakenTyp2-weakenTyp1-inv x ≟'-term weakenTyp2-weakenTyp1-inv y = lift-≟-1 weakenTyp2-weakenTyp1-inv (_ ≟'-term _)
   weakenTyp-weakenTyp2-weakenTyp x ≟'-term weakenTyp-weakenTyp2-weakenTyp y = lift-≟-1 weakenTyp-weakenTyp2-weakenTyp (_ ≟'-term _)
-  weakenTyp-weakenTyp2-weakenTyp-inv x ≟'-term weakenTyp-weakenTyp2-weakenTyp-inv y = lift-≟-1 weakenTyp-weakenTyp2-weakenTyp-inv (_ ≟'-term _)
   weakenTyp1-weakenTyp x ≟'-term weakenTyp1-weakenTyp y = lift-≟-1 weakenTyp1-weakenTyp (_ ≟'-term _)
   weakenTyp1-weakenTyp-inv x ≟'-term weakenTyp1-weakenTyp-inv y = lift-≟-1 weakenTyp1-weakenTyp-inv (_ ≟'-term _)
   weakenTyp1-weakenTyp1-weakenTyp x ≟'-term weakenTyp1-weakenTyp1-weakenTyp y = lift-≟-1 weakenTyp1-weakenTyp1-weakenTyp (_ ≟'-term _)
@@ -108,9 +101,7 @@ mutual
     = lift-≟-5 (λ C B b c → substTyp2-substTyp-substTyp-weakenTyp1-weakenTyp-weakenTyp {C = C} {B = B} {b = b} {c = c}) (_ ≟'-typ _) (λ p → _ ≟'-typ _) (λ p q → _ ≟'-term _) (λ p q r → _ ≟'-term _) (λ p q r s → _ ≟'-term _)
   substTyp1-substTyp-weakenTyp2-weakenTyp x₂ ≟'-term substTyp1-substTyp-weakenTyp2-weakenTyp y = lift-≟-3 (λ B b → substTyp1-substTyp-weakenTyp2-weakenTyp {B = B} {b = b}) (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
   weakenTyp-weakenTyp1-weakenTyp x ≟'-term weakenTyp-weakenTyp1-weakenTyp x' = lift-≟-1 weakenTyp-weakenTyp1-weakenTyp (_ ≟'-term _)
-  weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp x ≟'-term weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp x' = lift-≟-1 weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp (_ ≟'-term _)
   beta-under-subst x ≟'-term beta-under-subst x' = lift-≟-1 beta-under-subst (_ ≟'-term _)
-  beta-under-subst-inv x ≟'-term beta-under-subst-inv x' = lift-≟-1 beta-under-subst-inv (_ ≟'-term _)
   ‘proj₁'’ ≟'-term ‘proj₁'’ = just refl
   ‘proj₂'’ ≟'-term ‘proj₂'’ = just refl
   ‘existT'’ ≟'-term ‘existT'’ = just refl
@@ -121,7 +112,6 @@ mutual
   (x ‘’ₐ x₁) ≟'-term y = nothing
   WSet x ≟'-term y = nothing
   WWSet x ≟'-term y = nothing
-  WWWSet x ≟'-term y = nothing
   ‘VAR₀’ ≟'-term y = nothing
   ⌜ x ⌝c ≟'-term y = nothing
   ⌜ x ⌝T ≟'-term y = nothing
@@ -132,7 +122,6 @@ mutual
   ‘tProd-nd’ ≟'-term y = nothing
   ‘context-pick-if'’ ≟'-term y = nothing
   substTyp-weakenTyp x₁ ≟'-term y = nothing
-  weakenTyp-substTyp-weakenTyp x₁ ≟'-term y = nothing
   weakenTyp-weakenTyp-substTyp-weakenTyp-inv x₁ ≟'-term y = nothing
   weakenTyp-substTyp-tProd x₁ ≟'-term y = nothing
   substTyp-weakenTyp1-VAR₀ x ≟'-term y = nothing
@@ -145,13 +134,9 @@ mutual
   weakenTyp1-tProd x ≟'-term y = nothing
   weakenTyp1-tProd-inv x ≟'-term y = nothing
   weakenTyp2-tProd-nd x ≟'-term y = nothing
-  substTyp-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp x ≟'-term y = nothing
-  weakenTyp-weakenTyp2-tProd-nd x ≟'-term y = nothing
-  weakenTyp-weakenTyp-weakenTyp2-weakenTyp x ≟'-term y = nothing
   substTyp2-tProd x₁ ≟'-term y = nothing
   substTyp1-substTyp-weakenTyp-inv x₂ ≟'-term y = nothing
   substTyp1-substTyp-weakenTyp x₂ ≟'-term y = nothing
-  weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv x₂ ≟'-term y = nothing
   weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp x₂ ≟'-term y = nothing
   substTyp2-weakenTyp-inv x₁ ≟'-term y = nothing
   weakenTyp-substTyp2-substTyp1-substTyp-weakenTyp-inv x₃ ≟'-term y = nothing
@@ -160,7 +145,6 @@ mutual
   weakenTyp2-weakenTyp1 x ≟'-term y = nothing
   weakenTyp2-weakenTyp1-inv x ≟'-term y = nothing
   weakenTyp-weakenTyp2-weakenTyp x ≟'-term y = nothing
-  weakenTyp-weakenTyp2-weakenTyp-inv x ≟'-term y = nothing
   weakenTyp1-weakenTyp x ≟'-term y = nothing
   weakenTyp1-weakenTyp-inv x ≟'-term y = nothing
   weakenTyp1-weakenTyp1-weakenTyp x ≟'-term y = nothing
@@ -176,9 +160,7 @@ mutual
   substTyp2-substTyp-substTyp-weakenTyp1-weakenTyp-weakenTyp x₃ ≟'-term y = nothing
   substTyp1-substTyp-weakenTyp2-weakenTyp x₂ ≟'-term y = nothing
   weakenTyp-weakenTyp1-weakenTyp x ≟'-term y = nothing
-  weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp x ≟'-term y = nothing
   beta-under-subst x ≟'-term y = nothing
-  beta-under-subst-inv x ≟'-term y = nothing
   ‘proj₁'’ ≟'-term y = nothing
   ‘proj₂'’ ≟'-term y = nothing
   ‘existT'’ ≟'-term y = nothing

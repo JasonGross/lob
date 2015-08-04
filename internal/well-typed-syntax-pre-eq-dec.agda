@@ -44,10 +44,7 @@ mutual
   ≟'-term-refl (⌜ x ⌝t) = lift-≟-1-refl ⌜_⌝t (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (WSet x) = lift-≟-1-refl WSet (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (WWSet x) = lift-≟-1-refl WWSet (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (WWWSet x) = lift-≟-1-refl WWWSet (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (substTyp-weakenTyp {A = A} {a = a} x₁) = lift-≟-3-refl (λ A a → substTyp-weakenTyp {A = A} {a = a})
-                                           (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl A) (≟'-term-refl (transport Term refl a)) (≟'-term-refl x₁)
-  ≟'-term-refl (weakenTyp-substTyp-weakenTyp {A = A} {a = a} x₁) = lift-≟-3-refl (λ A a → weakenTyp-substTyp-weakenTyp {A = A} {a = a})
                                            (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl A) (≟'-term-refl (transport Term refl a)) (≟'-term-refl x₁)
   ≟'-term-refl (weakenTyp-weakenTyp-substTyp-weakenTyp-inv x₁) = lift-≟-1-refl weakenTyp-weakenTyp-substTyp-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x₁)
   ≟'-term-refl (weakenTyp-substTyp-tProd x₁) = lift-≟-1-refl weakenTyp-substTyp-tProd (_ ≟'-term _) (≟'-term-refl x₁)
@@ -61,15 +58,11 @@ mutual
   ≟'-term-refl (weakenTyp1-tProd x) = lift-≟-1-refl weakenTyp1-tProd (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-tProd-inv x) = lift-≟-1-refl weakenTyp1-tProd-inv (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp2-tProd-nd x) = lift-≟-1-refl weakenTyp2-tProd-nd (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (substTyp-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp x) = lift-≟-1-refl substTyp-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (weakenTyp-weakenTyp2-tProd-nd x) = lift-≟-1-refl weakenTyp-weakenTyp2-tProd-nd (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (weakenTyp-weakenTyp-weakenTyp2-weakenTyp x) = lift-≟-1-refl weakenTyp-weakenTyp-weakenTyp2-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (substTyp2-tProd x₁) = lift-≟-1-refl substTyp2-tProd (_ ≟'-term _) (≟'-term-refl x₁)
   ≟'-term-refl (substTyp1-substTyp-weakenTyp-inv x₂) = lift-≟-1-refl substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x₂)
   ≟'-term-refl (substTyp1-substTyp-weakenTyp {T = T} {b = b} x₂) = lift-≟-3-refl
                                                      (λ T b → substTyp1-substTyp-weakenTyp {T = T} {b = b}) (_ ≟'-typ _)
                                                      (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl T) (≟'-term-refl b) (≟'-term-refl x₂)
-  ≟'-term-refl (weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv x₂) = lift-≟-1-refl weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x₂)
   ≟'-term-refl (weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp {T = T} {b = b} x₂) = lift-≟-3-refl
                                                      (λ T b → weakenTyp-weakenTyp-substTyp1-substTyp-weakenTyp {T = T} {b = b}) (_ ≟'-typ _)
                                                      (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _) (≟'-typ-refl T) (≟'-term-refl b) (≟'-term-refl x₂)
@@ -82,7 +75,6 @@ mutual
   ≟'-term-refl (weakenTyp2-weakenTyp1 x) = lift-≟-1-refl weakenTyp2-weakenTyp1 (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp2-weakenTyp1-inv x) = lift-≟-1-refl weakenTyp2-weakenTyp1-inv (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp-weakenTyp2-weakenTyp x) = lift-≟-1-refl weakenTyp-weakenTyp2-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (weakenTyp-weakenTyp2-weakenTyp-inv x) = lift-≟-1-refl weakenTyp-weakenTyp2-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp x) = lift-≟-1-refl weakenTyp1-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp-inv x) = lift-≟-1-refl weakenTyp1-weakenTyp-inv (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (weakenTyp1-weakenTyp1-weakenTyp x) = lift-≟-1-refl weakenTyp1-weakenTyp1-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
@@ -120,9 +112,7 @@ mutual
                                                                 (_ ≟'-typ _) (λ p → _ ≟'-term _) (λ p q → _ ≟'-term _)
                                                                 (≟'-typ-refl B) (≟'-term-refl b) (≟'-term-refl x₂)
   ≟'-term-refl (weakenTyp-weakenTyp1-weakenTyp x) = lift-≟-1-refl weakenTyp-weakenTyp1-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp x) = lift-≟-1-refl weakenTyp-tProd-tProd-tProd-nd-weakenTyp-tProd-weakenTyp1-tProd-nd-weakenTyp (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl (beta-under-subst x) = lift-≟-1-refl beta-under-subst (_ ≟'-term _) (≟'-term-refl x)
-  ≟'-term-refl (beta-under-subst-inv x) = lift-≟-1-refl beta-under-subst-inv (_ ≟'-term _) (≟'-term-refl x)
   ≟'-term-refl ‘proj₁'’ = refl
   ≟'-term-refl ‘proj₂'’ = refl
   ≟'-term-refl ‘existT'’ = refl
