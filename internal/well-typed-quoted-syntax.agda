@@ -42,6 +42,9 @@ g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
 
 ‘s←←’ = qsubstTerm-qtApp-nd-qtApp-nd-undistr
 
+‘context-pick-if’ : ∀ (dummy : Term (‘Typ’ ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c))
+  → □ (‘Context’ ‘→’ ‘Typ’ ‘→'’ W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
+‘context-pick-if’ dummy = ‘context-pick-if'’ {ε} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} ‘'’ₐ dummy
 
 ‘cast’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c)
 ‘cast’ = ‘λ'∙’ ((SW1W (S₁₀W2W (substTyp-tProd (weakenTyp1-tProd (w1

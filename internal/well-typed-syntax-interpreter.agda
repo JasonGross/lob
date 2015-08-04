@@ -56,7 +56,7 @@ mutual
   Term⇓ ‘quote-sigma’ Γ⇓ (lift Γ , lift T) = lift (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ T ⌝T))
   Term⇓ ‘substTyp’ Γ⇓ (lift f) (lift x) = lift (f ‘’ x)
   Term⇓ ‘tProd-nd’ (Γ⇓ , lift Γ , lift A , lift B) = lift (A ‘→’ W B)
-  Term⇓ ‘context-pick-if'’ Γ⇓ (lift Γ) (lift dummy) (lift Γ') (lift val) = lift (context-pick-if-gen {P = Typ} {Γ} {Γ'} dummy val)
+  Term⇓ ‘context-pick-if'’ Γ⇓ (lift dummy) (lift Γ') (lift val) = lift (context-pick-if-gen {P = Typ} {_} {Γ'} dummy val)
   Term⇓ (WSet T) Γ⇓ = Term⇓ T Γ⇓
   Term⇓ (WWSet T) Γ⇓ = Term⇓ T Γ⇓
   Term⇓ (WWWSet T) Γ⇓ = Term⇓ T Γ⇓

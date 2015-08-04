@@ -46,7 +46,7 @@ mutual
                   ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T
                   ‘→’ W (‘Typ’ ‘’ ⌜ Γ ⌝c)))
     ‘tProd-nd’ : ∀ {Γ} → Term {Γ ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’} (W (W ‘Typ’))
-    ‘context-pick-if'’ : ∀ {Γ} → Term {Γ} (‘Context’ ‘→’ ‘Typ’ ‘→’ W (W ‘Context’ ‘→’ W1 ‘Typ’ ‘→’ W (W ‘Typ’)))
+    ‘context-pick-if'’ : ∀ {Γ Γ'} → Term {Γ} (‘Typ’ ‘’ ⌜ Γ' ⌝c ‘→’ W (‘Context’ ‘→’ ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ Γ' ⌝c))))
     -- Ty : ∀ {Γ} → Typ Γ → Term {Γ} ‘Set’
     WSet : ∀ {Γ A} → Term {Γ ▻ A} (W ‘Set’) → Term {Γ ▻ A} ‘Set’
     WWSet : ∀ {Γ A B} → Term {Γ ▻ A ▻ B} (W (W ‘Set’)) → Term {Γ ▻ A ▻ B} ‘Set’
