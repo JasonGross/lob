@@ -1,8 +1,12 @@
 {-# OPTIONS --without-K #-}
 module well-typed-syntax-interpreter where
+open import common public
 open import well-typed-syntax
 import well-typed-syntax-pre-interpreter
 open import well-typed-syntax-context-pre-helpers
+
+max-level : Level
+max-level = well-typed-syntax-pre-interpreter.inner.max-level
 
 Context⇓ : (Γ : Context) → Set (lsuc max-level)
 Context⇓ = well-typed-syntax-pre-interpreter.inner.Context⇓
