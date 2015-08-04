@@ -8,14 +8,24 @@ max-level : Level
 max-level = lsuc lzero
 
 module inner
-  (context-pick-if-gen  : ∀ {ℓ} {P : Context → Set ℓ}
-                          {Γ' Γ : Context}
+  (context-pick-if-gen' : ∀ ℓ (P : Context → Set ℓ)
+                          (Γ' Γ : Context)
                           (dummy : P Γ')
                           (val : P Γ) →
                         P Γ')
-  (context-pick-if-gen-refl : ∀ {ℓ P Γ dummy val} →
-                            context-pick-if-gen {ℓ} {P} {Γ} {Γ} dummy val ≡ val)
+  (context-pick-if-gen-refl' : ∀ ℓ P Γ dummy val →
+                            context-pick-if-gen' ℓ P Γ Γ dummy val ≡ val)
   where
+
+  context-pick-if-gen : ∀ {ℓ} {P : Context → Set ℓ}
+                          {Γ' Γ : Context}
+                          (dummy : P Γ')
+                          (val : P Γ) →
+                        P Γ'
+  context-pick-if-gen {P = P} dummy val = context-pick-if-gen' _ P _ _ dummy val
+  context-pick-if-gen-refl : ∀ {ℓ P Γ dummy val} →
+                            context-pick-if-gen {ℓ} {P} {Γ} {Γ} dummy val ≡ val
+  context-pick-if-gen-refl {P = P} = context-pick-if-gen-refl' _ P _ _ _
 
   mutual
     Context⇓ : (Γ : Context) → Set (lsuc max-level)
