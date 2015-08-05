@@ -3,9 +3,10 @@ module well-typed-quoted-syntax where
 open import common
 open import well-typed-syntax
 open import well-typed-syntax-helpers public
-open import well-typed-syntax-context-helpers public
 open import well-typed-quoted-syntax-postulates public
 open import well-typed-quoted-syntax-defs public
+open import well-typed-syntax-context-helpers public
+open import well-typed-syntax-eq-dec public
 
 infixr 2 _‘‘∘’’_
 
@@ -44,7 +45,7 @@ g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
 
 ‘context-pick-if’ : ∀ (dummy : Term (‘Typ’ ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c))
   → □ (‘Context’ ‘→’ ‘Typ’ ‘→'’ W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
-‘context-pick-if’ dummy = ‘context-pick-if'’ {ε} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} ‘'’ₐ dummy
+‘context-pick-if’ dummy = ‘context-pick-if'’ {ε} ‘'’ₐ dummy
 
 ‘cast’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c)
 ‘cast’ = ‘λ'∙’ ((SW1W (S₁₀W2W (substTyp-tProd (weakenTyp1-tProd (w1

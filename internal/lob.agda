@@ -23,7 +23,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   dummy = ‘Context’
 
   cast : (Γv : Σ Typ) → Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
-  cast (Γ , v) = context-pick-if {Typ} {Γ} (W dummy) v
+  cast (Γ , v) = context-pick-if {P = Typ} {Γ} (W dummy) v
 
   Hf : (h : Σ Typ) → Typ ε
   Hf h = (cast h ‘’ quote-sigma h ‘→'’ ‘X’)
@@ -74,8 +74,8 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   toH-helper-helper p x = transport (λ k → □ (k ‘’ quote-sigma h ‘→'’ ‘□’ ‘’ ⌜ k ‘’ quote-sigma h ‘→'’ ‘X’ ⌝T)) p x
 
   toH-helper : □ (cast h ‘’ quote-sigma h ‘→'’ ‘H’)
-  toH-helper = toH-helper-helper {k = context-pick-if {Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) h2}
-                                 (sym (context-pick-if-refl {Typ} {W dummy} {h2}))
+  toH-helper = toH-helper-helper {k = context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) h2}
+                                 (sym (context-pick-if-refl {P = Typ} {W dummy} {h2}))
                                  (S₀₀W1'→ (‘ssw1’ ‘∘’ ‘‘fcomp-nd’’ ‘'’ₐ (‘s←←’ ‘‘∘’’ ‘cast-refl’ ‘‘∘’’ ⌜→'⌝ ‘'’ₐ ⌜ ‘λ∙’ ‘VAR₀’ ⌝t) ‘∘’ ⌜←'⌝))
 
   ‘toH’ : □ (‘H'’ ‘→'’ ‘H’)
@@ -90,8 +90,8 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   fromH-helper-helper p x = transport (λ k → □ (‘□’ ‘’ ⌜ k ‘’ quote-sigma h ‘→'’ ‘X’ ⌝T ‘→'’ k ‘’ quote-sigma h)) p x
 
   fromH-helper : □ (‘H’ ‘→'’ cast h ‘’ quote-sigma h)
-  fromH-helper = fromH-helper-helper {k = context-pick-if {Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) h2}
-                                     (sym (context-pick-if-refl {Typ} {W dummy} {h2}))
+  fromH-helper = fromH-helper-helper {k = context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) h2}
+                                     (sym (context-pick-if-refl {P = Typ} {W dummy} {h2}))
                                      (S₀₀W1'← (⌜→'⌝ ‘∘’ ‘‘fcomp-nd’’ ‘'’ₐ
                                                           (⌜→'⌝ ‘'’ₐ ⌜ ‘λ∙’ ‘VAR₀’ ⌝t ‘‘∘’’ ‘cast-refl'’ ‘‘∘’’ ‘s→→’) ‘∘’ ‘ssw1'’))
   {--}

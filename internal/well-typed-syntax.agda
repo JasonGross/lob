@@ -23,7 +23,7 @@ mutual
     W1 : ∀ {Γ A B} → Typ (Γ ▻ B) → Typ (Γ ▻ A ▻ (W {Γ = Γ} {A = A} B))
     W2 : ∀ {Γ A B C} → Typ (Γ ▻ B ▻ C) → Typ (Γ ▻ A ▻ W B ▻ W1 C)
     _‘→’_ : ∀ {Γ} (A : Typ Γ) → Typ (Γ ▻ A) → Typ Γ
-    ‘Σ'’ : ∀ {Γ} (T : Typ Γ) → Typ (Γ ▻ T) → Typ Γ
+    ‘Σ’ : ∀ {Γ} (T : Typ Γ) → Typ (Γ ▻ T) → Typ Γ
     ‘Context’ : ∀ {Γ} → Typ Γ
     ‘Typ’ : ∀ {Γ} → Typ (Γ ▻ ‘Context’)
     ‘Term’ : ∀ {Γ} → Typ (Γ ▻ ‘Context’ ▻ ‘Typ’)
@@ -38,13 +38,13 @@ mutual
     ⌜_⌝T : ∀ {Γ Γ'} → Typ Γ' → Term {Γ} (‘Typ’ ‘’ ⌜ Γ' ⌝c)
     ⌜_⌝t : ∀ {Γ Γ'} {T : Typ Γ'} → Term T → Term {Γ} (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ T ⌝T)
     ‘quote-term’ : ∀ {Γ Γ'} {A : Typ Γ'} → Term {Γ} (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ A ⌝T ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ ‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ A ⌝T ⌝T))
-    ‘quote-sigma’ : ∀ {Γ Γ'} → Term {Γ} (‘Σ'’ ‘Context’ ‘Typ’ ‘→’ W (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ ‘Σ'’ ‘Context’ ‘Typ’ ⌝T))
+    ‘quote-sigma’ : ∀ {Γ Γ'} → Term {Γ} (‘Σ’ ‘Context’ ‘Typ’ ‘→’ W (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))
     ‘substTyp’ : ∀ {Γ' Γ} {A : Typ Γ}
       → Term {Γ'} (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c
                   ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T
                   ‘→’ W (‘Typ’ ‘’ ⌜ Γ ⌝c)))
     ‘tProd-nd’ : ∀ {Γ} → Term {Γ ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’} (W (W ‘Typ’))
-    ‘context-pick-if'’ : ∀ {Γ Γ'} → Term {Γ} (‘Typ’ ‘’ ⌜ Γ' ⌝c ‘→’ W (‘Context’ ‘→’ ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ Γ' ⌝c))))
+    ‘context-pick-if'’ : ∀ {Γ} → Term {Γ} (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ‘→’ W (‘Context’ ‘→’ ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))))
     substTyp-weakenTyp : ∀ {Γ A B} {a : Term {Γ} A} → Term {Γ} (W B ‘’ a) → Term {Γ} B
     weakenTyp-substTyp-tProd : ∀ {Γ T T' A B} {a : Term {Γ} T} → Term {Γ = Γ ▻ T'} (W ((A ‘→’ B) ‘’ a)) → Term {Γ ▻ T'} (W ((A ‘’ a) ‘→’ (B ‘’₁ a)))
     substTyp-weakenTyp1-VAR₀ : ∀ {Γ A T} → Term {Γ ▻ A} (W1 T ‘’ ‘VAR₀’) → Term {Γ ▻ A} T
@@ -106,6 +106,6 @@ mutual
     beta-under-subst : ∀ {Γ A B B'} {g : Term {Γ} (A ‘→’ W B)} {x : Term {Γ} A}
       → Term (B' ‘’ substTyp-weakenTyp (‘λ∙’ (substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w g))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’)) ‘’ₐ x))
       → Term (B' ‘’ substTyp-weakenTyp (g ‘’ₐ x))
-    ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ'’ T P ‘→’ W T)
-    ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ'’ T P} (W1 P ‘’ substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
-    ‘existT'’ : ∀ {Γ T P} → Term (T ‘→’ P ‘→’ W (W (‘Σ'’ {Γ} T P)))
+    ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ’ T P ‘→’ W T)
+    ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ’ T P} (W1 P ‘’ substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
+    ‘existT'’ : ∀ {Γ T P} → Term (T ‘→’ P ‘→’ W (W (‘Σ’ {Γ} T P)))

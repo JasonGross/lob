@@ -3,68 +3,9 @@ module well-typed-syntax-interpreter-full where
 open import common public
 open import well-typed-syntax
 open import well-typed-syntax-interpreter
-open import well-typed-syntax-context-pre-helpers
-
-lift→ : ∀ {ℓ ℓ′ ℓ′′ A} {R : Set ℓ′′} → (A → R) → (Lifted {ℓ} {ℓ′} A → R)
-lift→ f (lift x) = f x
-
-lift→→ : ∀ {ℓ ℓ′ ℓ′′ ℓ′′′ ℓ′′′′ A B} {R : Set ℓ′′′′} → ((x : A) → B x → R) → ((x : Lifted {ℓ} {ℓ′} A) → Lifted {ℓ′′} {ℓ′′′} (lift→ B x) → R)
-lift→→ f (lift x) (lift y) = f x y
-
-lift→→→ : ∀ {ℓ₀ ℓ ℓ′ ℓ′′ ℓ′′′ ℓ′′′′ ℓ′′′′′ A B C} {R : Set ℓ₀} → ((x : A) → (y : B x) → C x y → R)
-  → ((x : Lifted {ℓ} {ℓ′} A) → (y : Lifted {ℓ′′} {ℓ′′′} (lift→ B x)) → Lifted {ℓ′′′′} {ℓ′′′′′} (lift→→ C x y) → R)
-lift→→→ f (lift x) (lift y) (lift z) = f x y z
-
-Context' : Set₀
-Context' = Context
-
-Typ' : (Γ⇓ : Lifted {_} {max-level} Context') → Set₀
-Typ' = lift→ Typ
-
-Term' : (Γ⇓ : Lifted {_} {max-level} Context') → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓)) → Set₀
-Term' = lift→→ (λ Γ → Term {Γ})
-
-ε' : Lifted {_} {max-level} Context'
-ε' = lift ε
-
-_▻'_ : (Γ⇓ : Lifted {_} {max-level} Context') → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓)) → Lifted {_} {max-level} Context'
-Γ⇓ ▻' T⇓ = lift (lift→→ _▻_ Γ⇓ T⇓)
-
-‘Σ'’' : (Γ⇓ : Lifted {_} {max-level} Context')
-  → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓))
-  → Lifted {_} {max-level} (Typ' (Γ⇓ ▻' T⇓))
-  → Lifted {_} {max-level} (Typ' Γ⇓)
-‘Σ'’' (lift Γ) (lift T) (lift P) = lift (‘Σ'’ {Γ} T P)
-
-_‘’'_ : (Γ⇓ : Lifted {_} {max-level} Context')
-  → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓))
-  → Lifted {_} {max-level} (Typ' (Γ⇓ ▻' T⇓))
-  → Lifted {_} {max-level} (Term' Γ⇓ T⇓)
-  → Lifted {_} {max-level} (Typ' Γ⇓)
-_‘’'_ (lift Γ) (lift A) (lift T) (lift a) = lift (T ‘’ a)
-
-_‘→’'_ : (Γ⇓ : Lifted {_} {max-level} Context')
-  → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓))
-  → Lifted {_} {max-level} (Typ' (Γ⇓ ▻' T⇓))
-  → Lifted {_} {max-level} (Typ' Γ⇓)
-_‘→’'_ (lift Γ) (lift A) (lift B) = lift (A ‘→’ B)
-
-W' : (Γ⇓ : Lifted {_} {max-level} Context')
-  → (T⇓ : Lifted {_} {max-level} (Typ' Γ⇓))
-  → Lifted {_} {max-level} (Typ' Γ⇓)
-  → Lifted {_} {max-level} (Typ' (Γ⇓ ▻' T⇓))
-W' (lift Γ) (lift A) (lift B) = lift (W B)
-
-context-pick-if' : (Γ⇓ : Lifted {_} {max-level} Context')
-  → (dummy⇓ : Lifted {_} {max-level} (Typ' Γ⇓))
-  → (Γ'⇓ : Lifted {_} {max-level} Context')
-  → (v⇓ : Lifted {_} {max-level} (Typ' Γ'⇓))
-  → Lifted {_} {max-level} (Typ' Γ⇓)
-context-pick-if' (lift Γ) dummy⇓ (lift Γ') v⇓ = context-pick-if-gen {P = λ Γ' → Lifted (Typ Γ')} {Γ} {Γ'} dummy⇓ v⇓
-
 
 Contextε⇓ : Context⇓ ε
-Contextε⇓ = tt -- , Context' , Typ' , Term' , ε' , _▻'_ , ‘Σ'’' , _‘’'_ , _‘→’'_ , W' , context-pick-if'
+Contextε⇓ = tt
 
 Typε⇓ : Typ ε → Set max-level
 Typε⇓ T = Typ⇓ T Contextε⇓

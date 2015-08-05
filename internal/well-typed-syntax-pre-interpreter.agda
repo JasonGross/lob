@@ -8,24 +8,24 @@ max-level : Level
 max-level = lsuc lzero
 
 module inner
-  (context-pick-if-gen' : ∀ ℓ (P : Context → Set ℓ)
-                          (Γ' Γ : Context)
-                          (dummy : P Γ')
+  (context-pick-if' : ∀ ℓ (P : Context → Set ℓ)
+                          (Γ : Context)
+                          (dummy : P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’))
                           (val : P Γ) →
-                        P Γ')
-  (context-pick-if-gen-refl' : ∀ ℓ P Γ dummy val →
-                            context-pick-if-gen' ℓ P Γ Γ dummy val ≡ val)
+                        P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’))
+  (context-pick-if-refl' : ∀ ℓ P dummy val →
+                            context-pick-if' ℓ P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) dummy val ≡ val)
   where
 
-  context-pick-if-gen : ∀ {ℓ} {P : Context → Set ℓ}
-                          {Γ' Γ : Context}
-                          (dummy : P Γ')
+  context-pick-if : ∀ {ℓ} {P : Context → Set ℓ}
+                          {Γ : Context}
+                          (dummy : P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’))
                           (val : P Γ) →
-                        P Γ'
-  context-pick-if-gen {P = P} dummy val = context-pick-if-gen' _ P _ _ dummy val
-  context-pick-if-gen-refl : ∀ {ℓ P Γ dummy val} →
-                            context-pick-if-gen {ℓ} {P} {Γ} {Γ} dummy val ≡ val
-  context-pick-if-gen-refl {P = P} = context-pick-if-gen-refl' _ P _ _ _
+                        P (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
+  context-pick-if {P = P} dummy val = context-pick-if' _ P _ dummy val
+  context-pick-if-refl : ∀ {ℓ P dummy val} →
+                            context-pick-if {ℓ} {P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} dummy val ≡ val
+  context-pick-if-refl {P = P} = context-pick-if-refl' _ P _ _
 
   mutual
     Context⇓ : (Γ : Context) → Set (lsuc max-level)
@@ -45,7 +45,7 @@ module inner
     Typ⇓ ‘Context’ Γ⇓ = Lifted Context
     Typ⇓ ‘Typ’ (Γ⇓ , T⇓) = Lifted (Typ (lower T⇓))
     Typ⇓ ‘Term’ (Γ⇓ , T⇓ , t⇓) = Lifted (Term (lower t⇓))
-    Typ⇓ (‘Σ'’ T T₁) Γ⇓ = Σ (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
+    Typ⇓ (‘Σ’ T T₁) Γ⇓ = Σ (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
 
     Term⇓ : ∀ {Γ : Context} {T : Typ Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Typ⇓ T Γ⇓
     Term⇓ (w t) (Γ⇓ , A⇓) = Term⇓ t Γ⇓
@@ -59,7 +59,7 @@ module inner
     Term⇓ ‘quote-sigma’ Γ⇓ (lift Γ , lift T) = lift (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ T ⌝T))
     Term⇓ ‘substTyp’ Γ⇓ (lift f) (lift x) = lift (f ‘’ x)
     Term⇓ ‘tProd-nd’ (_ , _ , A⇓ , B⇓) = lift (lower A⇓ ‘→’ W (lower B⇓))
-    Term⇓ ‘context-pick-if'’ Γ⇓ (lift dummy) (lift Γ') (lift val) = lift (context-pick-if-gen {P = Typ} {_} {Γ'} dummy val)
+    Term⇓ ‘context-pick-if'’ Γ⇓ (lift dummy) (lift Γ') (lift val) = lift (context-pick-if {P = Typ} {Γ'} dummy val)
     Term⇓ (substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
     Term⇓ (weakenTyp-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
     Term⇓ (substTyp-weakenTyp1-VAR₀ t) Γ⇓ = Term⇓ t Γ⇓
