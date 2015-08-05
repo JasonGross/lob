@@ -95,3 +95,5 @@ module inner
     Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x
     Term⇓ ‘proj₂'’ (Γ⇓ , (x , p)) = p
     Term⇓ ‘existT'’ Γ⇓ x p = x , p
+    Term⇓ (f ‘‘’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
+    Term⇓ (f w‘‘’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))

@@ -64,24 +64,33 @@ postulate
         ‘→'’ ‘□’ ‘’ (A ‘‘→'’’ B))
 -- ‘‘fcomp-nd’’ = {!!}
 
-  qsubstTerm-qtApp-nd-qtApp-nd-distr : ∀ {T B C}
-         {a : Term {Γ = ε} (B ‘→'’ C ‘→'’ ‘Typ’ ‘’ ‘ε’)}
-         {b : Term {Γ = ε} (T ‘→'’ B)}
-         {c : Term {Γ = ε} (T ‘→'’ C)}
+  qsubstTerm-qtApp-nd-qtApp-nd-distr : ∀ {T B}
+         {b : Term {Γ = ε} (T ‘→'’ ‘Typ’ ‘’ ⌜ ε ▻ B ⌝c)}
+         {c : Term {Γ = ε} (T ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ B ⌝T)}
          {v : Term {Γ = ε} T} →
     (□ (‘□’
-         ‘’ ((SW ((w→→ a ‘'’ₐ (w→ b ‘'’ₐ ‘VAR₀’) ‘'’ₐ (w→ c ‘'’ₐ ‘VAR₀’) ‘t’ v)))
-               ‘‘→'’’ (a ‘'’ₐ (b ‘'’ₐ v) ‘'’ₐ (c ‘'’ₐ v)))))
+         ‘’ ((SW (((w→ b ‘'’ₐ ‘VAR₀’) w‘‘’’ (w→ c ‘'’ₐ ‘VAR₀’) ‘t’ v)))
+               ‘‘→'’’ ((b ‘'’ₐ v) ‘‘’’ (c ‘'’ₐ v)))))
 -- qsubstTerm-qtApp-nd-qtApp-nd-distr = {!!}
-  qsubstTerm-qtApp-nd-qtApp-nd-undistr : ∀ {T B C}
-         {a : Term {Γ = ε} (B ‘→'’ C ‘→'’ ‘Typ’ ‘’ ‘ε’)}
-         {b : Term {Γ = ε} (T ‘→'’ B)}
-         {c : Term {Γ = ε} (T ‘→'’ C)}
+  qsubstTerm-qtApp-nd-qtApp-nd-undistr : ∀ {T B}
+         {b : Term {Γ = ε} (T ‘→'’ ‘Typ’ ‘’ ⌜ ε ▻ B ⌝c)}
+         {c : Term {Γ = ε} (T ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ B ⌝T)}
          {v : Term {Γ = ε} T} →
     (□ (‘□’
-         ‘’ ((a ‘'’ₐ (b ‘'’ₐ v) ‘'’ₐ (c ‘'’ₐ v))
-               ‘‘→'’’ (SW ((w→→ a ‘'’ₐ (w→ b ‘'’ₐ ‘VAR₀’) ‘'’ₐ (w→ c ‘'’ₐ ‘VAR₀’) ‘t’ v))))))
+         ‘’ (((b ‘'’ₐ v) ‘‘’’ (c ‘'’ₐ v))
+               ‘‘→'’’ (SW (((w→ b ‘'’ₐ ‘VAR₀’) w‘‘’’ (w→ c ‘'’ₐ ‘VAR₀’) ‘t’ v))))))
 -- qsubstTerm-qtApp-nd-qtApp-nd-undistr = {!!}
+
+{-□
+(‘□’ ‘’
+ (‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , h2) ‘‘’’
+  (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , h2))
+  ‘‘→'’’ SW (((w→ ‘cast’ ‘'’ₐ ‘VAR₀’) w‘‘’’ (w→ ‘quote-sigma’ ‘'’ₐ ‘VAR₀’)) ‘t’ quote-sigma h)))
+
+w→ ‘cast’ ‘'’ₐ ‘VAR₀’
+
+      x : Term (W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))
+      x = (w→ ‘quote-sigma’ ‘'’ₐ ‘VAR₀’)-}
 
 postulate
 

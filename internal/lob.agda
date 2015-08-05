@@ -29,7 +29,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   Hf h = (cast h ‘’ quote-sigma h ‘→'’ ‘X’)
 
   qh : Term {Γ = (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} (W (‘Typ’ ‘’ ‘ε’))
-  qh = w→→ ‘substTyp’ ‘'’ₐ f' ‘'’ₐ x
+  qh = f' w‘‘’’ x
     where
       f' : Term (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
       f' = w→ ‘cast’ ‘'’ₐ ‘VAR₀’
@@ -73,9 +73,10 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   toH-helper-helper p x = transport (λ k → □ (k ‘’ quote-sigma h ‘→'’ ‘□’ ‘’ ⌜ k ‘’ quote-sigma h ‘→'’ ‘X’ ⌝T)) p x
 
   toH-helper : □ (cast h ‘’ quote-sigma h ‘→'’ ‘H’)
-  toH-helper = toH-helper-helper {k = context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) h2}
-                                 (sym (context-pick-if-refl {P = Typ} {W dummy} {h2}))
-                                 (S₀₀W1'→ (‘ssw1’ ‘∘’ ‘‘fcomp-nd’’ ‘'’ₐ (‘s←←’ ‘‘∘’’ ‘cast-refl’ ‘‘∘’’ ⌜→'⌝ ‘'’ₐ ⌜ ‘λ∙’ ‘VAR₀’ ⌝t) ‘∘’ ⌜←'⌝))
+  toH-helper = toH-helper-helper
+    {k = context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) h2}
+    (sym (context-pick-if-refl {P = Typ} {W dummy} {h2}))
+    (S₀₀W1'→ ((‘ssw1’ ‘∘’ ‘‘fcomp-nd’’ ‘'’ₐ (‘s←←’ ‘‘∘’’ ‘cast-refl’ ‘‘∘’’ ⌜→'⌝ ‘'’ₐ ⌜ ‘λ∙’ ‘VAR₀’ ⌝t)) ‘∘’ ⌜←'⌝))
 
   ‘toH’ : □ (‘H'’ ‘→'’ ‘H’)
   ‘toH’ = ⌜→'⌝ ‘∘’ ‘‘fcomp-nd’’ ‘'’ₐ (⌜→'⌝ ‘'’ₐ ⌜ toH-helper ⌝t) ‘∘’ ⌜←'⌝

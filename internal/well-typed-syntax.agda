@@ -8,6 +8,9 @@ infixl 3 _‘’₂_
 infixl 3 _‘’₃_
 infixl 3 _‘’ₐ_
 infixr 1 _‘→’_
+infixl 3 _‘‘’’_
+infixl 3 _w‘‘’’_
+
 
 mutual
   data Context : Set where
@@ -109,3 +112,12 @@ mutual
     ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ’ T P ‘→’ W T)
     ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ’ T P} (W1 P ‘’ substTyp-weakenTyp (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
     ‘existT'’ : ∀ {Γ T P} → Term (T ‘→’ P ‘→’ W (W (‘Σ’ {Γ} T P)))
+    {- these are redundant, but useful for not having to normalize the subsequent ones -}
+    _‘‘’’_ : ∀ {Γ} {A : Typ Γ}
+      → Term {ε} (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c)
+      → Term {ε} (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T)
+      → Term {ε} (‘Typ’ ‘’ ⌜ Γ ⌝c)
+    _w‘‘’’_ : ∀ {X Γ} {A : Typ Γ}
+      → Term {ε ▻ X} (W (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c))
+      → Term {ε ▻ X} (W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T))
+      → Term {ε ▻ X} (W (‘Typ’ ‘’ ⌜ Γ ⌝c))
