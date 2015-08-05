@@ -12,6 +12,3 @@ open import well-typed-syntax-helpers
 
 ‘proj₂’ : ∀ {T : Typ ε} {P : Typ (ε ▻ T)} → Term {ε ▻ ‘Σ’ T P} (W1 P ‘’ (w→ ‘proj₁’ ‘'’ₐ ‘VAR₀’))
 ‘proj₂’ {T} {P} = ‘proj₂'’
-
-‘existT’ : ∀ {T P} (x : □ T) (p : Term (P ‘’ x)) → Term (‘Σ’ T P)
-‘existT’ {T} {P} x p = S₁₀WW (S∀ (‘existT'’ ‘’ₐ x) ‘’ₐ p)

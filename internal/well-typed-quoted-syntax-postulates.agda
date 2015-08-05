@@ -7,22 +7,6 @@ open import well-typed-syntax-context-helpers
 open import well-typed-quoted-syntax-defs public
 
 postulate
-  ‘cast-refl’ : ∀ {T : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} →
-      □ (‘□’ ‘’
-          ((⌜ T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T ⌝T)
-             ‘‘→'’’
-             (‘cast’ ‘'’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T
-               ‘‘’’ (‘quote-sigma’ ‘'’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T))))
-
-  ‘cast-refl'’ : ∀ {T} →
-      □ (‘□’ ‘’
-          ((‘cast’ ‘'’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T
-             ‘‘’’ (‘quote-sigma’ ‘'’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T))
-             ‘‘→'’’ (⌜ T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T ⌝T)))
-
-
-
-postulate
   qsubstTerm-qtApp-nd-qtApp-nd-distr : ∀ {T B}
          {b : Term {ε} (T ‘→'’ ‘Typ’ ‘’ ⌜ ε ▻ B ⌝c)}
          {c : Term {ε} (T ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ B ⌝T)}

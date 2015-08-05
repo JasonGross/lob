@@ -111,7 +111,7 @@ mutual
       → Term (B' ‘’ SW (g ‘’ₐ x))
     ‘proj₁'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term (‘Σ’ T P ‘→’ W T)
     ‘proj₂'’ : ∀ {Γ} {T : Typ Γ} {P : Typ (Γ ▻ T)} → Term {Γ ▻ ‘Σ’ T P} (W1 P ‘’ SW (‘λ∙’ (weakenTyp1-weakenTyp (substTyp-weakenTyp1-VAR₀ (weakenTyp-tProd (w (weakenTyp-tProd (w ‘proj₁'’))) ‘’ₐ ‘VAR₀’))) ‘’ₐ ‘VAR₀’))
-    ‘existT'’ : ∀ {Γ T P} → Term (T ‘→’ P ‘→’ W (W (‘Σ’ {Γ} T P)))
+    ‘existT’ : ∀ {Γ T P} (x : Term {Γ} T) (p : Term (P ‘’ x)) → Term (‘Σ’ T P)
     {- these are redundant, but useful for not having to normalize the subsequent ones -}
     _‘‘’’_ : ∀ {Γ} {A : Typ Γ}
       → Term {ε} (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c)
@@ -162,3 +162,15 @@ mutual
     ⌜‘’⌝' : ∀ {B A} {b : Term {ε} B} →
         Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
             (⌜ A ⌝T ‘‘’’ ⌜ b ⌝t ‘‘→'’’ ⌜ A ‘’ b ⌝T))
+    ‘cast-refl’ : ∀ {T : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} →
+        Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
+            ((⌜ T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T ⌝T)
+               ‘‘→'’’
+               (SW (‘cast’ ‘’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T)
+                 ‘‘’’ SW (‘quote-sigma’ ‘’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T))))
+    ‘cast-refl'’ : ∀ {T : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} →
+        Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
+            ((SW (‘cast’ ‘’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T)
+                 ‘‘’’ SW (‘quote-sigma’ ‘’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T))
+               ‘‘→'’’
+               (⌜ T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T ⌝T)))

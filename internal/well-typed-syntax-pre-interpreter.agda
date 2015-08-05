@@ -27,6 +27,25 @@ module inner
                             context-pick-if {ℓ} {P} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} dummy val ≡ val
   context-pick-if-refl {P = P} = context-pick-if-refl' _ P _ _
 
+  private
+    dummy : Typ ε
+    dummy = ‘Context’
+
+  cast-helper : ∀ {X T A} {x : Term X} → A ≡ T → Term {ε} (T ‘’ x ‘→'’ A ‘’ x)
+  cast-helper refl = ‘λ∙’ ‘VAR₀’
+
+  cast'-proof : ∀ {T} → Term {ε} (context-pick-if {P = Typ} (W dummy) T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T
+                ‘→'’ T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T)
+  cast'-proof {T} = cast-helper {‘Σ’ ‘Context’ ‘Typ’}
+                      {context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) T}
+                      {T} (sym (context-pick-if-refl {P = Typ} {dummy = W dummy}))
+
+  cast-proof : ∀ {T} → Term {ε} (T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T
+                ‘→'’ context-pick-if {P = Typ} (W dummy) T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T)
+  cast-proof {T} = cast-helper {‘Σ’ ‘Context’ ‘Typ’} {T}
+                      {context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) T}
+                      (context-pick-if-refl {P = Typ} {dummy = W dummy})
+
   mutual
     Context⇓ : (Γ : Context) → Set (lsuc max-level)
     Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
@@ -56,11 +75,11 @@ module inner
     Term⇓ (⌜ T ⌝T) Γ⇓ = lift T
     Term⇓ (⌜ t ⌝t) Γ⇓ = lift t
     Term⇓ ‘quote-term’ Γ⇓ (lift T⇓) = lift ⌜ T⇓ ⌝t
-    Term⇓ ‘quote-sigma’ Γ⇓ (lift Γ , lift T) = lift (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ T ⌝T))
+    Term⇓ (‘quote-sigma’ {Γ₀} {Γ₁}) Γ⇓ (lift Γ , lift T) = lift (‘existT’ {Γ₁} ⌜ Γ ⌝c ⌜ T ⌝T)
     Term⇓ ‘cast’ Γ⇓ T⇓ = lift (context-pick-if
                               {P = Typ}
                               {lower (Σ.proj₁ T⇓)}
-                              (W (‘Typ’ ‘’ ⌜ ε ⌝c))
+                              (W dummy)
                               (lower (Σ.proj₂ T⇓)))
     Term⇓ (SW t) Γ⇓ = Term⇓ t Γ⇓
     Term⇓ (weakenTyp-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
@@ -96,7 +115,7 @@ module inner
     Term⇓ (beta-under-subst t) Γ⇓ = Term⇓ t Γ⇓
     Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x
     Term⇓ ‘proj₂'’ (Γ⇓ , (x , p)) = p
-    Term⇓ ‘existT'’ Γ⇓ x p = x , p
+    Term⇓ (‘existT’ x p) Γ⇓ = Term⇓ x Γ⇓ , Term⇓ p Γ⇓
     Term⇓ (f ‘‘’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
     Term⇓ (f w‘‘’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
     Term⇓ (f ‘‘→'’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘→'’ lower (Term⇓ x Γ⇓))
@@ -107,5 +126,7 @@ module inner
     Term⇓ ⌜←'⌝ Γ⇓ T⇓ = T⇓
     Term⇓ ⌜→'⌝ Γ⇓ T⇓ = T⇓
     Term⇓ (‘‘fcomp-nd’’ {A} {B} {C}) Γ⇓ g⇓ f⇓ = lift (_‘∘’_ {ε} (lower g⇓) (lower f⇓))
-    Term⇓ (⌜‘’⌝ {B} {A} {b}) Γ⇓ = lift (‘λ∙’ (‘VAR₀’ {ε} {A ‘’ b}))
-    Term⇓ (⌜‘’⌝' {B} {A} {b}) Γ⇓ = lift (‘λ∙’ (‘VAR₀’ {ε} {A ‘’ b}))
+    Term⇓ (⌜‘’⌝ {B} {A} {b}) Γ⇓ = lift (‘λ∙’ {ε} (‘VAR₀’ {ε} {_‘’_ {ε} A b}))
+    Term⇓ (⌜‘’⌝' {B} {A} {b}) Γ⇓ = lift (‘λ∙’ {ε} (‘VAR₀’ {ε} {_‘’_ {ε} A b}))
+    Term⇓ (‘cast-refl’ {T}) Γ⇓ = lift (cast-proof {T})
+    Term⇓ (‘cast-refl'’ {T}) Γ⇓ = lift (cast'-proof {T})
