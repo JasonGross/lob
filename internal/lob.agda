@@ -38,8 +38,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
       x = (w→ ‘quote-sigma’ ‘'’ₐ ‘VAR₀’)
 
   h2 : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
-  h2 = (W1 (‘□’)
-           ‘’ S₂₀₀W1WW (w1 (‘tProd-nd’ ‘t’₂ ‘ε’ ‘t’ S₁W' (w ⌜ ‘X’ ⌝T)) ‘t’ qh))
+  h2 = (W1 ‘□’ ‘’ S₂₀₀W1WW (w1 (‘tProd-nd’ ‘t’₂ ‘ε’ ‘t’ S₁W' (w ⌜ ‘X’ ⌝T)) ‘t’ qh))
 
   h : Σ Typ
   h = ((ε ▻ ‘Σ’ ‘Context’ ‘Typ’) , h2)
