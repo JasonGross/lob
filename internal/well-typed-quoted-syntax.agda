@@ -3,7 +3,6 @@ module well-typed-quoted-syntax where
 open import common
 open import well-typed-syntax
 open import well-typed-syntax-helpers public
-open import well-typed-quoted-syntax-postulates public
 open import well-typed-quoted-syntax-defs public
 open import well-typed-syntax-context-helpers public
 open import well-typed-syntax-eq-dec public
@@ -18,14 +17,6 @@ _‘‘∘’’_ : ∀ {A B C}
     → □ (‘□’ ‘’ (A ‘‘→'’’ C))
     → □ (‘□’ ‘’ (A ‘‘→'’’ B))
 g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
-
-{-‘ssw1’ = qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW
-
-‘ssw1'’ = qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW-inv-}
-
-‘s→→’ = qsubstTerm-qtApp-nd-qtApp-nd-distr
-
-‘s←←’ = qsubstTerm-qtApp-nd-qtApp-nd-undistr
 
 Conv0 : ∀ {qH0 qX} →
     Term {Γ = (ε ▻ ‘□’ ‘’ qH0)}

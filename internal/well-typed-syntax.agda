@@ -175,3 +175,17 @@ mutual
                  ‘‘’’ SW (‘quote-sigma’ ‘’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T))
                ‘‘→'’’
                (⌜ T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T ⌝T)))
+    ‘s→→’ : ∀ {T B}
+           {b : Term {ε} (T ‘→’ W (‘Typ’ ‘’ ⌜ ε ▻ B ⌝c))}
+           {c : Term {ε} (T ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ B ⌝T))}
+           {v : Term {ε} T} →
+      (Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c
+           ‘’ ((SW (((‘λ∙’ (SW (w→ b ‘’ₐ ‘VAR₀’) w‘‘’’ SW (w→ c ‘’ₐ ‘VAR₀’)) ‘’ₐ v))))
+                 ‘‘→'’’ (SW (b ‘’ₐ v) ‘‘’’ SW (c ‘’ₐ v)))))
+    ‘s←←’ : ∀ {T B}
+           {b : Term {ε} (T ‘→’ W (‘Typ’ ‘’ ⌜ ε ▻ B ⌝c))}
+           {c : Term {ε} (T ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ B ⌝T))}
+           {v : Term {ε} T} →
+      (Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c
+           ‘’ ((SW (b ‘’ₐ v) ‘‘’’ SW (c ‘’ₐ v))
+                 ‘‘→'’’ (SW (((‘λ∙’ (SW (w→ b ‘’ₐ ‘VAR₀’) w‘‘’’ SW (w→ c ‘’ₐ ‘VAR₀’)) ‘’ₐ v)))))))

@@ -46,6 +46,9 @@ module inner
                       {context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) T}
                       (context-pick-if-refl {P = Typ} {dummy = W dummy})
 
+  ‘idfun’ : ∀ {T} → Term {ε} (T ‘→'’ T)
+  ‘idfun’ = ‘λ∙’ ‘VAR₀’
+
   mutual
     Context⇓ : (Γ : Context) → Set (lsuc max-level)
     Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
@@ -131,3 +134,5 @@ module inner
     Term⇓ (⌜‘’⌝' {B} {A} {b}) Γ⇓ = lift (‘λ∙’ {ε} (‘VAR₀’ {ε} {_‘’_ {ε} A b}))
     Term⇓ (‘cast-refl’ {T}) Γ⇓ = lift (cast-proof {T})
     Term⇓ (‘cast-refl'’ {T}) Γ⇓ = lift (cast'-proof {T})
+    Term⇓ (‘s→→’ {T} {B} {b} {c} {v}) Γ⇓ = lift (‘idfun’ {_‘’_ {ε} (lower (Term⇓ b tt (Term⇓ v Γ⇓))) (lower (Term⇓ c tt (Term⇓ v Γ⇓)))})
+    Term⇓ (‘s←←’ {T} {B} {b} {c} {v}) Γ⇓ = lift (‘idfun’ {_‘’_ {ε} (lower (Term⇓ b tt (Term⇓ v Γ⇓))) (lower (Term⇓ c tt (Term⇓ v Γ⇓)))})
