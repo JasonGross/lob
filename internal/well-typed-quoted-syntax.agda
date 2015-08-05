@@ -10,8 +10,8 @@ open import well-typed-syntax-eq-dec public
 
 infixr 2 _‘‘∘’’_
 
-‘β’ = qbeta-nd
-‘β'’ = qbeta-nd-inv
+{-‘β’ = qbeta-nd
+‘β'’ = qbeta-nd-inv-}
 
 ⌜⌜⌝⌝ = qquote-term-under-app
 ⌜⌜⌝⌝' = qquote-term-under-app-inv
@@ -24,10 +24,6 @@ infixr 2 _‘‘∘’’_
 
 quote-sigma : (Γv : Σ Typ) → Term (‘Σ’ ‘Context’ ‘Typ’)
 quote-sigma (Γ , v) = ‘existT’ ⌜ Γ ⌝c ⌜ v ⌝T
-
-⌜→'⌝ = quote-typ-distr-tProd-nd
-
-⌜←'⌝ = quote-typ-undistr-tProd-nd
 
 _‘‘∘’’_ : ∀ {A B C}
     → □ (‘□’ ‘’ (C ‘‘→'’’ B))
@@ -59,14 +55,14 @@ g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
            ‘‘→'’’
            (‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)
              ‘‘’’ (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))))
-‘cast-refl’ = ‘β'’ ‘‘∘’’ substTerm-undistr-stuff ‘‘∘’’ qexistT-iota-inv ‘‘∘’’ ⌜⌜⌝⌝ ‘‘∘’’ ‘context-pick-if’-refl-inv ‘‘∘’’ ⌜‘’⌝
+‘cast-refl’ = substTerm-undistr-stuff ‘‘∘’’ qexistT-iota-inv ‘‘∘’’ ⌜⌜⌝⌝ ‘‘∘’’ ‘context-pick-if’-refl-inv ‘‘∘’’ ⌜‘’⌝
 
 ‘cast-refl'’ : ∀ {T} →
     □ (‘□’ ‘’
         ((‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)
            ‘‘’’ (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))
            ‘‘→'’’ (⌜ T ‘’ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T) ⌝T)))
-‘cast-refl'’ = ⌜‘’⌝' ‘‘∘’’ ‘context-pick-if’-refl ‘‘∘’’ ⌜⌜⌝⌝' ‘‘∘’’ qexistT-iota ‘‘∘’’ substTerm-distr-stuff ‘‘∘’’ ‘β’
+‘cast-refl'’ = ⌜‘’⌝' ‘‘∘’’ ‘context-pick-if’-refl ‘‘∘’’ ⌜⌜⌝⌝' ‘‘∘’’ qexistT-iota ‘‘∘’’ substTerm-distr-stuff
 
 Conv0 : ∀ {qH0 qX} →
     Term {Γ = (ε ▻ ‘□’ ‘’ qH0)}
@@ -74,4 +70,4 @@ Conv0 : ∀ {qH0 qX} →
     → Term {Γ = (ε ▻ ‘□’ ‘’ qH0)}
              (W
                 (‘□’ ‘’ (⌜ ‘□’ ‘’ qH0 ⌝T ‘‘→'’’ ⌜ qX ⌝T)))
-Conv0 {qH0} {qX} x = w→ quote-typ-distr-tProd-nd ‘'’ₐ x
+Conv0 {qH0} {qX} x = w→ ⌜→'⌝ ‘'’ₐ x

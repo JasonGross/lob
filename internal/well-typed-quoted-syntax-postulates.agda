@@ -23,28 +23,6 @@ postulate
 
 
 postulate
-  ‘tApp-nd’ : ∀ {Γ} {A : Term {ε} (‘Typ’ ‘’ Γ)} {B : Term {ε} (‘Typ’ ‘’ Γ)} →
-    Term {ε} (‘Term’ ‘’₁ Γ ‘’ (A ‘‘→'’’ B)
-        ‘→'’ ‘Term’ ‘’₁ Γ ‘’ A
-        ‘→'’ ‘Term’ ‘’₁ Γ ‘’ B)
--- ‘tApp-nd’ = {!!}
-
-  quote-typ-undistr-tProd-nd : ∀ {H X} →
-    Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (⌜ H ⌝T ‘‘→'’’ ⌜ X ⌝T)
-        ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ H ‘→'’ X ⌝T)
--- quote-typ-undistr-tProd-nd = {!!}
-
-  quote-typ-distr-tProd-nd : ∀ {H X} →
-    Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ H ‘→'’ X ⌝T
-        ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (⌜ H ⌝T ‘‘→'’’ ⌜ X ⌝T))
--- quote-typ-distr-tProd-nd = {!!}
-
-  ‘‘fcomp-nd’’ : ∀ {A B C} →
-    Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (A ‘‘→'’’ C)
-        ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (C ‘‘→'’’ B)
-        ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (A ‘‘→'’’ B))
--- ‘‘fcomp-nd’’ = {!!}
-
   qsubstTerm-qtApp-nd-qtApp-nd-distr : ∀ {T B}
          {b : Term {ε} (T ‘→'’ ‘Typ’ ‘’ ⌜ ε ▻ B ⌝c)}
          {c : Term {ε} (T ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ B ⌝T)}
@@ -63,7 +41,6 @@ postulate
 -- qsubstTerm-qtApp-nd-qtApp-nd-undistr = {!!}
 
 postulate
-
   quote-distr-substTyp : ∀ {B A} {b : Term {ε} B} →
       Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
           (⌜ A ‘’ b ⌝T ‘‘→'’’ ⌜ A ⌝T ‘‘’’ ⌜ b ⌝t))
@@ -78,24 +55,6 @@ postulate
   qquote-term-under-app-inv : ∀ {f} {t : Term {ε} (‘Σ’ ‘Context’ ‘Typ’)} →
       Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
           (f ‘‘’’ (‘quote-sigma’ ‘'’ₐ t) ‘‘→'’’ f ‘‘’’ ⌜ t ⌝t))
-
-  qbeta-nd-inv : ∀ {T A}
-           {f : Term {ε ▻ A} (W (‘Typ’ ‘’ ⌜ ε ▻ T ⌝c))}
-           {x : Term {ε} A}
-           {y : Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ T ⌝T)} →
-      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
-          ((((SW (f ‘t’ x))) ‘‘’’ y)
-             ‘‘→'’’ ((‘λ'∙’ f ‘'’ₐ x) ‘‘’’ y)))
-
-  qbeta-nd : ∀ {T A}
-           {f : Term {ε ▻ A} (W (‘Typ’ ‘’ ⌜ ε ▻ T ⌝c))}
-           {x : Term {ε} A}
-           {y : Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ T ⌝T)} →
-      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
-          (((‘λ'∙’ f ‘'’ₐ x) ‘‘’’ y)
-             ‘‘→'’’ ((SW (f ‘t’ x)) ‘‘’’ y)))
-
-
 
 
 postulate

@@ -43,10 +43,10 @@ mutual
     ⌜_⌝t : ∀ {Γ Γ'} {T : Typ Γ'} → Term T → Term {Γ} (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ T ⌝T)
     ‘quote-term’ : ∀ {Γ Γ'} {A : Typ Γ'} → Term {Γ} (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ A ⌝T ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ ‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ A ⌝T ⌝T))
     ‘quote-sigma’ : ∀ {Γ Γ'} → Term {Γ} (‘Σ’ ‘Context’ ‘Typ’ ‘→’ W (‘Term’ ‘’₁ ⌜ Γ' ⌝c ‘’ ⌜ ‘Σ’ ‘Context’ ‘Typ’ ⌝T))
-    ‘substTyp’ : ∀ {Γ' Γ} {A : Typ Γ}
+    {-‘substTyp’ : ∀ {Γ' Γ} {A : Typ Γ}
       → Term {Γ'} (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c
                   ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T
-                  ‘→’ W (‘Typ’ ‘’ ⌜ Γ ⌝c)))
+                  ‘→’ W (‘Typ’ ‘’ ⌜ Γ ⌝c)))-}
     ‘context-pick-if'’ : ∀ {Γ} → Term {Γ} (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ‘→’ W (‘Context’ ‘→’ ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))))
     SW : ∀ {Γ A B} {a : Term {Γ} A} → Term {Γ} (W B ‘’ a) → Term {Γ} B
     weakenTyp-substTyp-tProd : ∀ {Γ T T' A B} {a : Term {Γ} T} → Term {Γ = Γ ▻ T'} (W ((A ‘→’ B) ‘’ a)) → Term {Γ ▻ T'} (W ((A ‘’ a) ‘→’ (B ‘’₁ a)))
@@ -142,3 +142,17 @@ mutual
          {e : Term {ε} T'}
          → Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (SW (‘λ∙’ c ‘’ₐ e) ‘‘→'’’ b)
                     ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (SW (‘λ∙’ (c w‘‘→'’’ w b) ‘’ₐ e))))
+    ‘tApp-nd’ : ∀ {Γ} {A : Term {ε} (‘Typ’ ‘’ Γ)} {B : Term {ε} (‘Typ’ ‘’ Γ)} →
+      Term {ε} (‘Term’ ‘’₁ Γ ‘’ (A ‘‘→'’’ B)
+           ‘→’ W (‘Term’ ‘’₁ Γ ‘’ A
+           ‘→’ W (‘Term’ ‘’₁ Γ ‘’ B)))
+    ⌜←'⌝ : ∀ {H X} →
+      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (⌜ H ⌝T ‘‘→'’’ ⌜ X ⌝T)
+           ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ H ‘→’ W X ⌝T))
+    ⌜→'⌝ : ∀ {H X} →
+      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ ⌜ H ‘→’ W X ⌝T
+           ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (⌜ H ⌝T ‘‘→'’’ ⌜ X ⌝T)))
+    ‘‘fcomp-nd’’ : ∀ {A B C} →
+      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (A ‘‘→'’’ C)
+           ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (C ‘‘→'’’ B)
+           ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (A ‘‘→'’’ B))))
