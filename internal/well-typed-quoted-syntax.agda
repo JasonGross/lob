@@ -35,9 +35,9 @@ _‘‘∘’’_ : ∀ {A B C}
     → □ (‘□’ ‘’ (A ‘‘→'’’ B))
 g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
 
-‘ssw1’ = qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW
+{-‘ssw1’ = qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW
 
-‘ssw1'’ = qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW-inv
+‘ssw1'’ = qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW-inv-}
 
 ‘s→→’ = qsubstTerm-qtApp-nd-qtApp-nd-distr
 

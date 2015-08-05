@@ -23,23 +23,6 @@ postulate
 
 
 postulate
-
-  qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW : ∀ {T'}
-         {b : Term {ε} (‘Typ’ ‘’ ‘ε’)}
-         {c : Term {ε ▻ T'} (W (‘Typ’ ‘’ ‘ε’))}
-         {e : Term {ε} T'}
-    → Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (SW ((c w‘‘→'’’ w b) ‘t’ e))
-               ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (SW (c ‘t’ e) ‘‘→'’’ b))
--- qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW = {!!}
-
-  qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW-inv : ∀ {T'}
-         {b : Term {ε} (‘Typ’ ‘’ ‘ε’)}
-         {c : Term {ε ▻ T'} (W (‘Typ’ ‘’ ‘ε’))}
-         {e : Term {ε} T'}
-    → Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (SW (c ‘t’ e) ‘‘→'’’ b)
-               ‘→'’ ‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (SW ((c w‘‘→'’’ w b) ‘t’ e)))
--- qsubstTerm-substTerm-weakenTerm1-S₂₀₀W1WW-inv = {!!}
-
   ‘tApp-nd’ : ∀ {Γ} {A : Term {ε} (‘Typ’ ‘’ Γ)} {B : Term {ε} (‘Typ’ ‘’ Γ)} →
     Term {ε} (‘Term’ ‘’₁ Γ ‘’ (A ‘‘→'’’ B)
         ‘→'’ ‘Term’ ‘’₁ Γ ‘’ A

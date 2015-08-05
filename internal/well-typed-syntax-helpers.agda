@@ -13,10 +13,6 @@ infixr 2 _‘∘’_
 WS∀ : ∀ {Γ T T' A B} {a : Term {Γ = Γ} T} → Term {Γ = Γ ▻ T'} (W ((A ‘→’ B) ‘’ a)) → Term {Γ ▻ T'} (W ((A ‘’ a) ‘→’ (B ‘’₁ a)))
 WS∀ = weakenTyp-substTyp-tProd
 
-
-SW : ∀ {Γ A B} {a : Term {Γ} A} → Term {Γ} (W B ‘’ a) → Term {Γ} B
-SW = substTyp-weakenTyp
-
 _‘→'’_ : ∀ {Γ} → Typ Γ → Typ Γ → Typ Γ
 _‘→'’_ {Γ = Γ} A B = _‘→’_ {Γ = Γ} A (W {Γ = Γ} {A = A} B)
 
@@ -148,11 +144,11 @@ g ‘∘’ f = ‘λ∙’ (w→ f ‘'’ₐ (w→ g ‘'’ₐ ‘VAR₀’))
 
 WS₀₀W1 : ∀ {Γ T' B A} {b : Term {Γ} B} {a : Term {Γ ▻ B} (W A)} {T : Typ (Γ ▻ A)}
       → Term {Γ ▻ T'} (W (W1 T ‘’ a ‘’ b))
-      → Term {Γ ▻ T'} (W (T ‘’ (substTyp-weakenTyp (a ‘t’ b))))
+      → Term {Γ ▻ T'} (W (T ‘’ (SW (a ‘t’ b))))
 WS₀₀W1 = weakenTyp-substTyp-substTyp-weakenTyp1
 
 WS₀₀W1' : ∀ {Γ T' B A} {b : Term {Γ} B} {a : Term {Γ ▻ B} (W A)} {T : Typ (Γ ▻ A)}
-      → Term {Γ ▻ T'} (W (T ‘’ (substTyp-weakenTyp (a ‘t’ b))))
+      → Term {Γ ▻ T'} (W (T ‘’ (SW (a ‘t’ b))))
       → Term {Γ ▻ T'} (W (W1 T ‘’ a ‘’ b))
 WS₀₀W1' = weakenTyp-substTyp-substTyp-weakenTyp1-inv
 

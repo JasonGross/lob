@@ -60,7 +60,7 @@ module inner
     Term⇓ ‘substTyp’ Γ⇓ (lift f) (lift x) = lift (f ‘’ x)
     --Term⇓ ‘tProd-nd’ (_ , _ , A⇓ , B⇓) = lift (lower A⇓ ‘→’ W (lower B⇓))
     Term⇓ ‘context-pick-if'’ Γ⇓ (lift dummy) (lift Γ') (lift val) = lift (context-pick-if {P = Typ} {Γ'} dummy val)
-    Term⇓ (substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
+    Term⇓ (SW t) Γ⇓ = Term⇓ t Γ⇓
     Term⇓ (weakenTyp-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
     Term⇓ (substTyp-weakenTyp1-VAR₀ t) Γ⇓ = Term⇓ t Γ⇓
     Term⇓ (weakenTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
@@ -99,3 +99,5 @@ module inner
     Term⇓ (f w‘‘’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
     Term⇓ (f ‘‘→'’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘→'’ lower (Term⇓ x Γ⇓))
     Term⇓ (f w‘‘→'’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘→'’ lower (Term⇓ x Γ⇓))
+    Term⇓ w‘‘→'’’→‘‘→'’’ Γ⇓ T⇓ = T⇓
+    Term⇓ ‘‘→'’’→w‘‘→'’’ Γ⇓ T⇓ = T⇓
