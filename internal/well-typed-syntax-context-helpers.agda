@@ -4,8 +4,6 @@ open import common
 open import well-typed-syntax
 open import well-typed-syntax-helpers
 
-infixr 1 _‘‘→'’’_
-
 □_ : Typ ε → Set
 □_ T = Term {Γ = ε} T
 
@@ -17,6 +15,3 @@ infixr 1 _‘‘→'’’_
 
 ‘existT’ : ∀ {T P} (x : □ T) (p : Term (P ‘’ x)) → Term (‘Σ’ T P)
 ‘existT’ {T} {P} x p = S₁₀WW (S∀ (‘existT'’ ‘’ₐ x) ‘’ₐ p)
-
-_‘‘→'’’_ : ∀ {Γ} → (A : □ (‘Typ’ ‘’ Γ)) → (B : □ (‘Typ’ ‘’ Γ)) → □ (‘Typ’ ‘’ Γ)
-_‘‘→'’’_ {Γ = Γ} A B = (S₂₁₀WW (‘tProd-nd’ ‘t’₂ Γ ‘t’₁ A ‘t’ S₁₀W' B))

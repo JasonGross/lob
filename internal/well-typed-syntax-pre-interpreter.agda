@@ -58,7 +58,7 @@ module inner
     Term⇓ ‘quote-term’ Γ⇓ (lift T⇓) = lift ⌜ T⇓ ⌝t
     Term⇓ ‘quote-sigma’ Γ⇓ (lift Γ , lift T) = lift (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ Γ ⌝c) ‘’ₐ ⌜ T ⌝T))
     Term⇓ ‘substTyp’ Γ⇓ (lift f) (lift x) = lift (f ‘’ x)
-    Term⇓ ‘tProd-nd’ (_ , _ , A⇓ , B⇓) = lift (lower A⇓ ‘→’ W (lower B⇓))
+    --Term⇓ ‘tProd-nd’ (_ , _ , A⇓ , B⇓) = lift (lower A⇓ ‘→’ W (lower B⇓))
     Term⇓ ‘context-pick-if'’ Γ⇓ (lift dummy) (lift Γ') (lift val) = lift (context-pick-if {P = Typ} {Γ'} dummy val)
     Term⇓ (substTyp-weakenTyp t) Γ⇓ = Term⇓ t Γ⇓
     Term⇓ (weakenTyp-substTyp-tProd t) Γ⇓ T⇓ = Term⇓ t Γ⇓ T⇓
@@ -97,3 +97,5 @@ module inner
     Term⇓ ‘existT'’ Γ⇓ x p = x , p
     Term⇓ (f ‘‘’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
     Term⇓ (f w‘‘’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
+    Term⇓ (f ‘‘→'’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘→'’ lower (Term⇓ x Γ⇓))
+    Term⇓ (f w‘‘→'’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘→'’ lower (Term⇓ x Γ⇓))

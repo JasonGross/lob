@@ -10,7 +10,8 @@ infixl 3 _‘’ₐ_
 infixr 1 _‘→’_
 infixl 3 _‘‘’’_
 infixl 3 _w‘‘’’_
-
+infixr 1 _‘‘→'’’_
+infixr 1 _w‘‘→'’’_
 
 mutual
   data Context : Set where
@@ -46,7 +47,6 @@ mutual
       → Term {Γ'} (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c
                   ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T
                   ‘→’ W (‘Typ’ ‘’ ⌜ Γ ⌝c)))
-    ‘tProd-nd’ : ∀ {Γ} → Term {Γ ▻ ‘Context’ ▻ ‘Typ’ ▻ W ‘Typ’} (W (W ‘Typ’))
     ‘context-pick-if'’ : ∀ {Γ} → Term {Γ} (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ‘→’ W (‘Context’ ‘→’ ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))))
     substTyp-weakenTyp : ∀ {Γ A B} {a : Term {Γ} A} → Term {Γ} (W B ‘’ a) → Term {Γ} B
     weakenTyp-substTyp-tProd : ∀ {Γ T T' A B} {a : Term {Γ} T} → Term {Γ = Γ ▻ T'} (W ((A ‘→’ B) ‘’ a)) → Term {Γ ▻ T'} (W ((A ‘’ a) ‘→’ (B ‘’₁ a)))
@@ -121,3 +121,11 @@ mutual
       → Term {ε ▻ X} (W (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c))
       → Term {ε ▻ X} (W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T))
       → Term {ε ▻ X} (W (‘Typ’ ‘’ ⌜ Γ ⌝c))
+    _‘‘→'’’_ : ∀ {Γ}
+      → Term {ε} (‘Typ’ ‘’ Γ)
+      → Term {ε} (‘Typ’ ‘’ Γ)
+      → Term {ε} (‘Typ’ ‘’ Γ)
+    _w‘‘→'’’_ : ∀ {X Γ}
+      → Term {ε ▻ X} (W (‘Typ’ ‘’ Γ))
+      → Term {ε ▻ X} (W (‘Typ’ ‘’ Γ))
+      → Term {ε ▻ X} (W (‘Typ’ ‘’ Γ))

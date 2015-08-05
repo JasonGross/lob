@@ -38,7 +38,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
       x = (w→ ‘quote-sigma’ ‘'’ₐ ‘VAR₀’)
 
   h2 : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
-  h2 = (W1 ‘□’ ‘’ S₂₀₀W1WW (w1 (‘tProd-nd’ ‘t’₂ ‘ε’ ‘t’ S₁W' (w ⌜ ‘X’ ⌝T)) ‘t’ qh))
+  h2 = (W1 ‘□’ ‘’ (qh w‘‘→'’’ w ⌜ ‘X’ ⌝T))
 
   h : Σ Typ
   h = ((ε ▻ ‘Σ’ ‘Context’ ‘Typ’) , h2)
@@ -90,10 +90,10 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   fromH-helper-helper p x = transport (λ k → □ (‘□’ ‘’ ⌜ k ‘’ quote-sigma h ‘→'’ ‘X’ ⌝T ‘→'’ k ‘’ quote-sigma h)) p x
 
   fromH-helper : □ (‘H’ ‘→'’ cast h ‘’ quote-sigma h)
-  fromH-helper = fromH-helper-helper {k = context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) h2}
-                                     (sym (context-pick-if-refl {P = Typ} {W dummy} {h2}))
-                                     (S₀₀W1'← (⌜→'⌝ ‘∘’ ‘‘fcomp-nd’’ ‘'’ₐ
-                                                          (⌜→'⌝ ‘'’ₐ ⌜ ‘λ∙’ ‘VAR₀’ ⌝t ‘‘∘’’ ‘cast-refl'’ ‘‘∘’’ ‘s→→’) ‘∘’ ‘ssw1'’))
+  fromH-helper = fromH-helper-helper
+    {k = context-pick-if {P = Typ} {ε ▻ ‘Σ’ ‘Context’ ‘Typ’} (W dummy) h2}
+    (sym (context-pick-if-refl {P = Typ} {W dummy} {h2}))
+    (S₀₀W1'← (⌜→'⌝ ‘∘’ ‘‘fcomp-nd’’ ‘'’ₐ (⌜→'⌝ ‘'’ₐ ⌜ ‘λ∙’ ‘VAR₀’ ⌝t ‘‘∘’’ ‘cast-refl'’ ‘‘∘’’ ‘s→→’) ‘∘’ ‘ssw1'’))
   {--}
   ‘fromH’ : □ (‘H’ ‘→'’ ‘H'’)
   ‘fromH’ = ⌜→'⌝ ‘∘’ ‘‘fcomp-nd’’ ‘'’ₐ (⌜→'⌝ ‘'’ₐ ⌜ fromH-helper ⌝t) ‘∘’ ⌜←'⌝
