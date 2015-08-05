@@ -95,9 +95,3 @@ module inner
     Term⇓ ‘proj₁'’ Γ⇓ (x , p) = x
     Term⇓ ‘proj₂'’ (Γ⇓ , (x , p)) = p
     Term⇓ ‘existT'’ Γ⇓ x p = x , p
-    Term⇓ (‘cast-refl’₀ {T}) Γ⇓ = lift (helper {T} {context-pick-if-gen {P = Typ} (W (‘Typ’ ‘’ ⌜ ε ⌝c)) T}
-                                          (context-pick-if-gen-refl {P = Typ}))
-      where
-        helper : ∀ {T A} → A ≡ T → Term {ε} (T ‘’ (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
-                                              ‘→'’ A ‘’ (S₁₀WW (S∀ (‘existT'’ ‘’ₐ ⌜ ε ▻ ‘Σ'’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T)))
-        helper refl = ‘λ∙’ ‘VAR₀’

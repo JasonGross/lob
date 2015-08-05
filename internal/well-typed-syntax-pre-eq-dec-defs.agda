@@ -91,7 +91,6 @@ mutual
   ‘proj₁'’ ≟'-term ‘proj₁'’ = just refl
   ‘proj₂'’ ≟'-term ‘proj₂'’ = just refl
   ‘existT'’ ≟'-term ‘existT'’ = just refl
-  ‘cast-refl’₀ ≟'-term ‘cast-refl’₀ = just refl
   w x ≟'-term y = nothing
   ‘λ∙’ x ≟'-term y = nothing
   (x ‘’ₐ x₁) ≟'-term y = nothing
@@ -139,4 +138,3 @@ mutual
   ‘proj₁'’ ≟'-term y = nothing
   ‘proj₂'’ ≟'-term y = nothing
   ‘existT'’ ≟'-term y = nothing
-  ‘cast-refl’₀ ≟'-term y = nothing
