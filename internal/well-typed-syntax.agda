@@ -47,7 +47,7 @@ mutual
       → Term {Γ'} (‘Typ’ ‘’ ⌜ Γ ▻ A ⌝c
                   ‘→’ W (‘Term’ ‘’₁ ⌜ Γ ⌝c ‘’ ⌜ A ⌝T
                   ‘→’ W (‘Typ’ ‘’ ⌜ Γ ⌝c)))-}
-    ‘context-pick-if'’ : ∀ {Γ} → Term {Γ} (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ‘→’ W (‘Context’ ‘→’ ‘Typ’ ‘→’ W (W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))))
+    ‘cast’ : Term {ε} (‘Σ’ ‘Context’ ‘Typ’ ‘→’ W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
     SW : ∀ {Γ A B} {a : Term {Γ} A} → Term {Γ} (W B ‘’ a) → Term {Γ} B
     weakenTyp-substTyp-tProd : ∀ {Γ T T' A B} {a : Term {Γ} T} → Term {Γ = Γ ▻ T'} (W ((A ‘→’ B) ‘’ a)) → Term {Γ ▻ T'} (W ((A ‘’ a) ‘→’ (B ‘’₁ a)))
     substTyp-weakenTyp1-VAR₀ : ∀ {Γ A T} → Term {Γ ▻ A} (W1 T ‘’ ‘VAR₀’) → Term {Γ ▻ A} T
@@ -156,3 +156,9 @@ mutual
       Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (A ‘‘→'’’ C)
            ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (C ‘‘→'’’ B)
            ‘→’ W (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’ (A ‘‘→'’’ B))))
+    ⌜‘’⌝ : ∀ {B A} {b : Term {ε} B} →
+        Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
+            (⌜ A ‘’ b ⌝T ‘‘→'’’ ⌜ A ⌝T ‘‘’’ ⌜ b ⌝t))
+    ⌜‘’⌝' : ∀ {B A} {b : Term {ε} B} →
+        Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
+            (⌜ A ⌝T ‘‘’’ ⌜ b ⌝t ‘‘→'’’ ⌜ A ‘’ b ⌝T))

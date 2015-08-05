@@ -10,18 +10,6 @@ open import well-typed-syntax-eq-dec public
 
 infixr 2 _‘‘∘’’_
 
-{-‘β’ = qbeta-nd
-‘β'’ = qbeta-nd-inv-}
-
-⌜⌜⌝⌝ = qquote-term-under-app
-⌜⌜⌝⌝' = qquote-term-under-app-inv
-
-
-
-⌜‘’⌝ = quote-distr-substTyp
-⌜‘’⌝' = quote-undistr-substTyp
-
-
 quote-sigma : (Γv : Σ Typ) → Term (‘Σ’ ‘Context’ ‘Typ’)
 quote-sigma (Γ , v) = ‘existT’ ⌜ Γ ⌝c ⌜ v ⌝T
 
@@ -38,31 +26,6 @@ g ‘‘∘’’ f = (‘‘fcomp-nd’’ ‘'’ₐ f ‘'’ₐ g)
 ‘s→→’ = qsubstTerm-qtApp-nd-qtApp-nd-distr
 
 ‘s←←’ = qsubstTerm-qtApp-nd-qtApp-nd-undistr
-
-‘context-pick-if’ : ∀ (dummy : Term (‘Typ’ ‘’ ⌜ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’) ⌝c))
-  → □ (‘Context’ ‘→’ ‘Typ’ ‘→'’ W (‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c))
-‘context-pick-if’ dummy = ‘context-pick-if'’ {ε} ‘'’ₐ dummy
-
-‘cast’ : □ (‘Σ’ ‘Context’ ‘Typ’ ‘→'’ ‘Typ’ ‘’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c)
-‘cast’ = ‘λ'∙’ ((SW1W (S₁₀W2W (substTyp-tProd (weakenTyp1-tProd (w1
-                                                                          (SW1V
-                                                                           (w∀ (‘context-pick-if’ ⌜ W (‘Typ’ ‘’ ‘ε’) ⌝T) ‘’ₐ ‘VAR₀’))) ‘t’ (w→ ‘proj₁’ ‘'’ₐ ‘VAR₀’)) ‘’ₐ ‘proj₂’ ))))
-
-
-‘cast-refl’ : ∀ {T : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} →
-    □ (‘□’ ‘’
-        ((⌜ T ‘’ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T) ⌝T)
-           ‘‘→'’’
-           (‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)
-             ‘‘’’ (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))))
-‘cast-refl’ = substTerm-undistr-stuff ‘‘∘’’ qexistT-iota-inv ‘‘∘’’ ⌜⌜⌝⌝ ‘‘∘’’ ‘context-pick-if’-refl-inv ‘‘∘’’ ⌜‘’⌝
-
-‘cast-refl'’ : ∀ {T} →
-    □ (‘□’ ‘’
-        ((‘cast’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)
-           ‘‘’’ (‘quote-sigma’ ‘'’ₐ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T)))
-           ‘‘→'’’ (⌜ T ‘’ quote-sigma (ε ▻ ‘Σ’ ‘Context’ ‘Typ’ , T) ⌝T)))
-‘cast-refl'’ = ⌜‘’⌝' ‘‘∘’’ ‘context-pick-if’-refl ‘‘∘’’ ⌜⌜⌝⌝' ‘‘∘’’ qexistT-iota ‘‘∘’’ substTerm-distr-stuff
 
 Conv0 : ∀ {qH0 qX} →
     Term {Γ = (ε ▻ ‘□’ ‘’ qH0)}

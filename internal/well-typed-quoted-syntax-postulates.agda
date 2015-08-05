@@ -7,18 +7,20 @@ open import well-typed-syntax-context-helpers
 open import well-typed-quoted-syntax-defs public
 
 postulate
-  ‘context-pick-if’-refl-inv : ∀ {T dummy qqs} →
-      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
-          ((⌜ T ⌝T ‘‘’’ ⌜ qqs ⌝t)
+  ‘cast-refl’ : ∀ {T : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} →
+      □ (‘□’ ‘’
+          ((⌜ T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T ⌝T)
              ‘‘→'’’
-             ((S₁₀WW (substTyp-tProd (‘context-pick-if'’ {ε} ‘'’ₐ ⌜ dummy ⌝T ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T))
-                ‘‘’’ ⌜ qqs ⌝t)))
-  ‘context-pick-if’-refl : ∀ {T dummy qqs} →
-      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
-          ((S₁₀WW (substTyp-tProd (‘context-pick-if'’ {ε} ‘'’ₐ ⌜ dummy ⌝T ‘’ₐ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c) ‘’ₐ ⌜ T ⌝T)
-              ‘‘’’ ⌜ qqs ⌝t)
-             ‘‘→'’’
-             (⌜ T ⌝T ‘‘’’ ⌜ qqs ⌝t)))
+             (‘cast’ ‘'’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T
+               ‘‘’’ (‘quote-sigma’ ‘'’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T))))
+  -- ‘cast-refl’ = substTerm-undistr-stuff ‘‘∘’’ qexistT-iota-inv ‘‘∘’’ ⌜⌜⌝⌝ ‘‘∘’’ ‘context-pick-if’-refl-inv ‘‘∘’’ ⌜‘’⌝
+
+  ‘cast-refl'’ : ∀ {T} →
+      □ (‘□’ ‘’
+          ((‘cast’ ‘'’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T
+             ‘‘’’ (‘quote-sigma’ ‘'’ₐ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T))
+             ‘‘→'’’ (⌜ T ‘’ ‘existT’ ⌜ ε ▻ ‘Σ’ ‘Context’ ‘Typ’ ⌝c ⌜ T ⌝T ⌝T)))
+  -- ‘cast-refl'’ = ⌜‘’⌝' ‘‘∘’’ ‘context-pick-if’-refl ‘‘∘’’ ⌜⌜⌝⌝' ‘‘∘’’ qexistT-iota ‘‘∘’’ substTerm-distr-stuff
 
 
 
@@ -39,22 +41,6 @@ postulate
          ‘’ (((b ‘'’ₐ v) ‘‘’’ (c ‘'’ₐ v))
                ‘‘→'’’ (SW (((w→ b ‘'’ₐ ‘VAR₀’) w‘‘’’ (w→ c ‘'’ₐ ‘VAR₀’) ‘t’ v))))))
 -- qsubstTerm-qtApp-nd-qtApp-nd-undistr = {!!}
-
-postulate
-  quote-distr-substTyp : ∀ {B A} {b : Term {ε} B} →
-      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
-          (⌜ A ‘’ b ⌝T ‘‘→'’’ ⌜ A ⌝T ‘‘’’ ⌜ b ⌝t))
-  quote-undistr-substTyp : ∀ {B A} {b : Term {ε} B} →
-      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
-          (⌜ A ⌝T ‘‘’’ ⌜ b ⌝t ‘‘→'’’ ⌜ A ‘’ b ⌝T))
-
-  qquote-term-under-app : ∀ {f} {t : Term {ε} (‘Σ’ ‘Context’ ‘Typ’)} →
-      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
-          (f ‘‘’’ ⌜ t ⌝t ‘‘→'’’ f ‘‘’’ (‘quote-sigma’ ‘'’ₐ t)))
-
-  qquote-term-under-app-inv : ∀ {f} {t : Term {ε} (‘Σ’ ‘Context’ ‘Typ’)} →
-      Term {ε} (‘Term’ ‘’₁ ⌜ ε ⌝c ‘’
-          (f ‘‘’’ (‘quote-sigma’ ‘'’ₐ t) ‘‘→'’’ f ‘‘’’ ⌜ t ⌝t))
 
 
 postulate
