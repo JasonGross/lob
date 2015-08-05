@@ -101,7 +101,6 @@ weakenProd-nd : ∀ {Γ A B C} →
                              Term (A ‘→'’ B)
                              → Term {Γ = Γ ▻ C} (W A ‘→'’ W B)
 weakenProd-nd {Γ} {A} {B} {C} x = weakenTyp-tProd-nd (w x)
-w→ = weakenProd-nd
 
 
 
@@ -202,10 +201,3 @@ S₁₀W2W : ∀ {Γ T' A B T} {a : Term {Γ ▻ T'} (W A)} {b : Term {Γ ▻ T'
       → Term {Γ ▻ T'} (W2 (W T) ‘’₁ a ‘’ b)
       → Term {Γ ▻ T'} (W1 T ‘’ a)
 S₁₀W2W = substTyp1-substTyp-weakenTyp2-weakenTyp
-
-β : ∀ {Γ A B B'}
-  {g : Term {Γ} (A ‘→'’ B)}
-  {x : Term {Γ} A}
-  → Term {Γ} (B' ‘’ SW (w→ g ‘'’ₐ ‘VAR₀’ ‘t’ x))
-  → Term {Γ} (B' ‘’ (g ‘'’ₐ x))
-β = beta-under-subst

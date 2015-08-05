@@ -120,6 +120,7 @@ module inner
     Term⇓ (f w‘‘’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
     Term⇓ (f ‘‘→'’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘→'’ lower (Term⇓ x Γ⇓))
     Term⇓ (f w‘‘→'’’ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘→'’ lower (Term⇓ x Γ⇓))
+    Term⇓ (w→ x) Γ⇓ A⇓ = Term⇓ x (Σ.proj₁ Γ⇓) A⇓
     Term⇓ w‘‘→'’’→‘‘→'’’ Γ⇓ T⇓ = T⇓
     Term⇓ ‘‘→'’’→w‘‘→'’’ Γ⇓ T⇓ = T⇓
     Term⇓ ‘tApp-nd’ Γ⇓ f⇓ x⇓ = lift (SW (lower f⇓ ‘’ₐ lower x⇓))

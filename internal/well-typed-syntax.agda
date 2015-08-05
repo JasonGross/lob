@@ -129,6 +129,7 @@ mutual
       → Term {ε ▻ X} (W (‘Typ’ ‘’ Γ))
       → Term {ε ▻ X} (W (‘Typ’ ‘’ Γ))
       → Term {ε ▻ X} (W (‘Typ’ ‘’ Γ))
+    w→ : ∀ {Γ A B C} → Term (A ‘→’ W B) → Term {Γ = Γ ▻ C} (W A ‘→’ W (W B))
     {- things that were postulates, but are no longer -}
     ‘‘→'’’→w‘‘→'’’ : ∀ {T'}
          {b : Term {ε} (‘Typ’ ‘’ ⌜ ε ⌝c)}
