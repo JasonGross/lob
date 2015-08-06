@@ -23,7 +23,7 @@ mutual
   data Term : {Γ : Context} → Type Γ → Set where
     ⌜_⌝ : Type ε → Term {ε} ‘Typeε’
     _‘’ₐ_ : ∀ {Γ A B} → Term {Γ} (A ‘→’ B) → Term {Γ} A → Term {Γ} B
-    Lӧb : ∀ {X} → Term {ε} (‘□’ ‘’ ⌜ X ⌝ ‘→’ X) -> Term {ε} X
+    Lӧb : ∀ {X} → Term {ε} (‘□’ ‘’ ⌜ X ⌝ ‘→’ X) → Term {ε} X
     ‘tt’ : ∀ {Γ} → Term {Γ} ‘⊤’
 
 □ : Type ε → Set _
