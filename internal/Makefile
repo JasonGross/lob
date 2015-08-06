@@ -29,9 +29,10 @@ FAST_TARGETS := clean archclean printenv clean-old update-_CoqProject Makefile.c
 
 all: agda coq
 
-agda:
-	agda -i . --html lob.agda
-	agda -i . --html mini-lob.agda
+%.agdai: %.agda
+	agda -i . --html $<
+
+agda: lob.agdai mini-lob.agdai mini-quine.agdai
 
 Makefile.coq: Makefile _CoqProject
 	$(VECHO) "COQ_MAKEFILE -f _CoqProject > $@"
