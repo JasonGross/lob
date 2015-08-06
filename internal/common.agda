@@ -70,6 +70,9 @@ data ⊥ {ℓ : Level} : Set ℓ where
 ⊥-elim : {ℓ ℓ′ : Level} → ⊥ {ℓ} → {A : Set ℓ′} → A
 ⊥-elim ()
 
+¬_ : ∀ {ℓ} → Set ℓ → Set ℓ
+¬ T = T → ⊥ {lzero}
+
 record ⊤ {ℓ : Level} : Set ℓ where
   constructor tt
 

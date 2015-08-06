@@ -31,6 +31,7 @@ all: agda coq
 
 agda:
 	agda -i . --html lob.agda
+	agda -i . --html mini-lob.agda
 
 Makefile.coq: Makefile _CoqProject
 	$(VECHO) "COQ_MAKEFILE -f _CoqProject > $@"
