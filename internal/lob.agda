@@ -22,10 +22,10 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   dummy : Typ ε
   dummy = ‘Context’
 
-  cast : (Γv : Σ Typ) → Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
+  cast : (Γv : Σ Context Typ) → Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
   cast (Γ , v) = context-pick-if {P = Typ} {Γ} (W dummy) v
 
-  Hf : (h : Σ Typ) → Typ ε
+  Hf : (h : Σ Context Typ) → Typ ε
   Hf h = (cast h ‘’ quote-sigma h ‘→'’ ‘X’)
 
   qh : Term {Γ = (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)} (W (‘Typ’ ‘’ ‘ε’))
@@ -40,7 +40,7 @@ module inner (‘X’ : Typ ε) (‘f’ : Term {Γ = ε ▻ (‘□’ ‘’ �
   h2 : Typ (ε ▻ ‘Σ’ ‘Context’ ‘Typ’)
   h2 = (W1 ‘□’ ‘’ (qh w‘‘→'’’ w ⌜ ‘X’ ⌝T))
 
-  h : Σ Typ
+  h : Σ Context Typ
   h = ((ε ▻ ‘Σ’ ‘Context’ ‘Typ’) , h2)
 
   H0 : Typ ε

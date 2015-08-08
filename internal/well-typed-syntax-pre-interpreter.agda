@@ -54,7 +54,7 @@ module inner
     Typ⇓ : {Γ : Context} → Typ Γ → Context⇓ Γ → Set max-level
 
     Context⇓ ε = ⊤
-    Context⇓ (Γ ▻ T) = Σ (λ (Γ' : Context⇓ Γ) → Typ⇓ T Γ')
+    Context⇓ (Γ ▻ T) = Σ (Context⇓ Γ) (λ Γ' → Typ⇓ T Γ')
 
     Typ⇓ (T₁ ‘’ x) Γ⇓ = Typ⇓ T₁ (Γ⇓ , Term⇓ x Γ⇓)
     Typ⇓ (T₂ ‘’₁ a) (Γ⇓ , A⇓) = Typ⇓ T₂ ((Γ⇓ , Term⇓ a Γ⇓) , A⇓)
@@ -67,7 +67,7 @@ module inner
     Typ⇓ ‘Context’ Γ⇓ = Lifted Context
     Typ⇓ ‘Typ’ (Γ⇓ , T⇓) = Lifted (Typ (lower T⇓))
     Typ⇓ ‘Term’ (Γ⇓ , T⇓ , t⇓) = Lifted (Term (lower t⇓))
-    Typ⇓ (‘Σ’ T T₁) Γ⇓ = Σ (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
+    Typ⇓ (‘Σ’ T T₁) Γ⇓ = Σ (Typ⇓ T Γ⇓) (λ T⇓ → Typ⇓ T₁ (Γ⇓ , T⇓))
 
     Term⇓ : ∀ {Γ : Context} {T : Typ Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Typ⇓ T Γ⇓
     Term⇓ (w t) (Γ⇓ , A⇓) = Term⇓ t Γ⇓

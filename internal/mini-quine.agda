@@ -56,7 +56,7 @@ max-level = lzero
 mutual
   Context⇓ : (Γ : Context) → Set (lsuc max-level)
   Context⇓ ε = ⊤
-  Context⇓ (Γ ▻ T) = Σ (Type⇓ {Γ} T)
+  Context⇓ (Γ ▻ T) = Σ (Context⇓ Γ) (Type⇓ {Γ} T)
 
   Type⇓ : {Γ : Context} → Type Γ → Context⇓ Γ → Set max-level
   Type⇓ (W T) Γ⇓ = Type⇓ T (Σ.proj₁ Γ⇓)
@@ -123,5 +123,5 @@ incompleteness = lӧb
 soundness : ¬ □ ‘⊥’
 soundness x = Term⇓ x tt
 
-non-emptyness : Σ (λ T → □ T)
+non-emptyness : Σ (Type ε) (λ T → □ T)
 non-emptyness = ‘⊤’ , ‘tt’

@@ -20,14 +20,14 @@ true ∧ false = false
 false ∧ true = false
 false ∧ false = false
 
-record Σ {ℓ ℓ′} {A : Set ℓ} (P : A → Set ℓ′) : Set (ℓ ⊔ ℓ′) where
+record Σ {ℓ ℓ′} (A : Set ℓ) (P : A → Set ℓ′) : Set (ℓ ⊔ ℓ′) where
   constructor _,_
   field
     proj₁ : A
     proj₂ : P proj₁
 
 _×_ : ∀ {ℓ ℓ′} (A : Set ℓ) (B : Set ℓ′) → Set (ℓ ⊔ ℓ′)
-A × B = Σ (λ (_ : A) → B)
+A × B = Σ A (λ _ → B)
 
 if_then_else_ : ∀ {ℓ} {A : Set ℓ} → (b : bool) → A → A → A
 if true then t else f = t

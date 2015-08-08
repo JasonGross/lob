@@ -9,7 +9,7 @@ open import well-typed-syntax-eq-dec public
 
 infixr 2 _‘‘∘’’_
 
-quote-sigma : (Γv : Σ Typ) → Term {ε} (‘Σ’ ‘Context’ ‘Typ’)
+quote-sigma : (Γv : Σ Context Typ) → Term {ε} (‘Σ’ ‘Context’ ‘Typ’)
 quote-sigma (Γ , v) = ‘existT’ ⌜ Γ ⌝c ⌜ v ⌝T
 
 _‘‘∘’’_ : ∀ {A B C}
