@@ -32,7 +32,7 @@ all: agda coq
 %.agdai: %.agda
 	agda -i . --html $<
 
-agda: lob.agdai mini-lob.agdai mini-quine.agdai
+agda: lob.agdai mini-lob.agdai mini-quine.agdai mini-mini-lob.agda mini-lob-poem.agda
 
 Makefile.coq: Makefile _CoqProject
 	$(VECHO) "COQ_MAKEFILE -f _CoqProject > $@"
