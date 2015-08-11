@@ -57,6 +57,13 @@ option-map : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′}
 option-map f (just x) = just (f x)
 option-map f nothing = nothing
 
+option-map₂ : ∀ {ℓ ℓ′ ℓ′′} {A : Set ℓ} {B : Set ℓ′} {C : Set ℓ′′}
+  → (A → B → C)
+  → Maybe A → Maybe B → Maybe C
+option-map₂ f (just x) (just y) = just (f x y)
+option-map₂ f nothing _ = nothing
+option-map₂ f _ nothing = nothing
+
 
 option-bind : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′}
   → Maybe A

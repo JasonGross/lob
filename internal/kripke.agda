@@ -30,6 +30,7 @@ mutual
     Quine : ∀ {Γ} → Type (Γ ▻ ‘Type’ Γ) → Type Γ
     ‘⊤’ : ∀ {Γ} → Type Γ
     ‘⊥’ : ∀ {Γ} → Type Γ
+    ‘ℕ’ : ∀ {Γ} → Type Γ
 
   data Term : {Γ : Context} → Type Γ → Set where
     ⌜_⌝ : ∀ {Γ} → Type Γ → Term {Γ} (‘Type’ Γ)
@@ -43,6 +44,11 @@ mutual
     quine→ : ∀ {Γ φ} → Term {Γ} (Quine φ        ‘→’ φ ‘’ ⌜ Quine φ ⌝)
     quine← : ∀ {Γ φ} → Term {Γ} (φ ‘’ ⌜ Quine φ ⌝ ‘→’ Quine φ)
     ‘tt’ : ∀ {Γ} → Term {Γ} ‘⊤’
+    ‘0’ : ∀ {Γ} → Term {Γ} ‘ℕ’
+    ‘1+’ : ∀ {Γ} → Term {Γ} (‘ℕ’ ‘→’ ‘ℕ’)
+    --‘ℕ-elim’ : ∀ {Γ} → Term {Γ} (‘ℕ’ ‘→’ ‘ℕ’)
+    ‘⊥-elim’ : ∀ {Γ A} → Term {Γ} (‘⊥’ ‘→’ A)
+    _‘,’_ : ∀ {Γ A B} → Term {Γ} A → Term {Γ} B → Term {Γ} (A ‘×’ B)
     SW : ∀ {Γ X A} {a : Term A} → Term {Γ} (W X ‘’ a) → Term X
     →SW1SV→W : ∀ {Γ T X A B} {x : Term X}
       → Term {Γ} (T ‘→’ (W1 A ‘’ ‘VAR₀’ ‘→’ W B) ‘’ x)
@@ -98,6 +104,7 @@ mutual
   Type⇓ (A ‘×’ B) Γ⇓ = Type⇓ A Γ⇓ × Type⇓ B Γ⇓
   Type⇓ ‘⊤’ Γ⇓ = ⊤
   Type⇓ ‘⊥’ Γ⇓ = ⊥
+  Type⇓ ‘ℕ’ Γ⇓ = ℕ
   Type⇓ (Quine φ) Γ⇓ = Type⇓ φ (Γ⇓ , (lift (Quine φ)))
 
   Term⇓ : ∀ {Γ : Context} {T : Type Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Type⇓ T Γ⇓
@@ -107,6 +114,10 @@ mutual
   Term⇓ ‘⌜‘VAR₀’⌝’ Γ⇓ = lift ⌜ (lower (Σ.proj₂ Γ⇓)) ⌝
   Term⇓ (f ‘’ₐ x) Γ⇓ = Term⇓ f Γ⇓ (Term⇓ x Γ⇓)
   Term⇓ ‘tt’ Γ⇓ = tt
+  Term⇓ ‘0’ Γ⇓ = 0
+  Term⇓ ‘1+’ Γ⇓ = suc
+  Term⇓ (x ‘,’ y) Γ⇓ = (Term⇓ x Γ⇓ , Term⇓ y Γ⇓)
+  Term⇓ ‘⊥-elim’ Γ⇓ ()
   Term⇓ (quine→ {φ}) Γ⇓ x = x
   Term⇓ (quine← {φ}) Γ⇓ x = x
   Term⇓ (‘λ∙’ f) Γ⇓ x = Term⇓ f (Γ⇓ , x)
@@ -176,6 +187,20 @@ non-emptyness : Σ (Type ε) (λ T → □ T)
 non-emptyness = ‘⊤’ , ‘tt’
 
 module helpers where
+  search-term : ∀ {Γ} → (T : Type Γ) → Maybe (Term T)
+  search-term (W T₁) = {!!}
+  search-term (W1 T₂) = {!!}
+  search-term (T₁ ‘’ x) = {!!}
+  search-term (‘Type’ Γ) = {!!}
+  search-term ‘Term’ = {!!}
+  search-term (T ‘→’ T₁) = {!!}
+  search-term (T ‘×’ T₁) = option-map₂ _‘,’_ (search-term T) (search-term T₁)
+  search-term (Quine T) = {!!}
+  search-term ‘⊤’ = just ‘tt’
+  search-term ‘ℕ’ = just ‘0’
+  search-term {ε} ‘⊥’ = nothing
+  search-term {Γ ▻ x} ‘⊥’ = {!!}
+
   Wₕ : ∀ {Γ A} → Type Γ → Type (Γ ▻ A)
   Wₕ ‘⊤’ = ‘⊤’
   Wₕ ‘⊥’ = ‘⊥’
@@ -183,6 +208,28 @@ module helpers where
   Wₕ (T ‘×’ T₂) = Wₕ T ‘×’ Wₕ T₂
   Wₕ (W T₂) = W (Wₕ T₂)
   Wₕ T = W T
+
+  Wₕ→ : ∀ {Γ A T} → Term {Γ ▻ A} (Wₕ T ‘→’ W T)
+  Wₕ→ {T = W T₁} = w→ (w Wₕ→)
+  Wₕ→ {T = W1 T₂} = ‘λ∙’ ‘VAR₀’
+  Wₕ→ {T = T₁ ‘’ x} = ‘λ∙’ ‘VAR₀’
+  Wₕ→ {T = ‘Type’ ._} = ‘λ∙’ ‘VAR₀’
+  Wₕ→ {T = ‘Term’} = ‘λ∙’ ‘VAR₀’
+  Wₕ→ {T = T ‘→’ T₁} = {!!}
+  Wₕ→ {T = T ‘×’ T₁} = {!!}
+  Wₕ→ {T = Quine T} = {!!}
+  Wₕ→ {T = ‘⊤’} = ‘λ∙’ {!!}
+  Wₕ→ {T = ‘ℕ’} = {!!}
+  Wₕ→ {T = ‘⊥’} = ‘⊥-elim’
+
+  W1ₕ : ∀ {Γ A B} → Type (Γ ▻ A) → Type (Γ ▻ B ▻ W A)
+  W1ₕ ‘⊤’ = ‘⊤’
+  W1ₕ ‘⊥’ = ‘⊥’
+  W1ₕ (T ‘→’ T₂) = W1ₕ T ‘→’ W1ₕ T₂
+  W1ₕ (T ‘×’ T₂) = W1ₕ T ‘×’ W1ₕ T₂
+  W1ₕ (W T₂) = W (Wₕ T₂)
+  W1ₕ (W1 T₂) = W1 (W1ₕ T₂)
+  W1ₕ T = W1 T
 
   _‘’ₕ_ : ∀ {Γ A} → Type (Γ ▻ A) → Term A → Type Γ
   ‘⊤’ ‘’ₕ x₁ = ‘⊤’
@@ -192,6 +239,16 @@ module helpers where
   (f ‘→’ f₁) ‘’ₕ x₁ = (f ‘’ₕ x₁) ‘→’ (f₁ ‘’ₕ x₁)
   (f ‘×’ f₁) ‘’ₕ x₁ = (f ‘’ₕ x₁) ‘×’ (f₁ ‘’ₕ x₁)
   f ‘’ₕ x = f ‘’ x
+
+  _‘’ₐₕ_ : ∀ {Γ A T} → Term {Γ} (A ‘→’ T) → Term A → Term T
+  ‘λ∙’ ‘⌜‘VAR₀’⌝t’ ‘’ₐₕ x = ⌜ x ⌝t
+  ‘λ∙’ ‘⌜‘VAR₀’⌝’ ‘’ₐₕ x = ⌜ x ⌝t
+  ‘λ∙’ ‘VAR₀’ ‘’ₐₕ x = x
+  ‘λ∙’ (f ‘’ₐ f₁) ‘’ₐₕ x = ‘λ∙’ (f ‘’ₐₕ f₁) ‘’ₐ x
+  ‘λ∙’ (w f) ‘’ₐₕ x = f
+  (f ‘’ₐ f₁) ‘’ₐₕ x = (f ‘’ₐₕ f₁) ‘’ₐ x
+  (f ‘∘’ f₁) ‘’ₐₕ x = f ‘’ₐₕ (f₁ ‘’ₐₕ x)
+  f ‘’ₐₕ x = f ‘’ₐ x
 
   _‘→’ₕ_ : ∀ {Γ} → Type Γ → Type Γ → Type Γ
   ‘⊤’ ‘→’ₕ B = B
@@ -217,16 +274,9 @@ mutual
   simplify-type (T₁ ‘’ x) = simplify-type T₁ ‘’ₕ simplify-term x
   simplify-type (W T₁) = Wₕ (simplify-type T₁)
   simplify-type (W1 T₂) = W1ₕ (simplify-type T₂)
-    where W1ₕ : ∀ {Γ A B} → Type (Γ ▻ A) → Type (Γ ▻ B ▻ W A)
-          W1ₕ ‘⊤’ = ‘⊤’
-          W1ₕ ‘⊥’ = ‘⊥’
-          W1ₕ (T ‘→’ T₂) = W1ₕ T ‘→’ W1ₕ T₂
-          W1ₕ (T ‘×’ T₂) = W1ₕ T ‘×’ W1ₕ T₂
-          W1ₕ (W T₂) = W (Wₕ T₂)
-          W1ₕ (W1 T₂) = W1 (W1ₕ T₂)
-          W1ₕ T = W1 T
   simplify-type (‘Type’ Γ) = ‘Type’ Γ
   simplify-type ‘Term’ = ‘Term’
+  simplify-type ‘ℕ’ = ‘ℕ’
   simplify-type (Quine T) = Quine (simplify-type T)
 
   simplify-term : ∀ {Γ T} → Term {Γ} T → Term T
@@ -237,19 +287,14 @@ mutual
   simplify-term (‘λ∙’ t) = ‘λ∙’ (simplify-term t)
   simplify-term ‘VAR₀’ = ‘VAR₀’
   simplify-term (t ‘’ₐ t₁) = simplify-term t ‘’ₐₕ simplify-term t₁
-    where _‘’ₐₕ_ : ∀ {Γ A T} → Term {Γ} (A ‘→’ T) → Term A → Term T
-          ‘λ∙’ ‘⌜‘VAR₀’⌝t’ ‘’ₐₕ x = ⌜ x ⌝t
-          ‘λ∙’ ‘⌜‘VAR₀’⌝’ ‘’ₐₕ x = ⌜ x ⌝t
-          ‘λ∙’ ‘VAR₀’ ‘’ₐₕ x = x
-          ‘λ∙’ (f ‘’ₐ f₁) ‘’ₐₕ x = ‘λ∙’ (f ‘’ₐₕ f₁) ‘’ₐ x
-          ‘λ∙’ (w f) ‘’ₐₕ x = f
-          (f ‘’ₐ f₁) ‘’ₐₕ x = (f ‘’ₐₕ f₁) ‘’ₐ x
-          (f ‘∘’ f₁) ‘’ₐₕ x = f ‘’ₐₕ (f₁ ‘’ₐₕ x)
-          f ‘’ₐₕ x = f ‘’ₐ x
+  simplify-term (t ‘,’ t₁) = simplify-term t ‘,’ simplify-term t₁
   simplify-term ‘‘×'’’ = ‘‘×'’’
   simplify-term quine→ = quine→
   simplify-term quine← = quine←
   simplify-term ‘tt’ = ‘tt’
+  simplify-term ‘0’ = ‘0’
+  simplify-term ‘1+’ = ‘1+’
+  simplify-term ‘⊥-elim’ = ‘⊥-elim’
   simplify-term (SW t₁) = SW (simplify-term t₁)
   simplify-term (→SW1SV→W t₁) = →SW1SV→W (simplify-term t₁)
   simplify-term (←SW1SV→W t₁) = ←SW1SV→W (simplify-term t₁)
@@ -267,78 +312,21 @@ mutual
   simplify-term (t ‘‘→’’ t₁) = simplify-term t ‘‘→’’ simplify-term t₁
   simplify-term (t ww‘‘‘→’’’ t₁) = simplify-term t ww‘‘‘→’’’ simplify-term t₁
   simplify-term (t ww‘‘‘×’’’ t₁) = simplify-term t ww‘‘‘×’’’ simplify-term t₁
-{-
-mutual
-  simplify-type⇓→ : ∀ {Γ T Γ⇓} → Type⇓ {Γ} T Γ⇓ → Type⇓ {Γ} (simplify-type T) Γ⇓
-  simplify-type⇓→ {T = T ‘→’ T₁} T⇓ = {!!}
-  simplify-type⇓→ {T = W T₁} T⇓ = {!!}
-  simplify-type⇓→ {T = W1 T₂} T⇓ = {!!}
-  simplify-type⇓→ {T = T₁ ‘’ x} T⇓ = {!!}
-  simplify-type⇓→ {T = ‘Type’ ._} T⇓ = {!!}
-  simplify-type⇓→ {T = ‘Term’} T⇓ = {!!}
-  simplify-type⇓→ {T = T ‘×’ T₁} T⇓ = {!!}
-  simplify-type⇓→ {T = Quine T} T⇓ = {!!}
-  simplify-type⇓→ {T = ‘⊤’} T⇓ = tt
-  simplify-type⇓→ {T = ‘⊥’} T⇓ = T⇓
 
-  simplify-type⇓← : ∀ {Γ T Γ⇓} → Type⇓ {Γ} (simplify-type T) Γ⇓ → Type⇓ {Γ} T Γ⇓
-  simplify-type⇓← {T = W T₁} T⇓ = {!!}
-  simplify-type⇓← {T = W1 T₂} T⇓ = {!!}
-  simplify-type⇓← {T = T₁ ‘’ x} T⇓ = {!!}
-  simplify-type⇓← {T = ‘Type’ ._} T⇓ = {!!}
-  simplify-type⇓← {T = ‘Term’} T⇓ = {!!}
-  simplify-type⇓← {T = T ‘→’ T₁} T⇓ x = {!!}
-  simplify-type⇓← {Γ} {T ‘×’ T₁} {Γ⇓} T⇓ = helper {Γ} {simplify-type T} {simplify-type T₁} {T} {T₁} {Γ⇓} (simplify-type⇓← {T = T}) (simplify-type⇓← {T = T₁}) T⇓
-    where helper : ∀ {Γ A B A' B'} {Γ⇓ : Context⇓ Γ}
-                 → (Type⇓ A Γ⇓ → Type⇓ A' Γ⇓)
-                 → (Type⇓ B Γ⇓ → Type⇓ B' Γ⇓)
-                 → Type⇓ (A ‘×’ₕ B) Γ⇓
-                 → Type⇓ (A' ‘×’ B') Γ⇓
-          helper {A = ‘⊤’} f g x = f tt , g x
-          helper {A = ‘⊥’} f g ()
-          helper {A = W A₁} {‘⊤’} f g x = f x , g tt
-          helper {A = W1 A₂} {‘⊤’} f g x = f x , g tt
-          helper {A = A₁ ‘’ x} {‘⊤’} f g x₁ = f x₁ , g tt
-          helper {A = ‘Type’ ._} {‘⊤’} f g x = f x , g tt
-          helper {A = ‘Term’} {‘⊤’} f g x = f x , g tt
-          helper {A = A ‘→’ A₁} {‘⊤’} f g x = f x , g tt
-          helper {A = A ‘×’ A₁} {‘⊤’} f g x = f x , g tt
-          helper {A = Quine A} {‘⊤’} f g x = f x , g tt
-          helper {A = W A₁} {‘⊥’} {Γ⇓ = proj₁ , proj₂} f g ()
-          helper {A = W1 A₂} {‘⊥’} {Γ⇓ = proj₁ , proj₂ , proj₃} f g ()
-          helper {A = A₁ ‘’ x} {‘⊥’} f g ()
-          helper {A = ‘Type’ ._} {‘⊥’} f g ()
-          helper {A = ‘Term’} {‘⊥’} {Γ⇓ = proj₁ , proj₂} f g ()
-          helper {A = A ‘→’ A₁} {‘⊥’} f g ()
-          helper {A = A ‘×’ A₁} {‘⊥’} f g ()
-          helper {A = Quine A} {‘⊥’} f g ()
-          helper {A = W A₁} {W B₁} {Γ⇓ = proj₁ , proj₂} f g x = f (Σ.proj₁ x) , g (Σ.proj₂ x)
-          helper {A = W1 A₂} {W B₁} {Γ⇓ = proj₁ , proj₂} f g x = f (Σ.proj₁ x) , g (Σ.proj₂ x)
-          helper {A = A₂ ‘’ _} {W B₁} {Γ⇓ = proj₁ , proj₂} f g x = {!f (Σ.proj₁ x) , g (Σ.proj₂ x)!}
-          helper {A = ‘Type’ ._} {W B₁} {Γ⇓ = proj₁ , proj₂} f g x = f (Σ.proj₁ x) , g (Σ.proj₂ x)
-          helper {A = ‘Term’} {W B₁} {Γ⇓ = proj₁ , proj₂} f g x = f (Σ.proj₁ x) , g (Σ.proj₂ x)
-          helper {A = A₁ ‘→’ A₂} {W B₁} {Γ⇓ = proj₁ , proj₂} f g x = f (Σ.proj₁ x) , g (Σ.proj₂ x)
-          helper {A = A₁ ‘×’ A₂} {W B₁} {Γ⇓ = proj₁ , proj₂} f g x = f (Σ.proj₁ x) , g (Σ.proj₂ x)
-          helper {A = Quine A₁} {W B₁} {Γ⇓ = proj₁ , proj₂} f g x = f (Σ.proj₁ x) , g (Σ.proj₂ x)
-          helper {B = W1 B₂} f g x = {!!}
-          helper {B = B₁ ‘’ x} f g x₁ = {!!}
-          helper {B = ‘Type’ ._} f g x = {!!}
-          helper {B = ‘Term’} f g x = {!!}
-          helper {B = B ‘→’ B₁} f g x = {!!}
-          helper {B = B ‘×’ B₁} f g x = {!!}
-          helper {B = Quine B} f g x = {!!} {-
-          helper {A = W A₁} f g x = {!!}
-          helper {A = W1 A₂} f g x = {!!}
-          helper {A = A₁ ‘’ x} f g x₁ = {!!}
-          helper {A = ‘Type’ ._} f g x = {!!}
-          helper {A = ‘Term’} f g x = {!!}
-          helper {A = A ‘→’ A₁} f g x = {!!}
-          helper {A = A ‘×’ A₁} f g x = {!!}
-          helper {A = Quine A} f g x = {!!} -}
-  simplify-type⇓← {T = Quine T} T⇓ = {!!}
-  simplify-type⇓← {T = ‘⊤’} T⇓ = tt
-  simplify-type⇓← {T = ‘⊥’} T⇓ = T⇓
--}
+mutual
+  simplify-type→ : ∀ {Γ T} → Term {Γ} (simplify-type T ‘→’ T)
+  simplify-type→ {T = W T₁} = {!!}
+  simplify-type→ {T = W1 T₂} = {!!}
+  simplify-type→ {T = T₁ ‘’ x} = {!!}
+  simplify-type→ {T = ‘Type’ ._} = {!!}
+  simplify-type→ {T = ‘Term’} = {!!}
+  simplify-type→ {T = T ‘→’ T₁} = {!!}
+  simplify-type→ {T = T ‘×’ T₁} = {!!}
+  simplify-type→ {T = Quine T} = {!!}
+  simplify-type→ {T = ‘⊤’} = {!!}
+  simplify-type→ {T = ‘ℕ’} = {!!}
+  simplify-type→ {T = ‘⊥’} = {!!}
+
 
 module modal-fixpoint where
   context-to-term : Context → Set
@@ -373,167 +361,10 @@ module modal-fixpoint where
   helper-ikf world (T₂ ‘×’ T₃) x₁ = helper-ikf world T₂ x₁ ‘×’ helper-ikf world T₃ x₁
   helper-ikf world (Quine T₂) x₁ = hold world (Quine T₂ ‘’ x₁)
   helper-ikf world ‘⊤’ x₁ = ‘⊤’
+  helper-ikf world ‘ℕ’ x₁ = ‘ℕ’
   helper-ikf world ‘⊥’ x₁ = ‘⊥’
 
   mutual
-{-    _‘’ₐₕ_ : ∀ {Γ A B} {world} (f : Term {Γ} (A ‘→’ B)) (x : Term A) → Term B
-    ‘λ∙’ ‘⌜‘VAR₀’⌝t’ ‘’ₐₕ x₂ = ⌜ x₂ ⌝t
-    ‘λ∙’ ‘⌜‘VAR₀’⌝’ ‘’ₐₕ x₂ = ⌜ x₂ ⌝t
-    ‘λ∙’ ‘VAR₀’ ‘’ₐₕ x₂ = x₂
-    ‘λ∙’ (f ‘’ₐ f₁) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (SW f₁) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (w f) ‘’ₐₕ x₂ = f
-    ‘λ∙’ (→w (‘λ∙’ ‘VAR₀’)) ‘’ₐₕ x₂ = ‘λ∙’ ‘VAR₀’
-    ‘λ∙’ (→w (‘λ∙’ (f ‘’ₐ f₁))) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (‘λ∙’ (SW f₁))) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (‘λ∙’ (w f))) ‘’ₐₕ x₂ = ‘λ∙’ (w (‘λ∙’ f ‘’ₐₕ x₂))
-    ‘λ∙’ (→w (‘λ∙’ (→ww f))) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (‘λ∙’ (‘‘□’’ f))) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (‘λ∙’ (f ww‘‘‘→’’’ f₁))) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (‘λ∙’ (f ww‘‘‘×’’’ f₁))) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (f ‘’ₐ f₁)) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (SW f₁)) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (w→ f)) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (ww→ f)) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→w (f ‘∘’ f₁)) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (→ww f) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (f w‘‘’’ₐ f₁) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (‘‘□’’ f) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (f ww‘‘‘→’’’ f₁) ‘’ₐₕ x₂ = {!!}
-    ‘λ∙’ (f ww‘‘‘×’’’ f₁) ‘’ₐₕ x₂ = {!!}
-    _‘’ₐₕ_ {world = world} (f ‘’ₐ f₁) x₂ = hold-t world ((_‘’ₐₕ_ {world = world} f f₁) ‘’ₐ x₂)
-    _‘’ₐₕ_ {world = world} ‘‘×'’’ x₂ = {!!}
-    _‘’ₐₕ_ {world = world} quine→ x₂ = {!!}
-    _‘’ₐₕ_ {world = world} quine← x₂ = {!!}
-    _‘’ₐₕ_ {world = world} (SW f₁) x₂ = {!!}
-    _‘’ₐₕ_ {world = world} (→SW1SV→W f₁) x₂ = {!!}
-    _‘’ₐₕ_ {world = world} (←SW1SV→W f₁) x₂ = {!!}
-    →SW1SV→SW1SV→W (‘λ∙’ f₁) ‘’ₐₕ x₂ = {!!}
-    →SW1SV→SW1SV→W (f₁ ‘’ₐ f₂) ‘’ₐₕ x₂ = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ⌜ x ⌝) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ⌜ x₃ ⌝t) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘⌜‘VAR₀’⌝t’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘⌜‘VAR₀’⌝’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ ‘⌜‘VAR₀’⌝t’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ ‘⌜‘VAR₀’⌝’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ ‘VAR₀’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (x₃ ‘’ₐ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (SW x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (w x₃)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ ‘VAR₀’))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (x₃ ‘’ₐ x₄)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (SW x₄)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w ‘⌜‘VAR₀’⌝t’)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w ‘⌜‘VAR₀’⌝’)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w ‘VAR₀’)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (x₃ ‘’ₐ x₄))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (SW x₄))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (‘λ∙’ x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ x₃ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (SW x₃ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→W (‘λ∙’ x₃) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₁ ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→W (x₃ ‘’ₐ x₄) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₁ ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→W (SW x₄) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₁ ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→W (x₃ ‘∘’ x₄) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₁ ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→SW1SV→W (‘λ∙’ x₃) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₁ ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→SW1SV→W (x₃ ‘’ₐ x₄) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₁ ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→SW1SV→W quine← ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x ⌝))))) = ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x ⌝))))
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→SW1SV→W (SW x₄) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₁ ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→SW1SV→W (x₃ ‘∘’ x₄) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₁ ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ ((x₂ ‘∘’ x₃) ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x ⌝))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ⌜ x₃ ⌝t))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ‘⌜‘VAR₀’⌝t’))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ‘⌜‘VAR₀’⌝’))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (‘λ∙’ x₃)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ‘VAR₀’))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (x₃ ‘’ₐ x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ‘‘×'’’))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w quine→))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w quine←))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ‘tt’))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (SW x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (→SW1SV→W x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (←SW1SV→W x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (→SW1SV→SW1SV→W x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (←SW1SV→SW1SV→W x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (w x₃)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (w→ x₃)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (→w x₃)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (ww→ x₃)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (→ww x₃)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (x₃ ‘∘’ x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (x₃ w‘‘’’ₐ x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w ‘‘’ₐ’))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (‘‘□’’ x₃)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (x₃ ‘‘→’’ x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (x₃ ww‘‘‘→’’’ x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (w (x₃ ww‘‘‘×’’’ x₄)))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (→w x₃))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (→ww x₃))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (x₃ w‘‘’’ₐ x₄))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (‘‘□’’ x₃))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (x₃ ww‘‘‘→’’’ x₄))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (w (x₃ ww‘‘‘×’’’ x₄))))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (→ww x₃)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (‘‘□’’ x₃)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (x₃ ww‘‘‘→’’’ x₄)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (‘λ∙’ (x₃ ww‘‘‘×’’’ x₄)))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (x₃ ‘’ₐ x₄))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (SW x₄))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (w→ x₃))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (ww→ x₃))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→w (x₃ ‘∘’ x₄))) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (→ww x₃)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (x₃ w‘‘’’ₐ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (‘‘□’’ x₃)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (x₃ ww‘‘‘→’’’ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘λ∙’ (x₃ ww‘‘‘×’’’ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘VAR₀’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ (x₃ ‘’ₐ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘‘×'’’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ quine→) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ quine←) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘tt’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ SW x₄) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ →SW1SV→W x₄) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ←SW1SV→W x₄) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ →SW1SV→SW1SV→W x₄) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ←SW1SV→SW1SV→W x₄) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ w x₃) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ w→ x₃) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ →w x₃) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ww→ x₃) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ →ww x₃) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ (x₃ ‘∘’ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ (x₃ w‘‘’’ₐ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘‘’ₐ’) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ ‘‘□’’ x₃) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ (x₃ ‘‘→’’ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ (x₃ ww‘‘‘→’’’ x₄)) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (x₂ ‘’ₐ x₃ ww‘‘‘×’’’ x₄) = {!!}
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ SW x₃ = {!!}
-    →SW1SV→SW1SV→W (SW f₂) ‘’ₐₕ x₂ = {!!}
-    →SW1SV→SW1SV→W (←SW1SV→W f₂) ‘’ₐₕ x₂ = {!!}
-    →SW1SV→SW1SV→W (←SW1SV→SW1SV→W f₂) ‘’ₐₕ x₂ = {!!}
-    →SW1SV→SW1SV→W (f₁ ‘∘’ f₂) ‘’ₐₕ x₂ = {!!}
-    ←SW1SV→SW1SV→W (‘λ∙’ f₁) ‘’ₐₕ x₂ = {!!}
-    ←SW1SV→SW1SV→W (f₁ ‘’ₐ f₂) ‘’ₐₕ x₂ = {!!}
-    ←SW1SV→SW1SV→W quine← ‘’ₐₕ x₂ = {!!} -- ←SW1SV→SW1SV→W quine← ‘’ₐ x₂
-    ←SW1SV→SW1SV→W (SW f₂) ‘’ₐₕ x₂ = {!!}
-    ←SW1SV→SW1SV→W (→SW1SV→W f₂) ‘’ₐₕ x₂ = {!!}
-    ←SW1SV→SW1SV→W (→SW1SV→SW1SV→W f₂) ‘’ₐₕ x₂ = {!!}
-    ←SW1SV→SW1SV→W (f₁ ‘∘’ f₂) ‘’ₐₕ x₂ = {!!}
-    _‘’ₐₕ_ {world = world} (w→ f) x₂ = w→ f ‘’ₐ x₂
-    _‘’ₐₕ_ {world = world} (ww→ f) x₂ = {!!}
-    _‘’ₐₕ_ {world = world} (f ‘∘’ f₁) x₂ = _‘’ₐₕ_ {world = world} f (_‘’ₐₕ_ {world = world} f₁ x₂)
-    _‘’ₐₕ_ {world = world} ‘‘’ₐ’ x₂ = {!!}
-
-    ‘‘□’’ₕ : ∀ {Γ A B} → Term {Γ ▻ A ▻ B} (W (W (‘Term’ ‘’ ⌜ ‘Type’ Γ ⌝))) → Term {Γ ▻ A ▻ B} (W (W (‘Type’ Γ)))
-    ‘‘□’’ₕ t = ‘‘□’’ t
-
-    _‘∘’ₕ_ : ∀ {Γ A B C} {world} (g : Term {Γ} (B ‘→’ C)) (f : Term (A ‘→’ B)) → Term (A ‘→’ C)
-    f ‘∘’ₕ g = f ‘∘’ g-}
-
     in-kripke-frame-c : ∀ (world : ℕ) → Context → Context
     in-kripke-frame : ∀ {Γ} (world : ℕ) → Type Γ → Type (in-kripke-frame-c world Γ)
     in-kripke-frame-t : ∀ {Γ} (world : ℕ) {T : Type Γ} → Term T → Term (in-kripke-frame world T)
@@ -541,66 +372,30 @@ module modal-fixpoint where
     in-kripke-frame-c world ε = ε
     in-kripke-frame-c world (Γ ▻ x) = in-kripke-frame-c world Γ ▻ in-kripke-frame world x
 
-    _‘’ₐₕ_ : ∀ {Γ A B} → Term {Γ} (A ‘→’ B) → Term {Γ} A → Term {Γ} B
-    (f₁ ‘’ₐ f₂) ‘’ₐₕ x₁ = (f₁ ‘’ₐₕ f₂) ‘’ₐ x₁
-    →SW1SV→SW1SV→W quine→ ‘’ₐₕ (←SW1SV→SW1SV→W quine← ‘’ₐ f) = f
-    f ‘’ₐₕ x = {!!}
-
-
     in-kripke-frame world (T ‘→’ T₁) = (in-kripke-frame world T) ‘→’ (in-kripke-frame world T₁)
     in-kripke-frame world (‘Type’ Γ) = ‘Type’ (in-kripke-frame-c world Γ)
     in-kripke-frame world (W T₁) = W (in-kripke-frame world T₁)
     in-kripke-frame world (W1 T₂) = W1 (in-kripke-frame world T₂)
     in-kripke-frame zero (‘Term’ ‘’ x) = ‘⊤’
-    in-kripke-frame {Γ = Γ} (suc world) (‘Term’ ‘’ (f ‘’ₐ x)) = helper helper'
+    in-kripke-frame {Γ = Γ} (suc world) (‘Term’ ‘’ (f ‘’ₐ x)) = {!!}
       where helper' : Term (in-kripke-frame world (‘Type’ Γ))
             helper' = simplify-term (in-kripke-frame-t world f) ‘’ₐₕ simplify-term (in-kripke-frame-t world x)
 
             helper : ∀ {Γ} → Term (in-kripke-frame world (‘Type’ Γ)) → Type (in-kripke-frame-c (suc world) Γ)
             helper x = {!!}
     in-kripke-frame (suc world) (‘Term’ ‘’ x) = {!in-kripke-frame world x!}
-    in-kripke-frame world (T₁ ‘’ x) = {!!}
-    in-kripke-frame world ‘Term’ = {!!}
-    in-kripke-frame world (T ‘×’ T₁) = {!!}
-    in-kripke-frame world (Quine T) = {!!}
+    in-kripke-frame world (T₁ ‘’ x) = in-kripke-frame world T₁ ‘’ in-kripke-frame-t world x
+    in-kripke-frame world ‘Term’ = ‘Term’
+    in-kripke-frame world ‘ℕ’ = ‘ℕ’
+    in-kripke-frame world (T ‘×’ T₁) = in-kripke-frame world T ‘×’ in-kripke-frame world T₁
+    in-kripke-frame world (Quine T) = Quine (in-kripke-frame world T)
     in-kripke-frame world ‘⊤’ = ‘⊤’
     in-kripke-frame world ‘⊥’ = ‘⊥’
 
     in-kripke-frame-t world ⌜ x ⌝ = ⌜ (in-kripke-frame world x) ⌝
     in-kripke-frame-t zero ⌜ t ⌝t = ‘tt’
     in-kripke-frame-t (suc world) ⌜ t ⌝t = {!!}
-    in-kripke-frame-t world ‘⌜‘VAR₀’⌝t’ = {!!}
-    in-kripke-frame-t world ‘⌜‘VAR₀’⌝’ = {!!}
-    in-kripke-frame-t world (‘λ∙’ t) = ‘λ∙’ (in-kripke-frame-t world t)
-    in-kripke-frame-t world ‘VAR₀’ = ‘VAR₀’
-    in-kripke-frame-t world (t ‘’ₐ t₁) = in-kripke-frame-t world t ‘’ₐₕ in-kripke-frame-t world t₁
-    in-kripke-frame-t world ‘‘×'’’ = {!!}
-    in-kripke-frame-t world quine→ = {!!}
-    in-kripke-frame-t world quine← = {!!}
-    in-kripke-frame-t world ‘tt’ = ‘tt’
-    in-kripke-frame-t world (SW t₁) = {!!}
-    in-kripke-frame-t world (→SW1SV→W t₁) = {!!}
-    in-kripke-frame-t world (←SW1SV→W t₁) = {!!}
-    in-kripke-frame-t world (→SW1SV→SW1SV→W t₁) = {!!}
-    in-kripke-frame-t world (←SW1SV→SW1SV→W t₁) = {!!}
-    in-kripke-frame-t world (w t) = w (in-kripke-frame-t world t)
-    in-kripke-frame-t world (w→ t) = w→ (in-kripke-frame-t world t)
-    in-kripke-frame-t world (→w t) = →w (in-kripke-frame-t world t)
-    in-kripke-frame-t world (ww→ t) = ww→ (in-kripke-frame-t world t)
-    in-kripke-frame-t world (→ww t) = →ww (in-kripke-frame-t world t)
-    in-kripke-frame-t world (t ‘∘’ t₁) = {!!}
-    in-kripke-frame-t world (t w‘‘’’ₐ t₁) = {!!}
-    in-kripke-frame-t world ‘‘’ₐ’ = {!!}
-    in-kripke-frame-t zero (‘‘□’’ t) = w (w ⌜ ‘⊤’ ⌝)
-    in-kripke-frame-t {Γ = Γ ▻ A ▻ B} (suc world) (‘‘□’’ t) = helper {lzero} (‘‘□’’ₕ (in-kripke-frame-t world t))
-      where ‘‘□’’ₕ : ∀ {Γ A B} → Term {in-kripke-frame-c world Γ ▻ A ▻ B} (W (W (in-kripke-frame world (‘Term’ ‘’ ⌜ ‘Type’ Γ ⌝)))) → Term {in-kripke-frame-c world Γ ▻ A ▻ B} (W (W (‘Type’ (in-kripke-frame-c world Γ))))
-            ‘‘□’’ₕ T = {!!}
-
-            helper : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′} → A → B
-            helper t = {!!}
-    in-kripke-frame-t world (t ‘‘→’’ t₁) = {!!}
-    in-kripke-frame-t world (t ww‘‘‘→’’’ t₁) = {!!}
-    in-kripke-frame-t world (t ww‘‘‘×’’’ t₁) = {!!}
+    in-kripke-frame-t world x = {!!}
 {-
     in-kripke-frame zero ‘Term’ = ‘⊤’
     in-kripke-frame {Γ} world (T ‘→’ T₁) = simplify-type (in-kripke-frame world T ‘→’ in-kripke-frame world T₁)
@@ -662,6 +457,7 @@ module modal-fixpoint where
   kripke-reduce (T ‘×’ T₁) v = kripke-reduce T v ‘×’ kripke-reduce T₁ v
   kripke-reduce (Quine x) v = {!!}
   kripke-reduce ‘⊤’ v = ‘⊤’
+  kripke-reduce ‘ℕ’ v = ‘ℕ’
   kripke-reduce ‘⊥’ v = ‘⊥’
 
 
@@ -680,6 +476,7 @@ module modal-fixpoint where
   kripke-finalize (T ‘×’ T₁) v = kripke-finalize T v ‘×’ kripke-finalize T₁ v
   kripke-finalize (Quine x) v = {!!}
   kripke-finalize ‘⊤’ v = ‘⊤’
+  kripke-finalize ‘ℕ’ v = ‘ℕ’
   kripke-finalize ‘⊥’ v = ‘⊥’
 
   mutual
@@ -694,11 +491,13 @@ module modal-fixpoint where
     kripke-count (T ‘×’ T₁) = kripke-count T + kripke-count T₁
     kripke-count (Quine T) = kripke-count T
     kripke-count ‘⊤’ = 0
+    kripke-count ‘ℕ’ = 0
     kripke-count ‘⊥’ = 0
 
     kripke-count-t : ∀ {Γ T} → Term {Γ} T → ℕ
     kripke-count-t ⌜ x ⌝ = kripke-count x
     kripke-count-t (x ‘’ₐ x₁) = kripke-count-t x + kripke-count-t x₁
+    kripke-count-t (x ‘,’ x₁) = kripke-count-t x + kripke-count-t x₁
     kripke-count-t ⌜ x ⌝t = kripke-count-t x
     kripke-count-t ‘⌜‘VAR₀’⌝t’ = 0
     kripke-count-t ‘⌜‘VAR₀’⌝’ = 0
@@ -707,6 +506,9 @@ module modal-fixpoint where
     kripke-count-t quine→ = 0
     kripke-count-t quine← = 0
     kripke-count-t ‘tt’ = 0
+    kripke-count-t ‘0’ = 0
+    kripke-count-t ‘1+’ = 0
+    kripke-count-t ‘⊥-elim’ = 0
     kripke-count-t (SW x₁) = kripke-count-t x₁
     kripke-count-t (→SW1SV→W x₁) = kripke-count-t x₁
     kripke-count-t (←SW1SV→W x₁) = kripke-count-t x₁
@@ -774,6 +576,7 @@ ww‘‘‘¬’’’ T = T ww‘‘‘→’’’ w (w ⌜ ⌜ ‘⊥’ ⌝ 
 ‘CooperateBot’ : □ ‘Bot’
 ‘FairBot’ : □ ‘Bot’
 ‘PrudentBot’ : □ ‘Bot’
+‘WaitFairBot’ : □ (‘ℕ’ ‘→’ ‘Bot’)
 
 ‘DefectBot’ = make-bot (w (w ⌜ ‘⊥’ ⌝))
 ‘CooperateBot’ = make-bot (w (w ⌜ ‘⊤’ ⌝))
@@ -788,6 +591,9 @@ ww‘‘‘¬’’’ T = T ww‘‘‘→’’’ w (w ⌜ ⌜ ‘⊥’ ⌝ 
 
     ¬□⊥ : ∀ {Γ A B} → Term {Γ ▻ A ▻ B} (W (W (‘□’ (‘Type’ Γ))))
     ¬□⊥ = w (w ⌜ ⌜ ‘¬’ (‘□’ ‘⊥’) ⌝ ⌝t)
+‘WaitFairBot’ = Lӧb {‘ℕ’ ‘→’ ‘Bot’} (‘λ∙’ (→w (‘λ∙’ ({!!} ‘’ₐ helper))))
+  where helper : Term {ε ▻ ‘□’ (‘ℕ’ ‘→’ ‘Bot’) ▻ W ‘ℕ’} (W (W (‘□’ (‘ℕ’ ‘→’ ‘Bot’))))
+        helper = w ‘VAR₀’
 
 data KnownBot : Set where
   DefectBot : KnownBot
@@ -810,14 +616,22 @@ FB-spec CooperateBot b = ‘FairBot’ cooperates-with b
 FB-spec FairBot b = ‘FairBot’ cooperates-with b
 FB-spec PrudentBot b = ‘FairBot’ cooperates-with b
 
+PB-spec : KnownBot → □ ‘Bot’ → Type ε
+PB-spec DefectBot b = ‘¬’ (‘PrudentBot’ cooperates-with b)
+PB-spec CooperateBot b = ‘PrudentBot’ cooperates-with b
+PB-spec FairBot b = ‘PrudentBot’ cooperates-with b
+PB-spec PrudentBot b = ‘PrudentBot’ cooperates-with b
+
 FB-good : ∀ {b} → □ (FB-spec b (KnownBot⇓ b))
+PB-good : ∀ {b} → □ (PB-spec b (KnownBot⇓ b))
 
 DB-defects {b} = ‘λ∙’ ‘VAR₀’
 CB-cooperates {b} = ‘tt’
 FB-good {DefectBot} = {!!}
 FB-good {CooperateBot} = {!!}
-FB-good {FairBot} = {!!}
+FB-good {FairBot} = Lӧb {!!}
 FB-good {PrudentBot} = {!!}
+PB-good {b} = {!!}
 
 
 {-
