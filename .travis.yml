@@ -38,7 +38,7 @@ install:
 
 before_script:
  - uname -a
- - if [ ! -z "$COQ" ]; then opam init --auto-setup; fi
+ - if [ ! -z "$COQ" ]; then opam init -y --auto-setup; fi
  - if [ ! -z "$COQ" ]; then opam update; fi
  - if [ ! -z "$COQ" ]; then opam repo add coq-core-dev https://coq.inria.fr/opam/core-dev || true; fi
  - if [ ! -z "$COQ" ]; then opam repo add coq-released https://coq.inria.fr/opam/released || true; fi
