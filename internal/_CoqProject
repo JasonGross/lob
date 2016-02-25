@@ -1,5 +1,4 @@
 -R . Lob
--arg -no-native-compiler
 Notations.v
 TermOperations.v
 quote_term.v
