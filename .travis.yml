@@ -31,10 +31,9 @@ install:
  - cat $HOME/.cabal/config
  - if [ ! -z "$AGDA" -a ! -d "$HOME/cache/.cabal-sandbox" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
  - if [ ! -z "$AGDA" ]; then cabal update; fi
- - if [ ! -z "$AGDA" ]; then cabal install 'cpphs <1.20'; fi
  - if [ ! -z "$AGDA" ]; then cabal install alex; fi
  - if [ ! -z "$AGDA" ]; then cabal install happy; fi # https://github.com/SublimeHaskell/SublimeHaskell/issues/184
- - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install Agda-$AGDA); fi
+ - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install 'cpphs <1.20' Agda-$AGDA); fi
 
 
 before_script:
