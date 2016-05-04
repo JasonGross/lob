@@ -9,7 +9,7 @@ cache:
  directories:
   - $HOME/cache
   - $HOME/.opam
-  - $HOME/.cabal
+#  - $HOME/.cabal
 
 addons:
   apt:
