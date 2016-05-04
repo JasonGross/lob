@@ -20,9 +20,9 @@ addons:
 
 env:
  matrix:
-  - AGDA="2.4.2.3"  COQ=""    TARGETS="agda"
-  - AGDA="2.4.2.3"  COQ="yes" TARGETS="coq"
-  - AGDA="2.4.2.3"  COQ="yes" TARGETS="coq-axiomatization"
+  - AGDA="2.4.2.5"  COQ=""    TARGETS="agda"
+  - AGDA=""         COQ="yes" TARGETS="coq"
+  - AGDA=""         COQ="yes" TARGETS="coq-axiomatization"
 
 install:
  - export PATH="$HOME/cache/.cabal-sandbox/bin:$HOME/.cabal/bin:$PATH"
