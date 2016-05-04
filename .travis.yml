@@ -20,36 +20,36 @@ addons:
 
 env:
  matrix:
-  - AGDA="2.4.2.5"  COQ="yes" TARGETS="agda"
-  - AGDA="2.4.2.5"  COQ="yes" TARGETS="coq"
-  - AGDA="2.4.2.5"  COQ="yes" TARGETS="coq-axiomatization"
+  - AGDA="2.4.2.5"  COQ=""    REBUILD_CACHE="yes" TARGETS="agda"
+  - AGDA=""         COQ=""    REBUILD_CACHE="yes" TARGETS="coq"
+  - AGDA=""         COQ="yes" REBUILD_CACHE="yes" TARGETS="coq-axiomatization"
 
 install:
  - export PATH="$HOME/cache/.cabal-sandbox/bin:$HOME/.cabal/bin:$PATH"
 # - rm -rf $HOME/cache
  - mkdir -p "$HOME/cache"
  - cat $HOME/.cabal/config
- - if [ ! -z "$AGDA" -a ! -d "$HOME/cache/.cabal-sandbox" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
- - if [ ! -z "$AGDA" ]; then cabal update; fi
- - if [ ! -z "$AGDA" ]; then cabal install alex; fi
- - if [ ! -z "$AGDA" ]; then cabal install happy; fi # https://github.com/SublimeHaskell/SublimeHaskell/issues/184
- - if [ ! -z "$AGDA" ]; then (cd "$HOME/cache" && cabal install 'cpphs <1.20' Agda-$AGDA); fi
+ - if [ ! -z "$AGDA$REBUILD_CACHE" -a ! -d "$HOME/cache/.cabal-sandbox" ]; then (cd "$HOME/cache" && cabal sandbox init); fi
+ - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then cabal update; fi
+ - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then cabal install alex; fi
+ - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then cabal install happy; fi # https://github.com/SublimeHaskell/SublimeHaskell/issues/184
+ - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then (cd "$HOME/cache" && cabal install 'cpphs <1.20' Agda-$AGDA); fi
 
 
 before_script:
  - uname -a
- - if [ ! -z "$COQ" ]; then opam init -y --auto-setup; fi
- - if [ ! -z "$COQ" ]; then opam update; fi
- - if [ ! -z "$COQ" ]; then opam repo add coq-core-dev https://coq.inria.fr/opam/core-dev || true; fi
- - if [ ! -z "$COQ" ]; then opam repo add coq-released https://coq.inria.fr/opam/released || true; fi
- - if [ ! -z "$COQ" ]; then eval `opam config env`; fi
- - if [ ! -z "$COQ" ]; then opam list -a; fi
- - if [ ! -z "$COQ" ]; then coqc -v || true; fi
- - if [ ! -z "$COQ" ]; then echo | coqtop || true; fi
- - if [ ! -z "$COQ" ]; then opam install -y -j4 -v coq.8.5~beta2; fi
- - if [ ! -z "$COQ" ]; then opam list -a; fi
- - if [ ! -z "$COQ" ]; then opam install -y -j4 -v coq-template-coq.1.0.0~beta2; fi
- - if [ ! -z "$COQ" ]; then opam list -a; fi
- - if [ ! -z "$COQ" ]; then eval `opam config env`; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam init -y --auto-setup; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam update; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam repo add coq-core-dev https://coq.inria.fr/opam/core-dev || true; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam repo add coq-released https://coq.inria.fr/opam/released || true; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then eval `opam config env`; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam list -a; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then coqc -v || true; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then echo | coqtop || true; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam install -y -j4 -v coq.8.5~beta2; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam list -a; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam install -y -j4 -v coq-template-coq.1.0.0~beta2; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then opam list -a; fi
+ - if [ ! -z "$COQ$REBUILD_CACHE" ]; then eval `opam config env`; fi
 
 script: make $TARGETS
