@@ -20,9 +20,9 @@ addons:
 
 env:
  matrix:
-  - AGDA="2.4.2.5"  COQ=""    REBUILD_CACHE="yes" TARGETS="agda"
-  - AGDA=""         COQ=""    REBUILD_CACHE="yes" TARGETS="coq"
-  - AGDA=""         COQ="yes" REBUILD_CACHE="yes" TARGETS="coq-axiomatization"
+  - AGDA="yes"      COQ=""    AGDA_VERSION="2.4.2.5" REBUILD_CACHE="yes" TARGETS="agda"
+  - AGDA=""         COQ=""    AGDA_VERSION="2.4.2.5" REBUILD_CACHE="yes" TARGETS="coq"
+  - AGDA=""         COQ="yes" AGDA_VERSION="2.4.2.5" REBUILD_CACHE="yes" TARGETS="coq-axiomatization"
 
 install:
  - export PATH="$HOME/cache/.cabal-sandbox/bin:$HOME/.cabal/bin:$PATH"
@@ -33,7 +33,7 @@ install:
  - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then cabal update; fi
  - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then cabal install alex; fi
  - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then cabal install happy; fi # https://github.com/SublimeHaskell/SublimeHaskell/issues/184
- - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then (cd "$HOME/cache" && cabal install 'cpphs <1.20' Agda-$AGDA); fi
+ - if [ ! -z "$AGDA$REBUILD_CACHE" ]; then (cd "$HOME/cache" && cabal install 'cpphs <1.20' Agda-$AGDA_VERSION); fi
 
 
 before_script:
