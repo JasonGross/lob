@@ -86,7 +86,6 @@ mutual
   Term⇓ : ∀ {Γ : Context} {T : Type Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Type⇓ T Γ⇓
   Term⇓ ⌜ x ⌝ Γ⇓ = lift x
   Term⇓ (f ‘’ₐ x) Γ⇓ = Term⇓ f Γ⇓ (Term⇓ x Γ⇓)
-  --Term⇓ (Lӧb Term‘X’→X) Γ⇓ = Term⇓ Term‘X’→X Γ⇓ (lift (Lӧb Term‘X’→X))
   Term⇓ ‘tt’ Γ⇓ = tt
   Term⇓ (‘eqv’ f b) Γ⇓ = eqv (Term⇓ f Γ⇓) (Term⇓ b Γ⇓)
   Term⇓ (‘fwd’ e) Γ⇓ = let open _~_ in Term⇓ e Γ⇓ .fwd
