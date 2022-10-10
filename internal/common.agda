@@ -9,6 +9,7 @@ infixl 1 _≡_
 infixr 2 _∧_
 infixr 2 _×_
 infixl 2 _+_
+infixr 3 _∷_
 
 data bool : Set where
   true : bool
@@ -148,9 +149,13 @@ data ℕ : Set where
 
 max : ℕ → ℕ → ℕ
 max 0 y = y
-max x 0 = x
+max x@(suc _) 0 = x
 max (suc x) (suc y) = suc (max x y)
 
 _+_ : ℕ → ℕ → ℕ
 0 + b = b
 suc a + b = suc (a + b)
+
+data List {ℓ} (A : Set ℓ) : Set ℓ where
+  [] : List A
+  _∷_ : A → List A → List A
