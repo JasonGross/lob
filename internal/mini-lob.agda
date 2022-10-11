@@ -33,7 +33,7 @@ max-level : Level
 max-level = lzero
 
 mutual
-  Context⇓ : (Γ : Context) → Set (lsuc max-level)
+  Context⇓ : (Γ : Context) → Set max-level
   Context⇓ ε = ⊤
   Context⇓ (Γ ▻ T) = Σ (Context⇓ Γ) (Type⇓ {Γ} T)
 
