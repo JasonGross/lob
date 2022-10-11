@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K #-}
 module mini-diagonal-dependent where
-open import common
+open import common hiding (_~_; eqv; refl~)
 
 infixl 2 _▻_
 infixl 3 _‘’_

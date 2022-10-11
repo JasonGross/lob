@@ -6,6 +6,7 @@ open import Agda.Primitive public
 
 infixl 1 _,_
 infixl 1 _≡_
+infixr 1 _~_
 infixr 2 _∧_
 infixr 2 _×_
 infixl 2 _+_
@@ -34,11 +35,11 @@ if_then_else_ : ∀ {ℓ} {A : Set ℓ} → (b : bool) → A → A → A
 if true then t else f = t
 if false then t else f = f
 
-data Lifted {a b} (A : Set a) : Set (b ⊔ a) where
-  lift : A → Lifted A
+record Lifted {a b} (A : Set a) : Set (b ⊔ a) where
+  constructor lift
+  field lower : A
 
-lower : ∀ {a b A} → Lifted {a} {b} A → A
-lower (lift x) = x
+open Lifted using (lower) public
 
 data Maybe {ℓ : Level} (A : Set ℓ) : Set ℓ where
   just    : (x : A) → Maybe A
@@ -159,3 +160,24 @@ suc a + b = suc (a + b)
 data List {ℓ} (A : Set ℓ) : Set ℓ where
   [] : List A
   _∷_ : A → List A → List A
+
+ap : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {x y : A} (p : x ≡ y) → f x ≡ f y
+ap f refl = refl
+
+record IsEquiv {ℓ} {A B : Set ℓ} (f : A → B) : Set ℓ where
+  constructor is-eqv
+  field
+    inv : B → A
+    isretr : ∀ b → f (inv b) ≡ b
+    issect : ∀ a → inv (f a) ≡ a
+    isadj : ∀ a → isretr (f a) ≡ ap f (issect a)
+
+record _~_ {ℓ} (A B : Set ℓ) : Set ℓ where
+  constructor eqv
+  field
+    fwd : A → B
+    iseqv : IsEquiv fwd
+  open IsEquiv iseqv renaming (inv to bak) public
+
+refl~ : ∀ {ℓ} {A : Set ℓ} → A ~ A
+refl~ = eqv (λ a → a) (is-eqv (λ a → a) (λ b → refl) (λ a → refl) (λ a → refl))
