@@ -131,6 +131,8 @@ Type⇓ (‘Δ’ H T h f) Γ⇓ = Type⇓ T
             , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’
             , iso))
 
+
+-- Work around AGDABUG(https://github.com/agda/agda/issues/6181)
 Term⇓-helper1-cast
   : ∀ {H T h f} Γ⇓
       → Term⇓ h (Γ⇓ , lift (‘Δ’ H T h f) , lift (löb f) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’ , iso)
