@@ -19,10 +19,13 @@ data Context where
   ε : Context
   _▻_ : (Γ : Context) → Type Γ → Context
 
+‘□Typeε’ : Type ε
+
 data Type where
   _‘’_ : ∀ {Γ A} → Type (Γ ▻ A) → Term {Γ} A → Type Γ
   ‘Typeε’ : Type ε
   ‘□’ : Type (ε ▻ ‘Typeε’)
+  ‘‘□’’ : Type (ε ▻ ‘□Typeε’)
   _‘→’_ : ∀ {Γ} → Type Γ → Type Γ → Type Γ
   _‘×’_ : ∀ {Γ} → Type Γ → Type Γ → Type Γ
   ‘⊤’ : ∀ {Γ} → Type Γ
@@ -52,8 +55,11 @@ data Term where
   ‘refl’ : ∀ {Γ A} {x : Term {Γ} A} → Term (x ‘≡’ x)
   ‘Δ-fwd’ : ∀ {T} → Term (‘Δ’ T ‘→’ (‘□’ ‘’ ⌜ ‘Δ’ T ⌝ ‘→’ T))
   ‘Δ-bak’ : ∀ {T} → Term (‘□’ ‘’ ⌜ ‘Δ’ T ⌝ ‘→’ T) → Term (‘Δ’ T)
+  ‘‘Δ-bak’’ : ∀ {T} → Term (‘□’ ‘’ ⌜ ‘□’ ‘’ ⌜ ‘Δ’ T ⌝ ‘→’ T ⌝ ‘→’ ‘□’ ‘’ ⌜ ‘Δ’ T ⌝)
   ‘Δ’-point-surjection : ∀ {T} {f : Term (‘□’ ‘’ ⌜ ‘Δ’ T ⌝ ‘→’ T)} {d}
     → Term (‘Δ-fwd’ ‘’ₐ (‘Δ-bak’ f) ‘’ₐ d ‘≡’ f ‘’ₐ d)
+
+‘□Typeε’ = ‘□’ ‘’ ⌜ ‘Typeε’ ⌝
 
 □ : Type ε → Set _
 □ = Term {ε}
@@ -77,30 +83,39 @@ data Term where
     □inf = ‘□’ ‘’ ⌜ inf ⌝
     p = f ‘∘’ ϕ ‘∘’ ((‘id’ ‘××’ ‘quote’) ‘∘’ ‘dup’)
     löb-f = p ‘’ₐ ϕ⁻¹p
-{-
-‘Lӧb’ : ∀ {X} {T} {S : □ (‘□’ ‘’ ⌜ X ⌝ ‘→’ ‘Typeε’)}
-  (‘fst-T’ : □ (T ‘→’ ‘□’ ‘’ ⌜ X ⌝))
-  (‘snd-T’ : ∀ (t : □ T) → □ (‘□’ ‘’ (S ‘’ₐ (‘fst-T’ ‘’ₐ t))))
-  (‘pair-T’ : ∀ (pf : □ (‘□’ ‘’ ⌜ X ⌝)) (s : □ (‘□’ ‘’ (S ‘’ₐ pf))) → □ T)
+
+the : ∀ {ℓ} → (A : Set ℓ) → A → A
+the A x = x
+
+‘Lӧb’ : ∀ {X} {T} {S : □ X → Set} {‘S’ : □ (‘□’ ‘’ ⌜ X ⌝ ‘→’ ‘Typeε’)}
+  (‘fst-T’ : □ (‘□’ ‘’ ⌜ T ‘→’ ‘□’ ‘’ ⌜ X ⌝ ⌝))
+--  (‘snd-T’ : ∀ (t : □ T) → □ (‘□’ ‘’ (S ‘’ₐ (‘fst-T’ ‘’ₐ t))))
+  (‘pair-T’ : ∀ (pf : □ (‘□’ ‘’ ⌜ X ⌝)) (s : □ (‘□’ ‘’ (‘S’ ‘’ₐ pf))) → □ T)
+  (‘‘pair-T’’ : ∀ (pf : □ (‘□’ ‘’ ⌜ ‘□’ ‘’ ⌜ X ⌝ ⌝)) (s : □ (‘‘□’’ ‘’ (‘‘’’ₐ ‘’ₐ ⌜ ‘S’ ⌝ₜ ‘’ₐ pf))) → □ (‘□’ ‘’ ⌜ T ⌝))
   (f : □(T ‘→’ X)) →
-  let inf = ‘Δ’ T in
-  let □inf = ‘□Δ’ T in
-  let ϕ = the (□((□inf ‘×’ ‘□’ ‘’ ⌜ □inf ⌝) ‘→’ T)) let k = ‘□Δ-fwd’ in {!!} in
-  let p = the (□(‘□’ ‘’ ⌜ ‘Δ’ T ⌝ ‘→’ X)) (f ‘∘’ ϕ ‘∘’ ((‘id’ ‘××’ ‘quote□Δ’) ‘∘’ {!‘dup’!})) in ∀
-  (ϕ⁻¹p : □ □inf)
---  (ϕ-eq : ∀ (q : □ □inf) → □ (‘□’ ‘’ (‘‘≡’’ ‘’ₐ ⌜ p ‘’ₐ q ⌝ₜ ‘’ₐ (‘fst-T’ ‘’ₐ (ϕ ‘’ₐ (ϕ⁻¹p ‘,’ ⌜ q ⌝ₜ))))))
-  → let löb-f = p ‘’ₐ {!ϕ⁻¹p!} in ∀
-  (s : □ (‘□’ ‘’ (S ‘’ₐ ⌜ löb-f ⌝ₜ)))
+  let □□inf = ‘Δ’ (‘□’ ‘’ ⌜ T ⌝) in
+  let □□□inf = ‘□’ ‘’ ⌜ □□inf ⌝ in
+  let ϕ = the (□((□□inf ‘×’ □□□inf) ‘→’ ‘□’ ‘’ ⌜ T ⌝)) (‘uncurry’ ‘’ₐ ‘Δ-fwd’) in
+  let p = the (□(□□□inf ‘→’ ‘□’ ‘’ ⌜ ‘□’ ‘’ ⌜ X ⌝ ⌝)) (‘‘’’ₐ ‘’ₐ ⌜ ‘‘’’ₐ ‘’ₐ ⌜ f ⌝ₜ ‘∘’ ϕ ⌝ₜ ‘∘’ ‘‘,’’ ‘∘’ (‘id’ ‘××’ ‘quote’) ‘∘’ ‘dup’) in
+
+  let ϕ⁻¹p = the (□ □□□inf) ⌜ ‘Δ-bak’ {!!} ⌝ₜ in
+--  (ϕ-eq : ∀ (q : □ □ □inf) → □ (‘□’ ‘’ (‘‘≡’’ ‘’ₐ ⌜ p ‘’ₐ q ⌝ₜ ‘’ₐ (‘fst-T’ ‘’ₐ (ϕ ‘’ₐ (ϕ⁻¹p ‘,’ ⌜ q ⌝ₜ))))))
+  let ‘‘löb-f’’ = the (□ (‘□’ ‘’ ⌜ ‘□’ ‘’ ⌜ X ⌝ ⌝)) (p ‘’ₐ ϕ⁻¹p) in ∀
+  (‘s’ : □ (‘‘□’’ ‘’ (‘‘’’ₐ ‘’ₐ ⌜ ‘S’ ⌝ₜ ‘’ₐ ‘‘löb-f’’)))
+  → let ‘löb-f’ = the (□ (‘□’ ‘’ ⌜ X ⌝)) (‘‘’’ₐ ‘’ₐ ⌜ f ⌝ₜ ‘’ₐ ‘‘pair-T’’ ‘‘löb-f’’ ‘s’) in ∀
+  (s : □ (‘□’ ‘’ (‘S’ ‘’ₐ ‘löb-f’)))
+  → let löb-f = the (□ X) (f ‘’ₐ ‘pair-T’ ‘löb-f’ s) in ∀
+  (s' : S löb-f)
   → □ X
-‘Lӧb’ {X} {T} {S} ‘fst-T’ ‘snd-T’ ‘pair-T’ f ϕ⁻¹p s = löb-f
+‘Lӧb’ = {!!} -- {X} {T} {S} ‘fst-T’ ‘snd-T’ ‘pair-T’ f ϕ⁻¹p s = löb-f
   module ‘Lӧb’ where
-    inf = ‘Δ’ T
+    {-inf = ‘Δ’ T
     □inf = ‘□’ ‘’ ⌜ inf ⌝
     ϕ = {!!}
     p = f ‘∘’ ϕ ‘∘’ ((‘id’ ‘××’ ‘quote’) ‘∘’ ‘dup’)
-    löb-f = p ‘’ₐ {!ϕ⁻¹p!}
+    löb-f = p ‘’ₐ {!ϕ⁻¹p!}-}
 
--}
+
 max-level : Level
 max-level = lzero
 
@@ -111,9 +126,12 @@ Term⇓ : ∀ {Γ : Context} {T : Type Γ} → Term T → (Γ⇓ : Context⇓ Γ
 Context⇓ ε = ⊤
 Context⇓ (Γ ▻ T) = Σ (Context⇓ Γ) (Type⇓ {Γ} T)
 
+Type⇓‘‘□’’ : Context⇓ (ε ▻ ‘□Typeε’) → Set max-level
+
 Type⇓ (T ‘’ x) Γ⇓ = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓)
 Type⇓ ‘Typeε’ Γ⇓ = Lifted (Type ε)
 Type⇓ ‘□’ Γ⇓ = Lifted (Term {ε} (lower (Σ.proj₂ Γ⇓)))
+Type⇓ ‘‘□’’ Γ⇓ = Type⇓‘‘□’’ Γ⇓
 Type⇓ (A ‘→’ B) Γ⇓ = Type⇓ A Γ⇓ → Type⇓ B Γ⇓
 Type⇓ ‘⊤’ Γ⇓ = ⊤
 Type⇓ ‘⊥’ Γ⇓ = ⊥
@@ -135,6 +153,7 @@ Term⇓ ‘refl’ Γ⇓ = refl
 Term⇓ ‘‘≡’’ Γ⇓ x y = lift (lower x ‘≡’ lower y)
 Term⇓ ‘Δ-fwd’ Γ⇓ f⇓ d = f⇓ (lower d)
 Term⇓ (‘Δ-bak’ f) Γ⇓ d = Term⇓ f Γ⇓ (lift d)
+Term⇓ ‘‘Δ-bak’’ Γ⇓ f = lift (‘Δ-bak’ (lower f))
 Term⇓ ‘id’ Γ⇓ = λ x → x
 Term⇓ ‘eval’ Γ⇓ ( f , x ) = f x
 Term⇓ ‘curry’ Γ⇓ f a b = f (a , b)
@@ -146,6 +165,8 @@ Term⇓ ‘dup’ Γ⇓ = λ x → x , x
 Term⇓ (f ‘××’ g) Γ⇓ (a , b) = (Term⇓ f Γ⇓ a , Term⇓ g Γ⇓ b)
 Term⇓ (f ‘∘’ g) Γ⇓ = λ x → Term⇓ f Γ⇓ (Term⇓ g Γ⇓ x)
 Term⇓ (‘Δ’-point-surjection {T} {f} {d}) Γ⇓ = Term⇓-‘Δ’-point-surjection {T} {f} {d} Γ⇓
+
+Type⇓‘‘□’’ Γ⇓ = Lifted (Term {ε} (‘□’ ‘’ (lower (Σ.proj₂ Γ⇓))))
 
 Term⇓-‘Δ’-point-surjection Γ⇓ = refl
 
