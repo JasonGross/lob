@@ -20,11 +20,13 @@ lawvere = p ∘□ϕ⁻¹ p ∘quote
     p : □ inf ~> B
     p = f ∘□ϕ∘quote ∘□dup∘quote
 
--- TODO
-{-
+
 lawvere-fix : ∀
   (_∘□_∘quote : ∀ {a b c} → (□ b ~> c) → (□ a ~> b) → (□ a ~> c))
   {a₂} (_≈_ : ∀ {a b} → (□ a ~> b) → (□ a ~> b) → Set a₂)
+  (ϕ-eq : ∀ {a} {f : □ B ~> a} {g : □ inf ~> B} →
+    (((f ∘□ϕ∘quote) ∘□dup∘quote) ∘□ϕ⁻¹ g ∘quote)
+    ≈
+    (f ∘□ (g ∘□ϕ⁻¹ g ∘quote) ∘quote))
   → lawvere ≈ (f ∘□ lawvere ∘quote)
-lawvere-fix _∘□_∘quote _≈_ = {!!}
--}
+lawvere-fix _∘□_∘quote _≈_ ϕ-eq = ϕ-eq
