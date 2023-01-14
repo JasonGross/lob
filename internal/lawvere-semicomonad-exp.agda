@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K #-}
 open import common
-module lawvere-semicomonad
+module lawvere-semicomonad-exp
   {o a}
   (𝒞 : Set o)
   (_~>_ : 𝒞 → 𝒞 → Set a)
