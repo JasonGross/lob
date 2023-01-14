@@ -41,6 +41,9 @@ _←■→_ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} → A ↔ B → B 
 f ←■→ g = iff (λ x → g .fwdl (f .fwdl x)) (λ x → f .bakl (g .bakl x))
   where open _↔_
 
+id↔ : ∀ {a} {A : Set a} → A ↔ A
+id↔ = iff (λ x → x) (λ x → x)
+
 if_then_else_ : ∀ {ℓ} {A : Set ℓ} → (b : bool) → A → A → A
 if true then t else f = t
 if false then t else f = f
