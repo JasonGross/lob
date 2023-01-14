@@ -31,6 +31,16 @@ record Σ {ℓ ℓ′} (A : Set ℓ) (P : A → Set ℓ′) : Set (ℓ ⊔ ℓ�
 _×_ : ∀ {ℓ ℓ′} (A : Set ℓ) (B : Set ℓ′) → Set (ℓ ⊔ ℓ′)
 A × B = Σ A (λ _ → B)
 
+record _↔_ {a b} (A : Set a) (B : Set b) : Set (a ⊔ b) where
+  constructor iff
+  field
+    fwdl : A → B
+    bakl : B → A
+
+_←■→_ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} → A ↔ B → B ↔ C → A ↔ C
+f ←■→ g = iff (λ x → g .fwdl (f .fwdl x)) (λ x → f .bakl (g .bakl x))
+  where open _↔_
+
 if_then_else_ : ∀ {ℓ} {A : Set ℓ} → (b : bool) → A → A → A
 if true then t else f = t
 if false then t else f = f
