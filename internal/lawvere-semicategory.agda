@@ -1,5 +1,4 @@
 {-# OPTIONS --without-K #-}
-open import common
 module lawvere-semicategory
   {o a}
   (𝒞 : Set o)
