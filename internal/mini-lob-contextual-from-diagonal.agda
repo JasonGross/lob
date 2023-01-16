@@ -91,8 +91,8 @@ Wk1₁ T@(Wk _) = Wk₁ (red1 T)
 Wk1₁ T@(Wk₁ _) = Wk₁ (red1 T)
 Wk1₁ T@(a ‘≡’ b) = Wk₁ (red1 T)
 
-subst1 (T ‘’ a) b = T ‘’ a ‘’ b -- red1 ((subst1 T a) ‘’ b)
-subst1 (T ‘’₁ a) b = T ‘’₁ a ‘’ b -- red1 ((subst1₁ T a) ‘’ b)
+subst1 (T ‘’ a) b = (subst1 T a) ‘’ b
+subst1 (T ‘’₁ a) b = (subst1₁ T a) ‘’ b
 subst1 ‘□’ x = ‘□’ ‘’ x
 subst1 ‘‘□’’ x = ‘‘□’’ ‘’ x
 subst1 (A ‘→’ B) x = A ‘’ x ‘→’ B ‘’ x
@@ -136,17 +136,18 @@ data Term where
   ‘dup’ : ∀ {Γ A} → Term {Γ} (A ‘→’ A ‘×’ A)
   ‘proj₁’ : ∀ {Γ A B} → Term {Γ} (‘Σ’ A B ‘→’ A)
   _‘××’_ : ∀ {Γ A B C D} → Term {Γ} (A ‘→’ C) → Term {Γ} (B ‘→’ D) → Term {Γ} (A ‘×’ B ‘→’ C ‘×’ D)
+  wk→ : ∀ {Γ A B C} → Term {Γ} (A ‘→’ B) → Term {Γ ▻ C} (Wk A ‘→’ Wk B)
+  var₀ : ∀ {Γ A} → Term {Γ ▻ A} (Wk A)
   ‘‘,’’ : ∀ {A B} → Term (‘□’ ‘’ ⌜ A ⌝ ‘×’ ‘□’ ‘’ ⌜ B ⌝ ‘→’ ‘□’ ‘’ ⌜ A ‘×’ B ⌝)
   _‘∘’_ : ∀ {Γ A B C} → Term {Γ} (B ‘→’ C) → Term {Γ} (A ‘→’ B) → Term {Γ} (A ‘→’ C)
   ‘tt’ : ∀ {Γ} → Term {Γ} ‘⊤’
   ‘refl’ : ∀ {Γ A} {x : Term {Γ} A} → Term (x ‘≡’ x)
   ‘λ’ : ∀ {Γ A B} → Term {Γ ▻ A} B → Term {Γ} (‘Π’ A B)
-  wk→ : ∀ {Γ A B C} → Term {Γ} (A ‘→’ B) → Term {Γ ▻ C} (Wk A ‘→’ Wk B)
-  var₀ : ∀ {Γ A} → Term {Γ ▻ A} (Wk A)
   red1→ : ∀ {Γ A} → Term {Γ} A → Term (red1 A)
   red1← : ∀ {Γ A} → Term {Γ} (red1 A) → Term A
   _‘××Σ’_ : ∀ {Γ A B A′ B′} → (f : Term {Γ} (A ‘→’ A′)) → Term {Γ} (‘Π’ A (B ‘→’ Wk₁ B′ ‘’ (wk→ f ‘’ₐ var₀))) → Term {Γ} (‘Σ’ A B ‘→’ ‘Σ’ A′ B′)
   _‘××Σ'’_ : ∀ {Γ A B A′ B′} → (f : Term {Γ} (‘Σ’ A B ‘→’ A′)) → Term {Γ} (‘Π’ (‘Σ’ A B) (Wk₁ B′ ‘’ (wk→ f ‘’ₐ var₀))) → Term {Γ} (‘Σ’ A B ‘→’ ‘Σ’ A′ B′)
+  ‘‘,Σ’’ : ∀ {A B B′} → Term (‘Σ’ (‘□’ ‘’ ⌜ A ⌝) {!Wk₁ ‘□’ ‘’ ?!} ‘→’ ‘□’ ‘’ ⌜ ‘Σ’ A B ⌝)
   ‘Δ-fwd’ : ∀ {T} → Term (‘Δ’ T ‘→’ (T ‘’ ⌜ ‘Δ’ T ⌝))
   ‘Δ-bak’ : ∀ {T} → Term (T ‘’ ⌜ ‘Δ’ T ⌝) → Term (‘Δ’ T)
   ‘‘Δ-bak’’ : ∀ {T} → Term (‘□’ ‘’ ⌜ T ‘’ ⌜ ‘Δ’ T ⌝ ⌝ ‘→’ ‘□’ ‘’ ⌜ ‘Δ’ T ⌝)
@@ -326,8 +327,8 @@ Term⇓-red1↔ (‘Δ’ T) Γ⇓ = id↔
 Term⇓-red1↔ (T ‘’ x) Γ⇓ = Term⇓-subst1↔ T x Γ⇓
 Term⇓-red1↔ (T ‘’₁ a) Γ⇓ = Term⇓-subst1₁↔ T a Γ⇓
 
-Term⇓-subst1↔ (T ‘’ a) b Γ⇓ = id↔ {_} {Type⇓ T (Γ⇓ , Term⇓ b Γ⇓ , Term⇓ a (Γ⇓ , Term⇓ b Γ⇓))}
-Term⇓-subst1↔ (T ‘’₁ a) b Γ⇓ = id↔ {_} {Type⇓ T (Γ⇓ , Term⇓ a Γ⇓ , Term⇓ b Γ⇓)}
+Term⇓-subst1↔ (T ‘’ a) b Γ⇓ = Term⇓-subst1↔ T a _
+Term⇓-subst1↔ (T ‘’₁ a) b Γ⇓ = Term⇓-subst1₁↔ T a _
 Term⇓-subst1↔ ‘□’ x Γ⇓ = id↔ {_} {Lifted (Term (lower (Term⇓ x Γ⇓)))}
 Term⇓-subst1↔ ‘‘□’’ x Γ⇓ = id↔ {_} {Lifted (Term (‘□’ ‘’ lower (Term⇓ x Γ⇓)))}
 Term⇓-subst1↔ (A ‘→’ B) x Γ⇓ = id↔ {_} {Type⇓ A _ → Type⇓ B _}
@@ -351,66 +352,42 @@ Term⇓-subst1₁↔ (Wk T) x Γ⇓ = id↔ {_} {Type⇓ T _}
 Term⇓-subst1₁↔ (Wk₁ T) x Γ⇓ = id↔ {_} {Type⇓ T _}
 Term⇓-subst1₁↔ (a ‘≡’ b) x Γ⇓ = id↔ {_} {Term⇓ a _ ≡ Term⇓ b _}
 
-Term⇓-Wk1↔ T Γ⇓ = {!!}
-Term⇓-Wk1₁↔ T Γ⇓ = {!!}
-
-{-
-Term⇓-subst1-alt↔ (T ‘’ x) a Γ⇓ = id↔ {_} {Type⇓ T _}
-Term⇓-subst1-alt↔ (T ‘’₁ a) b Γ⇓ = id↔ {_} {Type⇓ T _}
-Term⇓-subst1-alt↔ ‘□’ a Γ⇓ = id↔ {_} {Lifted (Term (lower (Term⇓ a Γ⇓)))}
-Term⇓-subst1-alt↔ ‘‘□’’ a Γ⇓ = id↔ {_} {Lifted (Term (‘□’ ‘’ lower (Term⇓ a Γ⇓)))}
-Term⇓-subst1-alt↔ (A ‘→’ B) a Γ⇓ = {!id↔ {_} {?}!}
-Term⇓-subst1-alt↔ (A ‘×’ B) a Γ⇓ = {!!}
-Term⇓-subst1-alt↔ ‘⊤’ a Γ⇓ = id↔ {_} {⊤}
-Term⇓-subst1-alt↔ ‘⊥’ a Γ⇓ = id↔ {_} {⊥}
-Term⇓-subst1-alt↔ (‘Σ’ T T₁) a Γ⇓ = {!!}
-Term⇓-subst1-alt↔ (‘Π’ T T₁) a Γ⇓ = {!!}
-Term⇓-subst1-alt↔ (Wk T) a Γ⇓ = {!!}
-Term⇓-subst1-alt↔ (Wk₁ T) a Γ⇓ = {!!}
-Term⇓-subst1-alt↔ (x ‘≡’ x₁) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (T ‘’ x) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (T ‘’₁ a₁) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (T ‘→’ T₁) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (T ‘×’ T₁) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ ‘⊤’ a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ ‘⊥’ a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (‘Σ’ T T₁) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (‘Π’ T T₁) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (Wk T) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (Wk₁ T) a Γ⇓ = {!!}
-Term⇓-subst1₁-alt↔ (x ‘≡’ x₁) a Γ⇓ = {!!}
--}
-
-{-
-subst1 n (A ‘→’ B) x = red1 n (A ‘’ x ‘→’ B ‘’ x)
-subst1 n (A ‘×’ B) x = red1 n (A ‘’ x ‘×’ B ‘’ x)
-subst1 n ‘⊤’ x = ‘⊤’
-subst1 n ‘⊥’ x = ‘⊤’
-subst1 n (‘Σ’ A B) x = red1 n (‘Σ’ (A ‘’ x) (B ‘’₁ x))
-subst1 n (‘Π’ A B) x = red1 n (‘Π’ (A ‘’ x) (B ‘’₁ x))
-subst1 n (Wk T) x = T
-subst1 n (Wk₁ T) x = Wk₁ (red1 n T) ‘’ x
-subst1 n (a ‘≡’ b) x = (a ‘≡’ b) ‘’ x
-subst1₁ n (T ‘’ a) b = red1 n ((subst1 n T a) ‘’₁ b)
-subst1₁ n (T ‘’₁ a) b = red1 n ((subst1₁ n T a) ‘’₁ b)
-subst1₁ n (A ‘→’ B) x = red1 n (A ‘’₁ x ‘→’ B ‘’₁ x)
-subst1₁ n (A ‘×’ B) x = red1 n (A ‘’₁ x ‘×’ B ‘’₁ x)
-subst1₁ n ‘⊤’ x = ‘⊤’
-subst1₁ n ‘⊥’ x = ‘⊤’
-subst1₁ n (‘Σ’ A B) x = (‘Σ’ A B ‘’₁ x)
-subst1₁ n (‘Π’ A B) x = (‘Π’ A B ‘’₁ x)
-subst1₁ n (Wk T) x = (Wk T ‘’₁ x)
-subst1₁ n (Wk₁ T) x = (Wk₁ T ‘’₁ x)
-subst1₁ n (a ‘≡’ b) x = (a ‘≡’ b) ‘’₁ x
--}
+Term⇓-Wk1↔ T@(_ ‘’ _) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ T@(_ ‘’₁ _) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ T@‘Typeε’ Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ T@‘□’ Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ T@‘‘□’’ Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ (A ‘→’ B) Γ⇓ = id↔ {_} {Type⇓ A _ → Type⇓ B _}
+Term⇓-Wk1↔ (A ‘×’ B) Γ⇓ = id↔ {_} {Type⇓ A _ × Type⇓ B _}
+Term⇓-Wk1↔ ‘⊤’ Γ⇓ = id↔ {_} {⊤}
+Term⇓-Wk1↔ ‘⊥’ Γ⇓ = id↔ {_} {⊥}
+Term⇓-Wk1↔ T@(‘Σ’ A B) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ T@(‘Π’ A B) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ (Wk T) Γ⇓ = Term⇓-Wk1↔ T _
+Term⇓-Wk1↔ T@(Wk₁ _) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ T@(a ‘≡’ b) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1↔ T@(‘Δ’ _) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ T@(_ ‘’ _) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ T@(_ ‘’₁ _) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ T@‘□’ Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ T@‘‘□’’ Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ (A ‘→’ B) Γ⇓ = id↔ {_} {Type⇓ A _ → Type⇓ B _}
+Term⇓-Wk1₁↔ (A ‘×’ B) Γ⇓ = id↔ {_} {Type⇓ A _ × Type⇓ B _}
+Term⇓-Wk1₁↔ ‘⊤’ Γ⇓ = id↔ {_} {⊤}
+Term⇓-Wk1₁↔ ‘⊥’ Γ⇓ = id↔ {_} {⊥}
+Term⇓-Wk1₁↔ T@(‘Σ’ A B) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ T@(‘Π’ A B) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ T@(Wk _) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ T@(Wk₁ _) Γ⇓ = Term⇓-red1↔ T _
+Term⇓-Wk1₁↔ T@(a ‘≡’ b) Γ⇓ = Term⇓-red1↔ T _
 
 -- We want to prove this, but it's not true unless we quotient syntax by conversion
 -- Lӧb⇓-≡ : ∀ {X f Γ⇓} → Term⇓ (Lӧb {X} f) Γ⇓ ≡ Term⇓ f Γ⇓ (lift (Lӧb {X} f))
 -- Lӧb⇓-≡ = {!!}
 
 Lӧb : ∀ {X} → Term {ε} (‘□’ ‘’ ⌜ X ⌝ ‘→’ X) → Term {ε} X
-Lӧb {X} f = ‘Lӧb’ {X} {λ _ → ⊤} {‘⊤’} (f ‘∘’ ‘proj₁’) ‘⊤’ {!!} (‘λ’ (red1n← (suc (suc zero)) ‘tt’)) (red1n← (suc (suc zero)) {!!}) tt
-
+Lӧb {X} f = ‘Lӧb’ {X} {λ _ → ⊤} {‘⊤’} (f ‘∘’ ‘proj₁’) ‘⊤’ ((‘‘’’ₐ ‘’ₐ ⌜ ‘id’ ‘××Σ’ ‘λ’ (red1n← (suc (suc (suc zero))) (‘const’ ‘tt’)) ⌝ₜ) ‘∘’ {!!} ‘∘’ (‘quote’ ‘××Σ’ {!!})) (‘λ’ (red1n← (suc (suc zero)) ‘tt’)) (red1n← (suc (suc zero)) ‘tt’) tt
+-- (‘‘’’ₐ ‘’ₐ ⌜ {!? ‘,Σ’ ?!} ⌝ₜ) ‘∘’ ‘quote’ ‘∘’ ‘proj₁’
 ⌞_⌟ : Type ε → Set _
 ⌞ T ⌟ = Type⇓ T tt
 
