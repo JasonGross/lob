@@ -83,53 +83,78 @@ A ‘‘×’’ B = ‘‘×'’’ ‘’ₐ A ‘’ₐ B
 max-level : Level
 max-level = lzero
 
-mutual
-  Context⇓ : (Γ : Context) → Set (lsuc max-level)
-  Context⇓ ε = ⊤
-  Context⇓ (Γ ▻ T) = Σ (Context⇓ Γ) (Type⇓ {Γ} T)
+Context⇓ : (Γ : Context) → Set (lsuc max-level)
+Type⇓ : {Γ : Context} → Type Γ → Context⇓ Γ → Set max-level
+Term⇓ : ∀ {Γ : Context} {T : Type Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Type⇓ T Γ⇓
 
-  Type⇓ : {Γ : Context} → Type Γ → Context⇓ Γ → Set max-level
-  Type⇓ (W T) Γ⇓ = Type⇓ T (Σ.proj₁ Γ⇓)
-  Type⇓ (W1 T) Γ⇓ = Type⇓ T ((Σ.proj₁ (Σ.proj₁ Γ⇓)) , (Σ.proj₂ Γ⇓))
-  Type⇓ (T ‘’ x) Γ⇓ = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓)
-  Type⇓ (‘Type’ Γ) Γ⇓ = Lifted (Type Γ)
-  Type⇓ ‘Term’ Γ⇓ = Lifted (Term (lower (Σ.proj₂ Γ⇓)))
-  Type⇓ (A ‘→’ B) Γ⇓ = Type⇓ A Γ⇓ → Type⇓ B Γ⇓
-  Type⇓ (A ‘×’ B) Γ⇓ = Type⇓ A Γ⇓ × Type⇓ B Γ⇓
-  Type⇓ ‘⊤’ Γ⇓ = ⊤
-  Type⇓ ‘⊥’ Γ⇓ = ⊥
-  Type⇓ (Quine φ) Γ⇓ = Type⇓ φ (Γ⇓ , (lift (Quine φ)))
+Context⇓ ε = ⊤
+Context⇓ (Γ ▻ T) = Σ (Context⇓ Γ) (Type⇓ {Γ} T)
 
-  Term⇓ : ∀ {Γ : Context} {T : Type Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Type⇓ T Γ⇓
-  Term⇓ ⌜ x ⌝ Γ⇓ = lift x
-  Term⇓ ⌜ x ⌝t Γ⇓ = lift x
-  Term⇓ ‘⌜‘VAR₀’⌝t’ Γ⇓ = lift ⌜ (lower (Σ.proj₂ Γ⇓)) ⌝t
-  Term⇓ ‘⌜‘VAR₀’⌝’ Γ⇓ = lift ⌜ (lower (Σ.proj₂ Γ⇓)) ⌝
-  Term⇓ (f ‘’ₐ x) Γ⇓ = Term⇓ f Γ⇓ (Term⇓ x Γ⇓)
-  Term⇓ ‘tt’ Γ⇓ = tt
-  Term⇓ (quine→ {φ}) Γ⇓ x = x
-  Term⇓ (quine← {φ}) Γ⇓ x = x
-  Term⇓ (‘λ∙’ f) Γ⇓ x = Term⇓ f (Γ⇓ , x)
-  Term⇓ ‘VAR₀’ Γ⇓ = Σ.proj₂ Γ⇓
-  Term⇓ (SW t) = Term⇓ t
-  Term⇓ (←SW1SV→W f) = Term⇓ f
-  Term⇓ (→SW1SV→W f) = Term⇓ f
-  Term⇓ (←SW1SV→SW1SV→W f) = Term⇓ f
-  Term⇓ (→SW1SV→SW1SV→W f) = Term⇓ f
-  Term⇓ (w x) Γ⇓ = Term⇓ x (Σ.proj₁ Γ⇓)
-  Term⇓ (w→ f) Γ⇓ = Term⇓ f Γ⇓
-  Term⇓ (→w f) Γ⇓ = Term⇓ f Γ⇓
-  Term⇓ (ww→ f) Γ⇓ = Term⇓ f Γ⇓
-  Term⇓ (→ww f) Γ⇓ = Term⇓ f Γ⇓
-  Term⇓ ‘‘×'’’ Γ⇓ A B = lift (lower A ‘×’ lower B)
-  Term⇓ (g ‘∘’ f) Γ⇓ x = Term⇓ g Γ⇓ (Term⇓ f Γ⇓ x)
-  Term⇓ (f w‘‘’’ₐ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ₐ lower (Term⇓ x Γ⇓))
-  Term⇓ ‘‘’ₐ’ Γ⇓ f x = lift (lower f ‘’ₐ lower x)
-  -- Term⇓ (f w‘‘’’ x) Γ⇓ = lift {!!} --(lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
-  Term⇓ (‘‘□’’ {Γ} T) Γ⇓ = lift (‘Term’ ‘’ lower (Term⇓ T Γ⇓))
-  Term⇓ (A ‘‘→’’ B) Γ⇓ = lift ((lower (Term⇓ A Γ⇓)) ‘→’ (lower (Term⇓ B Γ⇓)))
-  Term⇓ (A ww‘‘‘→’’’ B) Γ⇓ = lift ((lower (Term⇓ A Γ⇓)) ‘‘→’’ (lower (Term⇓ B Γ⇓)))
-  Term⇓ (A ww‘‘‘×’’’ B) Γ⇓ = lift ((lower (Term⇓ A Γ⇓)) ‘‘×’’ (lower (Term⇓ B Γ⇓)))
+Type⇓-‘Term’ : ∀ {Γ} → Context⇓ (Γ ▻ ‘Type’ Γ) → Set max-level
+Type⇓-Quine : ∀ {Γ} (ϕ : Type (Γ ▻ ‘Type’ Γ)) → Context⇓ Γ → Set max-level
+
+Type⇓ (W T) Γ⇓ = Type⇓ T (Σ.proj₁ Γ⇓)
+Type⇓ (W1 T) Γ⇓ = Type⇓ T ((Σ.proj₁ (Σ.proj₁ Γ⇓)) , (Σ.proj₂ Γ⇓))
+Type⇓ (T ‘’ x) Γ⇓ = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓)
+Type⇓ (‘Type’ Γ) Γ⇓ = Lifted (Type Γ)
+Type⇓ ‘Term’ Γ⇓ = Type⇓-‘Term’ Γ⇓
+Type⇓ (A ‘→’ B) Γ⇓ = Type⇓ A Γ⇓ → Type⇓ B Γ⇓
+Type⇓ (A ‘×’ B) Γ⇓ = Type⇓ A Γ⇓ × Type⇓ B Γ⇓
+Type⇓ ‘⊤’ Γ⇓ = ⊤
+Type⇓ ‘⊥’ Γ⇓ = ⊥
+Type⇓ (Quine φ) Γ⇓ = Type⇓-Quine φ Γ⇓
+
+Type⇓-‘Term’ Γ⇓ = Lifted (Term ((lower (Σ.proj₂ Γ⇓))))
+Type⇓-Quine φ Γ⇓ = Type⇓ φ (Γ⇓ , lift (Quine φ))
+
+Term⇓-→SW1SV→W : ∀ {Γ T X A B} {x : Term X}
+      → (f : Term {Γ} (T ‘→’ (W1 A ‘’ ‘VAR₀’ ‘→’ W B) ‘’ x))
+      → ∀ Γ⇓ → Type⇓ (T ‘→’ A ‘’ x ‘→’ B) Γ⇓
+Term⇓-←SW1SV→W : ∀ {Γ T X A B} {x : Term X}
+      → (f : Term {Γ} ((W1 A ‘’ ‘VAR₀’ ‘→’ W B) ‘’ x ‘→’ T))
+      → ∀ Γ⇓ → Type⇓ ((A ‘’ x ‘→’ B) ‘→’ T) Γ⇓
+Term⇓-→SW1SV→SW1SV→W : ∀ {Γ T X A B} {x : Term X}
+      → (f : Term {Γ} (T ‘→’ (W1 A ‘’ ‘VAR₀’ ‘→’ W1 A ‘’ ‘VAR₀’ ‘→’ W B) ‘’ x))
+      → ∀ Γ⇓ → Type⇓ (T ‘→’ A ‘’ x ‘→’ A ‘’ x ‘→’ B) Γ⇓
+Term⇓-←SW1SV→SW1SV→W : ∀ {Γ T X A B} {x : Term X}
+      → (f : Term {Γ} ((W1 A ‘’ ‘VAR₀’ ‘→’ W1 A ‘’ ‘VAR₀’ ‘→’ W B) ‘’ x ‘→’ T))
+      → ∀ Γ⇓ → Type⇓ ((A ‘’ x ‘→’ A ‘’ x ‘→’ B) ‘→’ T) Γ⇓
+
+
+Term⇓ ⌜ x ⌝ Γ⇓ = lift x
+Term⇓ ⌜ x ⌝t Γ⇓ = lift x
+Term⇓ ‘⌜‘VAR₀’⌝t’ Γ⇓ = lift ⌜ (lower (Σ.proj₂ Γ⇓)) ⌝t
+Term⇓ ‘⌜‘VAR₀’⌝’ Γ⇓ = lift ⌜ (lower (Σ.proj₂ Γ⇓)) ⌝
+Term⇓ (f ‘’ₐ x) Γ⇓ = Term⇓ f Γ⇓ (Term⇓ x Γ⇓)
+Term⇓ ‘tt’ Γ⇓ = tt
+Term⇓ (quine→ {φ}) Γ⇓ x = x
+Term⇓ (quine← {φ}) Γ⇓ x = x
+Term⇓ (‘λ∙’ f) Γ⇓ x = Term⇓ f (Γ⇓ , x)
+Term⇓ ‘VAR₀’ Γ⇓ = Σ.proj₂ Γ⇓
+Term⇓ (SW t) = Term⇓ t
+Term⇓ (w x) Γ⇓ = Term⇓ x (Σ.proj₁ Γ⇓)
+Term⇓ (w→ f) Γ⇓ = Term⇓ f Γ⇓
+Term⇓ (→w f) Γ⇓ = Term⇓ f Γ⇓
+Term⇓ (ww→ f) Γ⇓ = Term⇓ f Γ⇓
+Term⇓ (→ww f) Γ⇓ = Term⇓ f Γ⇓
+Term⇓ ‘‘×'’’ Γ⇓ A B = lift (lower A ‘×’ lower B)
+Term⇓ (g ‘∘’ f) Γ⇓ x = Term⇓ g Γ⇓ (Term⇓ f Γ⇓ x)
+Term⇓ (f w‘‘’’ₐ x) Γ⇓ = lift (lower (Term⇓ f Γ⇓) ‘’ₐ lower (Term⇓ x Γ⇓))
+Term⇓ ‘‘’ₐ’ Γ⇓ f x = lift (lower f ‘’ₐ lower x)
+-- Term⇓ (f w‘‘’’ x) Γ⇓ = lift {!!} --(lower (Term⇓ f Γ⇓) ‘’ lower (Term⇓ x Γ⇓))
+Term⇓ (‘‘□’’ {Γ} T) Γ⇓ = lift (‘Term’ ‘’ lower (Term⇓ T Γ⇓))
+Term⇓ (A ‘‘→’’ B) Γ⇓ = lift ((lower (Term⇓ A Γ⇓)) ‘→’ (lower (Term⇓ B Γ⇓)))
+Term⇓ (A ww‘‘‘→’’’ B) Γ⇓ = lift ((lower (Term⇓ A Γ⇓)) ‘‘→’’ (lower (Term⇓ B Γ⇓)))
+Term⇓ (A ww‘‘‘×’’’ B) Γ⇓ = lift ((lower (Term⇓ A Γ⇓)) ‘‘×’’ (lower (Term⇓ B Γ⇓)))
+Term⇓ (←SW1SV→W f) = Term⇓-←SW1SV→W f
+Term⇓ (→SW1SV→W f) = Term⇓-→SW1SV→W f
+Term⇓ (←SW1SV→SW1SV→W f) = Term⇓-←SW1SV→SW1SV→W f
+Term⇓ (→SW1SV→SW1SV→W f) = Term⇓-→SW1SV→SW1SV→W f
+
+Term⇓-←SW1SV→W f = Term⇓ f
+Term⇓-→SW1SV→W f = Term⇓ f
+Term⇓-←SW1SV→SW1SV→W f = Term⇓ f
+Term⇓-→SW1SV→SW1SV→W f = Term⇓ f
 
 
 module inner (‘X’ : Type ε) (‘f’ : Term {ε} (‘□’ ‘X’ ‘→’ ‘X’)) where
