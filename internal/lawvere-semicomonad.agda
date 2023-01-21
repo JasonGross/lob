@@ -25,16 +25,22 @@ lawvere = ϕ⁻¹ p ⨾ p
   module lawvere where
     p : □ inf ~> B
     p = (dup ⨾ ((id ×× quot) ⨾ (□-×-codistr ⨾ □-map ϕ))) ⨾ f
-{-
+
 lawvere-fix : ∀
   {a₂} (_≈_ : ∀ {a b} → (a ~> b) → (a ~> b) → Set a₂)
   (□tt : 𝟙 ~> □ 𝟙)
   (_■_ : ∀ {a b} {f : a ~> b} {g : a ~> b} {h : a ~> b} → f ≈ g → g ≈ h → f ≈ h)
   (assoc : ∀ {a b c d} {h : a ~> b} {g : b ~> c} {f : c ~> d} → (h ⨾ (g ⨾ f)) ≈ ((h ⨾ g) ⨾ f))
+  (assoc⁻¹ : ∀ {a b c d} {h : a ~> b} {g : b ~> c} {f : c ~> d} → ((h ⨾ g) ⨾ f) ≈ (h ⨾ (g ⨾ f)))
   (2id : ∀ {a b} {f : a ~> b} → f ≈ f)
-  (_⨾-map_ : ∀ {a b c} {f f‵ : a ~> b} {g g‵ : b ~> c} → g ≈ g‵ → f ≈ f‵ → (f ⨾ g) ≈ (f‵ ⨾ g‵))
-  (ϕ-eq : ∀ {f} → {!((ϕ ∘ id×quot∘dup) ∘ ϕ⁻¹ f)!} ≈ (□tt ⨾ {!(□-map (f ∘ ϕ⁻¹ f) ∘ □tt)!}))
+  (rid : ∀ {a b} {f : a ~> b} → (f ⨾ id) ≈ f)
+  (_⨾-map_ : ∀ {a b c} {f f‵ : a ~> b} {g g‵ : b ~> c} → f ≈ f‵ → g ≈ g‵ → (f ⨾ g) ≈ (f‵ ⨾ g‵))
+  (dup-×× : ∀ {a b} {f : a ~> b} → (f ⨾ dup) ≈ (dup ⨾ (f ×× f)))
+  (××-map : ∀ {a b c a′ b′ c′} {f : a ~> b} {g : b ~> c} {f′ : a′ ~> b′} {g′ : b′ ~> c′} → ((f ×× f′) ⨾ (g ×× g′)) ≈ ((f ⨾ g) ×× (f′ ⨾ g′)))
+  (_××-2map_ : ∀ {a b c d} {f f′ : a ~> b} {g g′ : c ~> d} → (f ≈ f′) → (g ≈ g′) → ((f ×× g) ≈ (f′ ×× g′)))
+  (□-map-⨾ : ∀ {a b} {f : 𝟙 ~> □ a} {g : □ a ~> b} → (□-map f ⨾ □-map g) ≈ □-map (f ⨾ g))
+  (□-map-quot : ∀ {a} {f : 𝟙 ~> □ a} → (f ⨾ quot) ≈ (□tt ⨾ □-map f))
+  (ϕ-eq : ∀ {f g} → (dup ⨾ ((ϕ⁻¹ f ×× g) ⨾ (□-×-codistr ⨾ □-map ϕ))) ≈ (g ⨾ □-map f))
   → lawvere ≈ ((□tt ⨾ □-map lawvere) ⨾ f)
-lawvere-fix _≈_ □tt _■_ assoc 2id _⨾-map_ ϕ-eq =
-  assoc ■ (2id ⨾-map {!ϕ-eq!})
--}
+lawvere-fix _≈_ □tt _■_ assoc assoc⁻¹ 2id rid _⨾-map_ dup-×× ××-map _××-2map_ □-map-⨾ □-map-quot ϕ-eq =
+  assoc ■ (((assoc ■ (dup-×× ⨾-map 2id)) ■ (assoc⁻¹ ■ ((2id ⨾-map (assoc ■ ((××-map ⨾-map 2id) ■ (((rid ××-2map 2id) ⨾-map 2id))))) ■ (ϕ-eq ■ ((□-map-quot ⨾-map 2id) ■ (assoc⁻¹ ■ (2id ⨾-map □-map-⨾))))))) ⨾-map 2id)
