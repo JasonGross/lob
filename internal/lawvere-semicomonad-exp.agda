@@ -35,7 +35,7 @@ lawvere-fix : ∀
   (assoc : ∀ {a b c d} {h : a ~> b} {g : b ~> c} {f : c ~> d} → (h ⨾ (g ⨾ f)) ≈ ((h ⨾ g) ⨾ f))
   (assoc⁻¹ : ∀ {a b c d} {h : a ~> b} {g : b ~> c} {f : c ~> d} → ((h ⨾ g) ⨾ f) ≈ (h ⨾ (g ⨾ f)))
   (2id : ∀ {a b} {f : a ~> b} → f ≈ f)
-  (apply-λ : ∀ {a b c} {f : a ~> b} {g : c ~> a} → ((g ×× 𝒞λ f) ⨾ apply) ≈ (({!!} ⨾ g) ⨾ f))
+  (apply-λ : ∀ {a b} {f : a ~> b} {g : 𝟙 ~> a} → (dup {𝟙} ⨾ ((g ×× 𝒞λ f) ⨾ apply)) ≈ (g ⨾ f))
   (_⨾-map_ : ∀ {a b c} {f f‵ : a ~> b} {g g‵ : b ~> c} → f ≈ f‵ → g ≈ g‵ → (f ⨾ g) ≈ (f‵ ⨾ g‵))
   (dup-×× : ∀ {a b} {f : a ~> b} → (f ⨾ dup) ≈ (dup ⨾ (f ×× f)))
   (dup-××⁻¹ : ∀ {a b} {f : a ~> b} → (dup ⨾ (f ×× f)) ≈ (f ⨾ dup))
@@ -50,4 +50,4 @@ lawvere-fix : ∀
   (ϕ-eq : ∀ {f} → (ϕ⁻¹ f ⨾ □-map ϕ) ≈ (□tt ⨾ □-map (𝒞λ f)))
   → lawvere ≈ ((□tt ⨾ □-map lawvere) ⨾ f)
 lawvere-fix _≈_ □tt 𝒞λ _■_ assoc assoc⁻¹ 2id apply-λ _⨾-map_ dup-×× dup-××⁻¹ ××-map ××-map⁻¹ _××-2map_ □-2map □-map-⨾ dup-□-×-codistr □-map-××-codistr □-map-quot ϕ-eq =
-  assoc ■ (((((assoc ■ (dup-×× ⨾-map 2id)) ■ (assoc⁻¹ ■ ((2id ⨾-map ((assoc ■ (((××-map ■ (□-map-quot ××-2map ϕ-eq)) ⨾-map 2id))) ■ ((××-map⁻¹ ■ (2id ⨾-map 2id)) ⨾-map 2id))) ■ ((2id ⨾-map (assoc⁻¹ ■ (2id ⨾-map (assoc ■ ((□-map-××-codistr ⨾-map 2id) ■ (assoc⁻¹ ■ (2id ⨾-map (□-map-⨾ {-■ □-2map apply-λ-})))))))) ■ (assoc ■ ((dup-××⁻¹ ⨾-map 2id) ■ (assoc⁻¹ ■ (2id ⨾-map (assoc ■ (({!dup-□-×-codistr!} ⨾-map {!!}) ■ {!!}) )))))))))) ⨾-map 2id))
+  assoc ■ (((((assoc ■ (dup-×× ⨾-map 2id)) ■ (assoc⁻¹ ■ ((2id ⨾-map ((assoc ■ (((××-map ■ (□-map-quot ××-2map ϕ-eq)) ⨾-map 2id))) ■ ((××-map⁻¹ ■ (2id ⨾-map 2id)) ⨾-map 2id))) ■ ((2id ⨾-map (assoc⁻¹ ■ (2id ⨾-map (assoc ■ ((□-map-××-codistr ⨾-map 2id) ■ (assoc⁻¹ ■ (2id ⨾-map □-map-⨾))))))) ■ (assoc ■ ((dup-××⁻¹ ⨾-map 2id) ■ (assoc⁻¹ ■ (2id ⨾-map (assoc ■ ((dup-□-×-codistr ⨾-map 2id) ■ (□-map-⨾ ■ □-2map apply-λ)) )))))))))) ⨾-map 2id))
