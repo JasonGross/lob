@@ -4,6 +4,7 @@ module lawvere-semicomonad-via-depmon-exp
   {o a e}
   (𝒳 : Set o)
   (ℳ : 𝒳 → Set a)
+  (nil : 𝒳)
   (ext : Σ 𝒳 ℳ → 𝒳)
   (_≈_ : 𝒳 → 𝒳 → Set e)
   (_■_ : ∀ {a b c} → a ≈ b → b ≈ c → a ≈ c)
@@ -11,9 +12,10 @@ module lawvere-semicomonad-via-depmon-exp
   (ap-ext : ∀ {x y} {e : x ≈ y} {m : ℳ x} → ext (x , m) ≈ ext (y , sub-ℳ e m))
   (T : {x : 𝒳} -> Σ (ℳ x) (λ{ y → ℳ (ext (x , y)) }) → ℳ x)
   (T-law : ∀ {x : 𝒳} {y : ℳ x} {z : ℳ (ext (x , y))} → ext (ext (x , y) , z) ≈ ext (x , (T (y , z))))
-  (_×_ : 𝒳 → 𝒳 → 𝒳)
+  (dup : ∀ {x} → ℳ x)
+  (_××_ : ∀ {x} (y z : ℳ x) → ℳ (ext (x , dup)))
+  -- (_×_ : 𝒳 → 𝒳 → 𝒳)
   (_^_ : 𝒳 → 𝒳 → 𝒳)
-  --  (I : {x : 𝒳} → Unit {o} → ℳ x)
   where
 _▻_ : (x : 𝒳) → ℳ x → 𝒳
 x ▻ y = ext (x , y)
@@ -30,6 +32,7 @@ _⨾_ : ∀ {a b c} → a ~> b → b ~> c → a ~> c
 f ⨾ g = f₁ ⊙ sub-ℳ f₂ g₁ , (g₂ ■ ap-ext) ■ T-law
   where
     f₁ = Σ.proj₁ f ; f₂ = Σ.proj₂ f ; g₁ = Σ.proj₁ g ; g₂ = Σ.proj₂ g
+{-
 postulate
   apply : ∀ {a b} → (a × (b ^ a)) ~> b
   dup : ∀ {a} → (a ~> (a × a))
@@ -44,6 +47,7 @@ postulate
   ϕ : inf ~> (B ^ (□ inf))
   ϕ⁻¹ : (□ inf ~> B) → (𝟙 ~> □ inf)
   f : □ B ~> B
+  -}
 -- open lawvere-semicomonad-exp 𝒞 _~>_ _⨾_ _×_ _^_ apply dup _××_ 𝟙 □ □-map □-×-codistr quot B inf ϕ ϕ⁻¹ f public
 {-
 lawvere : (𝟙 ~> B)

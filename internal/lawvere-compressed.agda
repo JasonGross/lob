@@ -1,5 +1,5 @@
 {-# OPTIONS --without-K #-}
-module lawvere
+module lawvere-compressed
   {o a}
   (𝒞 : Set o)
   (_~>_ : 𝒞 → 𝒞 → Set a)

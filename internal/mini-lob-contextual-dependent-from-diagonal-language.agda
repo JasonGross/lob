@@ -5,6 +5,7 @@ open import common
 infixl 2 _▻_
 infixl 3 _‘’_
 infixr 1 _‘→’_
+infixr 1 _‘‘→’’_
 infixr 2 _‘×’_
 infixr 2 _‘××’_
 infixr 2 _‘××Σ’_
@@ -24,20 +25,20 @@ data Context where
 data Type where
   _‘’_ : ∀ {Γ A} → Type (Γ ▻ A) → Term {Γ} A → Type Γ
   _‘’₁_ : ∀ {Γ A B} → Type (Γ ▻ A ▻ B) → (a : Term {Γ} A) → Type (Γ ▻ B ‘’ a)
-  ‘Context’ : ∀ {Γ} → Type Γ
-  ‘Type’⌜_⌝ : ∀ {Γ} → Context → Type Γ
-  ‘Term’ : ∀ {Γ} {C : Context} → Type (Γ ▻ ‘Type’⌜ C ⌝)
-  _‘→’_ : ∀ {Γ} → Type Γ → Type Γ → Type Γ
-  _‘×’_ : ∀ {Γ} → Type Γ → Type Γ → Type Γ
-  ‘⊤’ : ∀ {Γ} → Type Γ
-  ‘⊥’ : ∀ {Γ} → Type Γ
-  ‘Σ’ : ∀ {Γ} A → Type (Γ ▻ A) → Type Γ
-  ‘Π’ : ∀ {Γ} A → Type (Γ ▻ A) → Type Γ
   Wk : ∀ {Γ A} → Type Γ → Type (Γ ▻ A)
   Wk₁ : ∀ {Γ A B} → Type (Γ ▻ B) → Type (Γ ▻ A ▻ Wk B)
-  _‘≡’_ : ∀ {Γ} {A : Type Γ} → Term A → Term A → Type Γ
+  _‘→’_ : ∀ {Γ} → Type Γ → Type Γ → Type Γ
+  _‘×’_ : ∀ {Γ} → Type Γ → Type Γ → Type Γ
+  ‘Π’ : ∀ {Γ} A → Type (Γ ▻ A) → Type Γ
+  ‘Σ’ : ∀ {Γ} A → Type (Γ ▻ A) → Type Γ
+  ‘⊤’ : ∀ {Γ} → Type Γ
+  ‘⊥’ : ∀ {Γ} → Type Γ
+  ‘≡’ : ∀ {Γ A} → Type (Γ ▻ A ▻ Wk A)
+  ‘Context’ : ∀ {Γ} → Type Γ
+  ‘Type’ : ∀ {Γ} → Type (Γ ▻ ‘Context’)
+  ‘Term’ : ∀ {Γ} → Type (Γ ▻ ‘Context’ ▻ ‘Type’)
   ‘Δ’ : ∀ {Γ} → Type (Γ ▻ ‘Type’⌜ Γ ⌝) → Type Γ
-
+{-
 red1 : ∀ {Γ} → Type Γ → Type Γ
 subst1 : ∀ {Γ A} → Type (Γ ▻ A) → Term {Γ} A → Type Γ
 subst1₁ : ∀ {Γ A B} → Type (Γ ▻ A ▻ B) → (a : Term {Γ} A) → Type (Γ ▻ B ‘’ a)
@@ -156,10 +157,16 @@ data Term where
   ‘‘’’ₐ : ∀ {Γ C A B} → Term {Γ} (‘Term’ {_} {C} ‘’ ⌜ A ‘→’ B ⌝ ‘→’ ‘Term’ ‘’ ⌜ A ⌝ ‘→’ ‘Term’ ‘’ ⌜ B ⌝)
   ‘‘≡’’ : ∀ {Γ C A} → Term {Γ} (‘Term’ {_} {C} ‘’ A ‘→’ ‘Term’ {_} {C} ‘’ A ‘→’ ‘Type’⌜ C ⌝)
   ‘‘,’’ : ∀ {Γ C A B} → Term {Γ} (‘Term’ {_} {C} ‘’ ⌜ A ⌝ ‘×’ ‘Term’ ‘’ ⌜ B ⌝ ‘→’ ‘Term’ ‘’ ⌜ A ‘×’ B ⌝)
+  ‘‘Exp’’ : ∀ {Γ C} → Term {Γ} (‘Type’⌜ C ⌝ ‘×’ ‘Type’⌜ C ⌝ ‘→’ ‘Type’⌜ C ⌝)
+  ‘‘Σ’’ : ∀ {Γ C} → Term {Γ} (‘Σ’ ‘Type’⌜ C ⌝ {!‘Type’⌜ ? ⌝!} ‘→’ ‘Type’⌜ C ⌝)
+--  ∀ {Γ} A → Type (Γ ▻ A) → Type Γ
   ‘Δ-fwd’ : ∀ {Γ T} → Term {Γ} (‘Δ’ T ‘→’ (T ‘’ ⌜ ‘Δ’ T ⌝))
   ‘Δ-bak’ : ∀ {Γ T} → Term {Γ} (T ‘’ ⌜ ‘Δ’ T ⌝) → Term (‘Δ’ T)
   ‘‘Δ-bak’’ : ∀ {Γ C T} → Term {Γ} (‘Term’ {_} {C} ‘’ ⌜ T ‘’ ⌜ ‘Δ’ T ⌝ ⌝ ‘→’ ‘Term’ ‘’ ⌜ ‘Δ’ T ⌝)
   ‘Δ’-point-surjection : ∀ {Γ T} {f : Term {Γ} (T ‘’ ⌜ ‘Δ’ T ⌝)} → Term (‘Δ-fwd’ ‘’ₐ (‘Δ-bak’ f) ‘≡’ f)
+
+_‘‘→’’_ : ∀ {Γ C} → Term {Γ} (‘Type’⌜ C ⌝) → Term {Γ} (‘Type’⌜ C ⌝) → Term {Γ} (‘Type’⌜ C ⌝)
+A ‘‘→’’ B = ‘‘Exp’’ ‘’ₐ (A ‘,’ B)
 
 red1n→ : ∀ {Γ A} n → Term {Γ} A → Term (red1n n A)
 red1n→ zero t = t
@@ -249,6 +256,7 @@ Term⇓ (_‘××Σ'’_ {Γ} {A} {B} {A′} {B′} f g) Γ⇓ = Term⇓-‘××
 Term⇓ ‘‘’’ₐ Γ⇓ f x = lift (lower f ‘’ₐ lower x)
 Term⇓ ‘‘≡’’ Γ⇓ x y = lift (lower x ‘≡’ lower y)
 Term⇓ ‘‘,’’ Γ⇓ (a , b) = lift (lower a ‘,’ lower b)
+Term⇓ ‘‘Exp’’ Γ⇓ (a , b) = lift (lower a ‘→’ lower b)
 Term⇓ ‘Δ-fwd’ Γ⇓ f⇓ = f⇓
 Term⇓ (‘Δ-bak’ f) Γ⇓ = Term⇓ f Γ⇓
 Term⇓ ‘‘Δ-bak’’ Γ⇓ f = lift (‘Δ-bak’ (lower f))
@@ -343,3 +351,4 @@ Term⇓-Wk1₁↔ T@(Wk _) Γ⇓ = Term⇓-red1↔ T _
 Term⇓-Wk1₁↔ T@(Wk₁ _) Γ⇓ = Term⇓-red1↔ T _
 Term⇓-Wk1₁↔ T@(a ‘≡’ b) Γ⇓ = Term⇓-red1↔ T _
 Term⇓-Wk1₁↔ T@(‘Δ’ _) Γ⇓ = Term⇓-red1↔ T _
+-}

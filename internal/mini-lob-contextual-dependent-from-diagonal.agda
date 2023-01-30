@@ -6,6 +6,30 @@ open import mini-lob-contextual-dependent-from-diagonal-language public
 the : ∀ {ℓ} → (A : Set ℓ) → A → A
 the A x = x
 
+‘clöb’ : ∀ {Γ C} {X : Type C} →
+  Term {Γ ▻
+    {-‘S’ : Type (ε ▻ ‘□’ ‘’ ⌜ X ⌝)-} ‘Type’⌜ {!!} ▻ ‘Term’ ‘’ ⌜ X ⌝ ⌝ ▻
+    -- let T = the ? ? in -- ‘Σ’ (‘□’ ‘’ ⌜ X ⌝) ‘S’
+    (let T = the (Term {Γ ▻ ‘Type’⌜ _ ▻ ‘Term’ ‘’ ⌜ X ⌝ ⌝} ‘Type’⌜ C ⌝) {!!} in
+    {- f : □(T ‘→’ X)-} ‘Term’ ‘’ (T ‘‘→’’ ⌜ X ⌝)) ▻
+    {- ‘Sᵢ’ : Type (ε ▻ ‘Typeε’ ▻ ‘□’) -} {!!} ▻ -- ∀ {Y} → □(□Y → Type)
+    {- ‘quoteΣSᵢ’ : ∀ {Y} → □(‘Σ’ (‘□’ ‘’ ⌜ Y ⌝) (‘Sᵢ’ ‘’₁ _) ‘→’ ‘□’ ‘’ ⌜ ‘Σ’ (‘□’ ‘’ ⌜ Y ⌝) (‘Sᵢ’ ‘’₁ _) ⌝) -} {!!} ▻
+    -- let □inf = the ? ? in -- ‘Δ’ (‘Σ’ ‘□’ ‘Sᵢ’ ‘→’ Wk T) in
+    -- let □□inf = the ? ? in -- ‘□’ ‘’ ⌜ □inf ⌝ in
+    -- let □□infₛ = the ? ? in -- ‘Σ’ □□inf (‘Sᵢ’ ‘’₁ _) in
+    -- let ϕ = the ? ? in -- the (□(□inf ‘×’ □□infₛ ‘→’ T)) (‘uncurry’ ‘’ₐ red1n→ (suc (suc zero)) (‘Δ-fwd’ {‘Σ’ ‘□’ ‘Sᵢ’ ‘→’ Wk T})) in
+    -- let p = the ? ? in -- the (□(□□infₛ ‘→’ ‘□’ ‘’ ⌜ X ⌝)) (‘‘’’ₐ ‘’ₐ ⌜ f ‘∘’ ϕ ⌝ₜ ‘∘’ ‘‘,’’ ‘∘’ (‘proj₁’ ‘××’ ‘quoteΣSᵢ’) ‘∘’ ‘dup’) in
+    {- s₁ : □(‘Π’ □□infₛ (Wk₁ ‘S’ ‘’ (wk→ p ‘’ₐ var₀))) -} {!!} ▻
+    -- let pt = the ? ? in -- the (□(□□infₛ ‘→’ T)) (p ‘××Σ'’ s₁) in
+    -- let ϕ⁻¹pt = the ? ? in -- the (□ □□inf) (‘‘Δ-bak’’ ‘’ₐ ⌜ red1n← (suc (suc zero)) pt ⌝ₜ) in
+    {- s₂ : □ (‘Sᵢ’ ‘’₁ _ ‘’ ϕ⁻¹pt) -} {!!} -- ▻
+    -- let ϕ⁻¹pts = the ? ? in -- the (□ □□infₛ) (ϕ⁻¹pt ‘,Σ’ s₂) in
+    -- let ‘löb’ = the ? ? in -- the (□ T) (pt ‘’ₐ ϕ⁻¹pts) in
+    -- let löb = the ? ? in -- the (□ X) (f ‘’ₐ ‘löb’) in
+    } -- □ X
+    (‘Term’ ‘’ ⌜ X ⌝)
+‘clöb’ = {!!}
+{-
 clӧb : ∀ {X} {‘S’ : Type (ε ▻ ‘□’ ‘’ ⌜ X ⌝)} →
   let T = ‘Σ’ (‘□’ ‘’ ⌜ X ⌝) ‘S’ in
   (f : □(T ‘→’ X))
@@ -149,3 +173,4 @@ soundness x = Term⇓ x tt
 
 non-emptyness : Σ (Type ε) (λ T → □ T)
 non-emptyness = ‘⊤’ , ‘tt’
+-}
