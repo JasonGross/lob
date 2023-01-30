@@ -3,26 +3,6 @@ module mini-lob-contextual-dependent-from-diagonal where
 open import common
 open import mini-lob-contextual-dependent-from-diagonal-language public
 
-‘Lӧb’-gen : ∀ {X} {T} {S : □ (‘□’ ‘’ ⌜ X ⌝ ‘→’ ‘Typeε’)}
-  (‘fst-T’ : □ (T ‘→’ ‘□’ ‘’ ⌜ X ⌝))
-  (‘snd-T’ : ∀ (t : □ T) → □ (‘□’ ‘’ (S ‘’ₐ (‘fst-T’ ‘’ₐ t))))
-  (‘pair-T’ : ∀ (pf : □ (‘□’ ‘’ ⌜ X ⌝)) (s : □ (‘□’ ‘’ (S ‘’ₐ pf))) → □ T)
-  (f : □(T ‘→’ X))
-  inf
-  → let □inf = ‘□’ ‘’ ⌜ inf ⌝ in ∀
-  (ϕ : □((□inf ‘×’ ‘□’ ‘’ ⌜ □inf ⌝) ‘→’ T))
-  → let p = f ‘∘’ ϕ ‘∘’ ((‘id’ ‘××’ ‘quote’) ‘∘’ ‘dup’) in ∀
-  (ϕ⁻¹p : □ □inf)
---  (ϕ-eq : ∀ (q : □ □inf) → □ (‘□’ ‘’ (‘‘≡’’ ‘’ₐ ⌜ p ‘’ₐ q ⌝ₜ ‘’ₐ (‘fst-T’ ‘’ₐ (ϕ ‘’ₐ (ϕ⁻¹p ‘,’ ⌜ q ⌝ₜ))))))
-  → let löb-f = p ‘’ₐ ϕ⁻¹p in ∀
-  (s : □ (‘□’ ‘’ (S ‘’ₐ ⌜ löb-f ⌝ₜ)))
-  → □ X
-‘Lӧb’-gen {X} {T} {S} ‘fst-T’ ‘snd-T’ ‘pair-T’ f inf ϕ ϕ⁻¹p s = löb-f
-  module ‘Lӧb’-gen where
-    □inf = ‘□’ ‘’ ⌜ inf ⌝
-    p = f ‘∘’ ϕ ‘∘’ ((‘id’ ‘××’ ‘quote’) ‘∘’ ‘dup’)
-    löb-f = p ‘’ₐ ϕ⁻¹p
-
 the : ∀ {ℓ} → (A : Set ℓ) → A → A
 the A x = x
 
