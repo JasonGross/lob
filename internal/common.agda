@@ -112,7 +112,7 @@ dec-eq A = (x : A) → (y : A) → dec-eq-on x y
 sym : {A : Set} → {x : A} → {y : A} → x ≡ y → y ≡ x
 sym refl = refl
 
-trans : {A : Set} → {x y z : A} → x ≡ y → y ≡ z → x ≡ z
+trans : ∀ {ℓ} {A : Set ℓ} → {x y z : A} → x ≡ y → y ≡ z → x ≡ z
 trans refl refl = refl
 
 transport : ∀ {A : Set} {x : A} {y : A} → (P : A → Set) → x ≡ y → P x → P y
@@ -127,6 +127,8 @@ transport3 P refl = transport2 (P _)
 transport4 : ∀ {A : Set} {B : A → Set} {C : (x : A) → (y : B x) → Set} {D : (x : A) → (y : B x) → (z : C x y) → Set} {x x' : A} {y : B x} {y' : B x'} {z : C x y} {z' : C x' y'} {w : D x y z} {w' : D x' y' z'} → (P : (x : A) → (y : B x) → (z : C x y) → D x y z → Set) → (p : x ≡ x') → (q : transport B p y ≡ y') → (r : transport2 C p q z ≡ z') → transport3 D p q r w ≡ w' → P x y z w → P x' y' z' w'
 transport4 P refl = transport3 (P _)
 
+sub : ∀ {l} {A : Set l} {m} (B : A -> Set m) {a1 a2} -> a1 ≡ a2 -> B a1 -> B a2
+sub B refl b = b
 
 Maybe-code : {A : Set} → Maybe A → Maybe A → Set
 Maybe-code (just x) (just x₁) = x ≡ x₁
