@@ -13,6 +13,7 @@ infixr 1 _‘≡’_
 infixl 3 _‘’ₐ_
 infixl 3 _‘’Πₐ_
 infixl 3 _‘∘’_
+infixl 3 _‘⨾’_
 
 data Context : Set
 data Type : Context → Set
@@ -21,6 +22,8 @@ data Term : {Γ : Context} → Type Γ → Set
 data Context where
   ε : Context
   _▻_ : (Γ : Context) → Type Γ → Context
+
+‘Type’⌜_⌝ : ∀ {Γ} → Context → Type Γ
 
 data Type where
   _‘’_ : ∀ {Γ A} → Type (Γ ▻ A) → Term {Γ} A → Type Γ
@@ -38,7 +41,7 @@ data Type where
   ‘Type’ : ∀ {Γ} → Type (Γ ▻ ‘Context’)
   ‘Term’ : ∀ {Γ} → Type (Γ ▻ ‘Context’ ▻ ‘Type’)
   ‘Δ’ : ∀ {Γ} → Type (Γ ▻ ‘Type’⌜ Γ ⌝) → Type Γ
-{-
+
 red1 : ∀ {Γ} → Type Γ → Type Γ
 subst1 : ∀ {Γ A} → Type (Γ ▻ A) → Term {Γ} A → Type Γ
 subst1₁ : ∀ {Γ A B} → Type (Γ ▻ A ▻ B) → (a : Term {Γ} A) → Type (Γ ▻ B ‘’ a)
@@ -47,7 +50,7 @@ Wk1₁ : ∀ {Γ A B} → Type (Γ ▻ B) → Type (Γ ▻ A ▻ Wk B)
 red1 (T ‘’ x) = subst1 T x
 red1 (T ‘’₁ a) = subst1₁ T a
 red1 ‘Context’ = ‘Context’
-red1 ‘Type’⌜ Γ ⌝ = ‘Type’⌜ Γ ⌝
+red1 ‘Type’ = ‘Type’
 red1 ‘Term’ = ‘Term’
 red1 (A ‘→’ B) = (red1 A) ‘→’ (red1 B)
 red1 (A ‘×’ B) = (red1 A) ‘×’ (red1 B)
@@ -57,12 +60,12 @@ red1 (‘Σ’ A B) = ‘Σ’ A (red1 B)
 red1 (‘Π’ A B) = ‘Π’ A (red1 B)
 red1 (Wk T) = Wk1 T
 red1 (Wk₁ T) = Wk1₁ T
-red1 (a ‘≡’ b) = a ‘≡’ b
+red1 ‘≡’ = ‘≡’
 red1 (‘Δ’ T) = ‘Δ’ T
 Wk1 T@(_ ‘’ _) = Wk (red1 T)
 Wk1 T@(_ ‘’₁ _) = Wk (red1 T)
-Wk1 T@‘Context’ = Wk (red1 T)
-Wk1 T@(‘Type’⌜ Γ ⌝) = Wk (red1 T)
+Wk1 ‘Context’ = ‘Context’
+Wk1 T@‘Type’ = Wk (red1 T)
 Wk1 T@‘Term’ = Wk (red1 T)
 Wk1 (A ‘→’ B) = Wk A ‘→’ Wk B
 Wk1 (A ‘×’ B) = Wk A ‘×’ Wk B
@@ -72,12 +75,12 @@ Wk1 (‘Σ’ A B) = ‘Σ’ (Wk A) (Wk₁ B)
 Wk1 (‘Π’ A B) = ‘Π’ (Wk A) (Wk₁ B)
 Wk1 (Wk T) = Wk (Wk1 T)
 Wk1 T@(Wk₁ _) = Wk (red1 T)
-Wk1 T@(a ‘≡’ b) = Wk (red1 T)
+Wk1 T@‘≡’ = Wk (red1 T)
 Wk1 T@(‘Δ’ _) = Wk (red1 T)
 Wk1₁ T@(_ ‘’ _) = Wk₁ (red1 T)
 Wk1₁ T@(_ ‘’₁ _) = Wk₁ (red1 T)
 Wk1₁ T@‘Context’ = Wk₁ (red1 T)
-Wk1₁ T@(‘Type’⌜ Γ ⌝) = Wk₁ (red1 T)
+Wk1₁ T@‘Type’ = Wk₁ (red1 T)
 Wk1₁ T@‘Term’ = Wk₁ (red1 T)
 Wk1₁ (A ‘→’ B) = Wk₁ A ‘→’ Wk₁ B
 Wk1₁ (A ‘×’ B) = Wk₁ A ‘×’ Wk₁ B
@@ -87,13 +90,13 @@ Wk1₁ T@(‘Σ’ A B) = Wk₁ (red1 T)
 Wk1₁ T@(‘Π’ A B) = Wk₁ (red1 T)
 Wk1₁ T@(Wk _) = Wk₁ (red1 T)
 Wk1₁ T@(Wk₁ _) = Wk₁ (red1 T)
-Wk1₁ T@(a ‘≡’ b) = Wk₁ (red1 T)
+Wk1₁ T@‘≡’ = Wk₁ (red1 T)
 Wk1₁ T@(‘Δ’ _) = Wk₁ (red1 T)
 
 subst1 (T ‘’ a) b = (subst1 T a) ‘’ b
 subst1 (T ‘’₁ a) b = (subst1₁ T a) ‘’ b
 subst1 ‘Context’ x = ‘Context’
-subst1 (‘Type’⌜ Γ ⌝) x = ‘Type’⌜ Γ ⌝
+subst1 T@‘Type’ x = T ‘’ x
 subst1 T@‘Term’ t = T ‘’ t
 subst1 (A ‘→’ B) x = A ‘’ x ‘→’ B ‘’ x
 subst1 (A ‘×’ B) x = A ‘’ x ‘×’ B ‘’ x
@@ -103,22 +106,22 @@ subst1 (‘Σ’ A B) x = ‘Σ’ (A ‘’ x) (B ‘’₁ x)
 subst1 (‘Π’ A B) x = ‘Π’ (A ‘’ x) (B ‘’₁ x)
 subst1 (Wk T) x = T
 subst1 (Wk₁ T) x = Wk1₁ T ‘’ x
-subst1 (a ‘≡’ b) x = (a ‘≡’ b) ‘’ x
+subst1 T@‘≡’ x = T ‘’ x
 subst1 T@(‘Δ’ _) x = T ‘’ x
 subst1₁ (T ‘’ a) b = ((subst1 T a) ‘’₁ b)
 subst1₁ (T ‘’₁ a) b = ((subst1₁ T a) ‘’₁ b)
 subst1₁ ‘Context’ x = ‘Context’
-subst1₁ (‘Type’⌜ Γ ⌝) x = ‘Type’⌜ Γ ⌝
+subst1₁ T@‘Type’ x = T ‘’₁ x
 subst1₁ T@‘Term’ t = T ‘’₁ t
 subst1₁ (A ‘→’ B) x = (A ‘’₁ x ‘→’ B ‘’₁ x)
 subst1₁ (A ‘×’ B) x = (A ‘’₁ x ‘×’ B ‘’₁ x)
 subst1₁ ‘⊤’ x = ‘⊤’
 subst1₁ ‘⊥’ x = ‘⊥’
-subst1₁ (‘Σ’ A B) x = (‘Σ’ A B ‘’₁ x)
-subst1₁ (‘Π’ A B) x = (‘Π’ A B ‘’₁ x)
-subst1₁ (Wk T) x = (Wk T ‘’₁ x)
-subst1₁ (Wk₁ T) x = (Wk₁ T ‘’₁ x)
-subst1₁ (a ‘≡’ b) x = (a ‘≡’ b) ‘’₁ x
+subst1₁ T@(‘Σ’ A B) x = T ‘’₁ x
+subst1₁ T@(‘Π’ A B) x = T ‘’₁ x
+subst1₁ (Wk T) x = Wk T ‘’₁ x
+subst1₁ (Wk₁ T) x = Wk₁ T ‘’₁ x
+subst1₁ T@‘≡’ x = T ‘’₁ x
 subst1₁ T@(‘Δ’ _) x = T ‘’₁ x
 
 red1n : ℕ → ∀ {Γ} → Type Γ → Type Γ
@@ -127,10 +130,15 @@ red1n (suc n) T = red1n n (red1 T)
 
 data Term where
   ⌜_⌝c : ∀ {Γ} → Context → Term {Γ} ‘Context’
-  ⌜_⌝ : ∀ {Γ C} → Type C → Term {Γ} (‘Type’⌜ C ⌝)
-  ⌜_⌝t : ∀ {Γ C T} → Term {C} T → Term {Γ} (‘Term’ ‘’ ⌜ T ⌝)
-  ‘quote’ : ∀ {Γ Γ′ C T} → Term {Γ} (‘Term’ {_} {C} ‘’ ⌜ T ⌝ ‘→’ ‘Term’ {_} {Γ′} ‘’ ⌜ ‘Term’ ‘’ ⌜ T ⌝ ⌝)
+  ⌜_⌝ : ∀ {Γ C} → Type C → Term {Γ} (‘Type’ ‘’ ⌜ C ⌝c)
+  ⌜_⌝t : ∀ {Γ C T} → Term {C} T → Term {Γ} (‘Term’ ‘’₁ ⌜ C ⌝c ‘’ ⌜ T ⌝)
   ‘id’ : ∀ {Γ A} → Term {Γ} (A ‘→’ A)
+  _‘⨾’_ : ∀ {Γ A B C} → Term {Γ} (A ‘→’ A)
+  {-wk→ : ∀ {Γ A B C} → Term {Γ} (A ‘→’ B) → Term {Γ ▻ C} (Wk A ‘→’ Wk B)
+  var₀ : ∀ {Γ A} → Term {Γ ▻ A} (Wk A)
+  wk : ∀ {Γ A B C} → Term {Γ ▻ A} C → Term {Γ ▻ A ▻ B} (Wk C)-}
+--  ‘quoteC’ : ∀
+{-  ‘quote’ : ∀ {Γ Γ′ C T} → Term {Γ} (‘Term’ {_} {C} ‘’ ⌜ T ⌝ ‘→’ ‘Term’ {_} {Γ′} ‘’ ⌜ ‘Term’ ‘’ ⌜ T ⌝ ⌝)
   ‘eval’ : ∀ {Γ A B} → Term {Γ} (((A ‘→’ B) ‘×’ A) ‘→’ B)
   ‘curry’ : ∀ {Γ A B C} → Term {Γ} ((A ‘×’ B ‘→’ C) ‘→’ (A ‘→’ (B ‘→’ C)))
   ‘uncurry’ : ∀ {Γ A B C} → Term {Γ} ((A ‘→’ (B ‘→’ C)) ‘→’ (A ‘×’ B ‘→’ C))
@@ -141,9 +149,6 @@ data Term where
   ‘const’ : ∀ {Γ A B} → Term {Γ} B → Term {Γ} (A ‘→’ B)
   ‘dup’ : ∀ {Γ A} → Term {Γ} (A ‘→’ A ‘×’ A)
   ‘proj₁’ : ∀ {Γ A B} → Term {Γ} (‘Σ’ A B ‘→’ A)
-  wk→ : ∀ {Γ A B C} → Term {Γ} (A ‘→’ B) → Term {Γ ▻ C} (Wk A ‘→’ Wk B)
-  var₀ : ∀ {Γ A} → Term {Γ ▻ A} (Wk A)
-  wk : ∀ {Γ A B C} → Term {Γ ▻ A} C → Term {Γ ▻ A ▻ B} (Wk C)
   _‘∘’_ : ∀ {Γ A B C} → Term {Γ} (B ‘→’ C) → Term {Γ} (A ‘→’ B) → Term {Γ} (A ‘→’ C)
   ‘tt’ : ∀ {Γ} → Term {Γ} ‘⊤’
   ‘refl’ : ∀ {Γ A} {x : Term {Γ} A} → Term (x ‘≡’ x)
@@ -165,6 +170,7 @@ data Term where
   ‘‘Δ-bak’’ : ∀ {Γ C T} → Term {Γ} (‘Term’ {_} {C} ‘’ ⌜ T ‘’ ⌜ ‘Δ’ T ⌝ ⌝ ‘→’ ‘Term’ ‘’ ⌜ ‘Δ’ T ⌝)
   ‘Δ’-point-surjection : ∀ {Γ T} {f : Term {Γ} (T ‘’ ⌜ ‘Δ’ T ⌝)} → Term (‘Δ-fwd’ ‘’ₐ (‘Δ-bak’ f) ‘≡’ f)
 
+‘Type’⌜_⌝ = ?
 _‘‘→’’_ : ∀ {Γ C} → Term {Γ} (‘Type’⌜ C ⌝) → Term {Γ} (‘Type’⌜ C ⌝) → Term {Γ} (‘Type’⌜ C ⌝)
 A ‘‘→’’ B = ‘‘Exp’’ ‘’ₐ (A ‘,’ B)
 
