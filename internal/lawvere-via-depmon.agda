@@ -12,14 +12,19 @@ module lawvere-via-depmon
   (ϕ : ℳ (ext (inf , dup)))
   (ϕ⁻¹ : ℳ inf → ℳ nil)
   -- (apply-to-ϕ⁻¹-self : ℳ inf → ℳ nil) -- if you have an arrow over inf, you can apply it to itself turned into an inf turn it into an inf and t
-  (f : ℳ (ext (ext (inf , dup) , ϕ)))
+  (f : ℳ (ext (inf , T (dup , ϕ))))
   where
 
 lawvere : ℳ nil
 lawvere = T (ϕ⁻¹ p , {!!}) -- ϕ⁻¹ p ⨾ p
   module lawvere where
     p : ℳ inf -- inf ~> B
-    p = T (dup , T (ϕ , f)) -- (dup ⨾ ϕ) ⨾ f
+    p = T (T (dup , ϕ) , f) -- (dup ⨾ ϕ) ⨾ f
+
+lawvere-fix : ∀
+  {a₂} (_≈_ : ∀ {x} → ℳ x → ℳ x → Set a₂) →
+  lawvere ≈ T (lawvere , {!!})
+lawvere-fix _≈_ = {!!}
 {-
 _▻_ : (x : 𝒳) → ℳ x → 𝒳
 x ▻ y = ext (x , y)
