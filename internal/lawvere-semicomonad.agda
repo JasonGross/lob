@@ -12,23 +12,23 @@ module lawvere-semicomonad
   (□ : 𝒞 → 𝒞)
   (□-map : ∀ {a b} → (a ~> b) → (□ a ~> □ b))
   (□-×-codistr : ∀ {a b} → (□ a × □ b) ~> □ (a × b))
+  (□-𝟙-codistr : 𝟙 ~> □ 𝟙)
   (quot : ∀ {a} → □ a ~> □ (□ a))
   (B : 𝒞)
   (inf : 𝒞)
   (ϕ : (inf × □ inf) ~> B)
-  (ϕ⁻¹ : (□ inf ~> B) → (𝟙 ~> □ inf))
+  (ϕ⁻¹ : (□ inf ~> B) → (𝟙 ~> inf))
   (f : □ B ~> B)
   where
 
 lawvere : (𝟙 ~> B)
-lawvere = ϕ⁻¹ p ⨾ p
+lawvere = (□-𝟙-codistr ⨾ □-map (ϕ⁻¹ p)) ⨾ p
   module lawvere where
     p : □ inf ~> B
     p = (dup ⨾ ((id ×× quot) ⨾ (□-×-codistr ⨾ □-map ϕ))) ⨾ f
 
 lawvere-fix : ∀
   {a₂} (_≈_ : ∀ {a b} → (a ~> b) → (a ~> b) → Set a₂)
-  (□tt : 𝟙 ~> □ 𝟙)
   (_■_ : ∀ {a b} {f : a ~> b} {g : a ~> b} {h : a ~> b} → f ≈ g → g ≈ h → f ≈ h)
   (assoc : ∀ {a b c d} {h : a ~> b} {g : b ~> c} {f : c ~> d} → (h ⨾ (g ⨾ f)) ≈ ((h ⨾ g) ⨾ f))
   (assoc⁻¹ : ∀ {a b c d} {h : a ~> b} {g : b ~> c} {f : c ~> d} → ((h ⨾ g) ⨾ f) ≈ (h ⨾ (g ⨾ f)))
@@ -39,8 +39,8 @@ lawvere-fix : ∀
   (××-map : ∀ {a b c a′ b′ c′} {f : a ~> b} {g : b ~> c} {f′ : a′ ~> b′} {g′ : b′ ~> c′} → ((f ×× f′) ⨾ (g ×× g′)) ≈ ((f ⨾ g) ×× (f′ ⨾ g′)))
   (_××-2map_ : ∀ {a b c d} {f f′ : a ~> b} {g g′ : c ~> d} → (f ≈ f′) → (g ≈ g′) → ((f ×× g) ≈ (f′ ×× g′)))
   (□-map-⨾ : ∀ {a b} {f : 𝟙 ~> □ a} {g : □ a ~> b} → (□-map f ⨾ □-map g) ≈ □-map (f ⨾ g))
-  (□-map-quot : ∀ {a} {f : 𝟙 ~> □ a} → (f ⨾ quot) ≈ (□tt ⨾ □-map f))
-  (ϕ-eq : ∀ {f g} → (dup ⨾ ((ϕ⁻¹ f ×× g) ⨾ (□-×-codistr ⨾ □-map ϕ))) ≈ (g ⨾ □-map f))
-  → lawvere ≈ ((□tt ⨾ □-map lawvere) ⨾ f)
-lawvere-fix _≈_ □tt _■_ assoc assoc⁻¹ 2id rid _⨾-map_ dup-×× ××-map _××-2map_ □-map-⨾ □-map-quot ϕ-eq =
+  (□-map-quot : ∀ {a} {f : 𝟙 ~> □ a} → (f ⨾ quot) ≈ (□-𝟙-codistr ⨾ □-map f))
+  (ϕ-eq : ∀ {f : □ inf ~> B} {g : 𝟙 ~> □ (□ inf)} → (dup ⨾ (((□-𝟙-codistr ⨾ □-map (ϕ⁻¹ f)) ×× g) ⨾ (□-×-codistr ⨾ □-map ϕ))) ≈ (g ⨾ □-map f))
+  → lawvere ≈ ((□-𝟙-codistr ⨾ □-map lawvere) ⨾ f)
+lawvere-fix _≈_ _■_ assoc assoc⁻¹ 2id rid _⨾-map_ dup-×× ××-map _××-2map_ □-map-⨾ □-map-quot ϕ-eq =
   assoc ■ (((assoc ■ (dup-×× ⨾-map 2id)) ■ (assoc⁻¹ ■ ((2id ⨾-map (assoc ■ ((××-map ⨾-map 2id) ■ (((rid ××-2map 2id) ⨾-map 2id))))) ■ (ϕ-eq ■ ((□-map-quot ⨾-map 2id) ■ (assoc⁻¹ ■ (2id ⨾-map □-map-⨾))))))) ⨾-map 2id)
