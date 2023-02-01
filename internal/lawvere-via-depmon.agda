@@ -2,10 +2,10 @@
 open import common using (Σ ; _,_)
 module lawvere-via-depmon
   {o a}
-  (𝒳 : Set o)
-  (ℳ : 𝒳 → Set a)
-  (nil : 𝒳)
-  (ext : Σ 𝒳 ℳ → 𝒳)
+  (𝒳 : Set o) -- CtxSyntax
+  (ℳ : 𝒳 → Set a) -- TySyntaxInContext
+  (nil : 𝒳) -- 1
+  (ext : Σ 𝒳 ℳ → 𝒳) -- Σ
   (T : {x : 𝒳} -> Σ (ℳ x) (λ{ y → ℳ (ext (x , y)) }) → ℳ x)
   (dup : ∀ {x} → ℳ x)
   (inf : 𝒳)
