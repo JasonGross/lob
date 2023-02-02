@@ -184,7 +184,45 @@ a ‘,Σ’ b = red1n→ (suc (suc zero)) (‘pairΣ’ ‘’Πₐ a) ‘’ₐ
 
 the : ∀ {ℓ} → (A : Set ℓ) → A → A
 the A x = x
-
+{-
+‘clӧb’ : ∀ {B} {P : Type (ε ▻ ‘□’ ‘’ ⌜ B ⌝)} →
+  let ΣP = ‘Σ’ (‘□’ ‘’ ⌜ B ⌝) P in
+  (f : □(ΣP ‘→’ B)) →
+  (R : Type (ε ▻ ‘Typeε’ ▻ ‘□’)) → -- ∀ {Y} → □(□Y → Type)
+  let inf = ‘Δ’ (‘Σ’ ‘□’ R ‘→’ Wk ΣP) in
+  let □inf = ‘□’ ‘’ ⌜ inf ⌝ in
+  let ΣR = ‘Σ’ (‘□’ ‘’ ⌜ inf ⌝) (R ‘’₁ _) in
+  (R₂ : Type (ε ▻ ‘□’ ‘’ ⌜ ΣR ⌝)) →
+  let ΣR₂ = ‘Σ’ (‘□’ ‘’ ⌜ ΣR ⌝) R₂ in
+  (‘quoteΣR’ : ∀ {Y} → □(‘Σ’ (‘□’ ‘’ ⌜ Y ⌝) (R ‘’₁ _) ‘→’ ‘□’ ‘’ ⌜ ‘Σ’ (‘□’ ‘’ ⌜ Y ⌝) (R ‘’₁ _) ⌝)) →
+  (‘quoteΣR₂’ : □(ΣR ‘→’ ΣR₂)) →
+  let ϕ = the (□(inf ‘×’ ΣR ‘→’ ΣP)) (‘uncurry’ ‘’ₐ red1n→ (suc (suc zero)) (‘Δ-fwd’ {‘Σ’ ‘□’ R ‘→’ Wk ΣP})) in
+--  let ϕ' = the (□(ΣR ‘×’ ΣR₂ ‘→’ ΣP)) let v = ϕ in {!!} in
+  let p' = the (□(ΣR ‘→’ B)) (f ‘∘’ {!!} ‘∘’ ‘dup’) in -- ‘‘’’ₐ ‘’ₐ ⌜ f ‘∘’ ϕ ⌝ₜ ‘∘’ ‘‘,’’ ‘∘’ (‘proj₁’ ‘××’ ‘quoteΣR’) ‘∘’ ‘dup’) in
+  let p = the (□(ΣR ‘→’ ‘□’ ‘’ ⌜ B ⌝)) (‘‘’’ₐ ‘’ₐ ⌜ f ‘∘’ ϕ ⌝ₜ ‘∘’ ‘‘,’’ ‘∘’ (‘proj₁’ ‘××’ ‘quoteΣR’) ‘∘’ ‘dup’) in
+  (s₁ : □(‘Π’ ΣR (Wk₁ P ‘’ (wk→ p ‘’ₐ var₀)))) →
+  let pt = the (□(ΣR ‘→’ ΣP)) (p ‘××Σ'’ s₁) in
+  let ϕ⁻¹pt = the (□ □inf) (‘‘Δ-bak’’ ‘’ₐ ⌜ red1n← (suc (suc zero)) pt ⌝ₜ) in
+  (s₂ : □ (R ‘’₁ _ ‘’ ϕ⁻¹pt)) →
+  let ϕ⁻¹pts = the (□ ΣR) (ϕ⁻¹pt ‘,Σ’ s₂) in
+  let ‘löb’ = the (□ ΣP) (pt ‘’ₐ ϕ⁻¹pts) in
+  let löb = the (□ B) (f ‘’ₐ ‘löb’) in
+  □ B
+‘clӧb’ {B} {P} f R R₂ ‘quoteΣR’ ‘quoteΣR₂’ s₁ s₂ = löb
+  module ‘clӧb’ where
+    ΣP = ‘Σ’ (‘□’ ‘’ ⌜ B ⌝) P
+    inf = ‘Δ’ (‘Σ’ ‘□’ R ‘→’ Wk ΣP)
+    □inf = ‘□’ ‘’ ⌜ inf ⌝
+    ΣR = ‘Σ’ (‘□’ ‘’ ⌜ inf ⌝) (R ‘’₁ _)
+    ΣR₂ = ‘Σ’ (‘□’ ‘’ ⌜ ΣR ⌝) R₂
+    ϕ = the (□(inf ‘×’ ΣR ‘→’ ΣP)) (‘uncurry’ ‘’ₐ red1n→ (suc (suc zero)) (‘Δ-fwd’ {‘Σ’ ‘□’ R ‘→’ Wk ΣP}))
+    p = the (□(ΣR ‘→’ ‘□’ ‘’ ⌜ B ⌝)) (‘‘’’ₐ ‘’ₐ ⌜ f ‘∘’ ϕ ⌝ₜ ‘∘’ ‘‘,’’ ‘∘’ (‘proj₁’ ‘××’ ‘quoteΣR’) ‘∘’ ‘dup’)
+    pt = the (□(ΣR ‘→’ ΣP)) (p ‘××Σ'’ s₁)
+    ϕ⁻¹pt = the (□ □inf) (‘‘Δ-bak’’ ‘’ₐ ⌜ red1n← (suc (suc zero)) pt ⌝ₜ)
+    ϕ⁻¹pts = the (□ ΣR) (ϕ⁻¹pt ‘,Σ’ s₂)
+    ‘löb’ = the (□ ΣP) (pt ‘’ₐ ϕ⁻¹pts)
+    löb = the (□ B) (f ‘’ₐ ‘löb’)
+-}
 ‘Lӧb’ : ∀ {X} {S : □ X → Set} {‘S’ : Type (ε ▻ ‘□’ ‘’ ⌜ X ⌝)} →
   let T = ‘Σ’ (‘□’ ‘’ ⌜ X ⌝) ‘S’ in
   (f : □(T ‘→’ X))

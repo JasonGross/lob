@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K #-}
 module lawvere-contextual-compressed
-  {o a} {p r r₂}
+  {o a} {p {-r-} r₂}
   (𝒞 : Set o)
   (_~>_ : 𝒞 → 𝒞 → Set a)
   (id : ∀ {a} → a ~> a)
@@ -15,14 +15,13 @@ module lawvere-contextual-compressed
   (P : (𝟙 ~> B) → Set p)
   (ΣP : 𝒞) -- Σ (□ B) P
   (f : ΣP ~> B)
-  (R : (𝟙 ~> inf) → Set r)
+--  (R : (𝟙 ~> inf) → Set r)
   (ΣR : 𝒞) -- Σ (□ inf) R
   (R₂ : (𝟙 ~> ΣR) → Set r₂)
   (ΣR₂ : 𝒞) -- Σ (□ ΣR) R₂
   (××ΣR₂P-but-this-needs-a-better-name : (l : ΣR ~> B) → (r : ∀ i → R₂ i → P (i ⨾ l)) → ΣR₂ ~> ΣP)
-  (pair-ΣR₂ : (l : 𝟙 ~> ΣR) → R₂ l → (𝟙 ~> ΣR₂))
   (quot : ΣR ~> ΣR₂)
-  (ϕ : (ΣR × ΣR₂) ~> ΣP) -- □ (inf × □ inf) ~> □ B)
+  (ϕ : (ΣR × ΣR₂) ~> ΣP) -- □ (inf × □ inf) ~> □ B
   (ϕ⁻¹ : (ΣR₂ ~> ΣP) → (𝟙 ~> ΣR))
   (f : ΣP ~> B)
   where
