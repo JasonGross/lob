@@ -14,13 +14,13 @@ module lawvere-semicomonad-exp-contextual-with-R
   (□-map : ∀ {a b} → (a ~> b) → (□ a ~> □ b))
   (□-𝟙-codistr : 𝟙 ~> □ 𝟙)
   (X : 𝒞)
-  {p} (P : (𝟙 ~> □ X) → Set p)
+  {p} (P : (𝟙 ~> X) → Set p)
   (ΣP : 𝒞)
   (S : 𝒞) -- S ~ Σ_(Σ R₁ → ΣP) R₂
-  {r₁} (R₁ : (𝟙 ~> □ S) → Set r₁)
+  {r₁} (R₁ : (𝟙 ~> S) → Set r₁)
   (ΣR₁ : 𝒞)
   {r₂} (R₂ : (ΣR₁ ~> ΣP) → Set r₂)
-  (pair-ΣRΣP : (f : S ~> X) → (∀ (s : 𝟙 ~> S) → R₁ (□-𝟙-codistr ⨾ □-map s) → P (□-𝟙-codistr ⨾ □-map (s ⨾ f))) → (ΣR₁ ~> ΣP))
+  (pair-ΣRΣP : (f : S ~> X) → (∀ (s : 𝟙 ~> S) → R₁ s → P (s ⨾ f)) → (ΣR₁ ~> ΣP))
   (quote-S : S ~> ΣR₁)
   (ϕ₁ : S ~> (ΣP ^ ΣR₁))
   -- We should also have ϕ₂ that says R₂ holds
@@ -32,7 +32,7 @@ pre-rewrap : S ~> X
 pre-rewrap = ((dup ⨾ (quote-S ×× ϕ₁)) ⨾ apply) ⨾ f
 
 module _
-  (p : ∀ (s : 𝟙 ~> S) → R₁ (□-𝟙-codistr ⨾ □-map s) → P (□-𝟙-codistr ⨾ □-map (s ⨾ pre-rewrap)))
+  (p : ∀ (s : 𝟙 ~> S) → R₁ s → P (s ⨾ pre-rewrap))
   where
 
   rewrap : ΣR₁ ~> ΣP
@@ -44,6 +44,13 @@ module _
 
     lawvere : (𝟙 ~> X)
     lawvere = ϕ⁻¹ rewrap p₂ ⨾ pre-rewrap
+
+    module _
+      (p₃ : R₁ (ϕ⁻¹ rewrap p₂))
+      where
+
+      Plawvere : P lawvere
+      Plawvere = p (ϕ⁻¹ rewrap p₂) p₃
 
 {-
 module _
