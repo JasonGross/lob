@@ -14,9 +14,9 @@ module lawvere-semicomonad-exp-contextual-no-R
   (□-map : ∀ {a b} → (a ~> b) → (□ a ~> □ b))
   (□-𝟙-codistr : 𝟙 ~> □ 𝟙)
   (X : 𝒞)
-  {p} (P : (𝟙 ~> □ X) → Set p)
+  {p} (P : (𝟙 ~> X) → Set p)
   (ΣP : 𝒞)
-  (pair-ΣP : ∀ {A} → (f : A ~> X) → (∀ (a : 𝟙 ~> A) → P (□-𝟙-codistr ⨾ □-map (a ⨾ f))) → (□ A ~> ΣP))
+  (pair-ΣP : ∀ {A} → (f : A ~> X) → (∀ (a : 𝟙 ~> A) → P (a ⨾ f)) → (□ A ~> ΣP))
   (S : 𝒞)
   (quote-S : S ~> □ S)
   (ϕ : S ~> (ΣP ^ (□ S)))
@@ -28,7 +28,7 @@ pre-rewrap : S ~> X
 pre-rewrap = ((dup ⨾ (quote-S ×× ϕ)) ⨾ apply) ⨾ f
 
 module _
-  (p : ∀ (s : 𝟙 ~> S) → P (□-𝟙-codistr ⨾ □-map (s ⨾ pre-rewrap)))
+  (p : ∀ (s : 𝟙 ~> S) → P (s ⨾ pre-rewrap))
   where
 
   rewrap : □ S ~> ΣP
