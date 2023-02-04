@@ -103,17 +103,23 @@ data _≡_ {ℓ} {A : Set ℓ} (x : A) : A → Set ℓ where
 _≢_ : ∀ {ℓ} {A : Set ℓ} → A → A → Set ℓ
 x ≢ y = x ≡ y → ⊥ {lzero}
 
-dec-eq-on : {A : Set} → (x : A) → (y : A) → Set
+dec-eq-on : ∀ {ℓ} {A : Set ℓ} → (x : A) → (y : A) → Set ℓ
 dec-eq-on x y = (x ≡ y) ⊎ (x ≢ y)
 
-dec-eq : Set → Set
+dec-eq : ∀ {ℓ} → Set ℓ → Set ℓ
 dec-eq A = (x : A) → (y : A) → dec-eq-on x y
 
-sym : {A : Set} → {x : A} → {y : A} → x ≡ y → y ≡ x
+UIP-on : ∀ {ℓ} → Set ℓ → Set ℓ
+UIP-on A = ∀ {x y : A} → (p q : x ≡ y) → p ≡ q
+
+sym : ∀ {ℓ} {A : Set ℓ} → {x : A} → {y : A} → x ≡ y → y ≡ x
 sym refl = refl
 
 trans : ∀ {ℓ} {A : Set ℓ} → {x y z : A} → x ≡ y → y ≡ z → x ≡ z
 trans refl refl = refl
+
+trans-syml : ∀ {ℓ} {A : Set ℓ} → {x y : A} (p : x ≡ y) → trans (sym p) p ≡ refl
+trans-syml refl = refl
 
 transport : ∀ {A : Set} {x : A} {y : A} → (P : A → Set) → x ≡ y → P x → P y
 transport P refl v = v
@@ -129,6 +135,25 @@ transport4 P refl = transport3 (P _)
 
 sub : ∀ {l} {A : Set l} {m} (B : A -> Set m) {a1 a2} -> a1 ≡ a2 -> B a1 -> B a2
 sub B refl b = b
+
+ap : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {x y : A} (p : x ≡ y) → f x ≡ f y
+ap f refl = refl
+
+transparent-dec-eq : ∀ {ℓ} {A : Set ℓ} → dec-eq A → dec-eq A
+transparent-dec-eq dec x y with (dec x x) | (dec x y)
+... | inj₁ p | inj₁ q = inj₁ (trans (sym p) q)
+... | inj₁ p | inj₂ q = inj₂ q
+... | inj₂ p | inj₁ q = ⊥-elim (p refl)
+... | inj₂ p | inj₂ q = inj₂ q
+
+transparent-dec-eq-refl : ∀ {ℓ} {A : Set ℓ} (dec : dec-eq A) {x y} (p : x ≡ y) → transparent-dec-eq dec x y ≡ inj₁ p
+transparent-dec-eq-refl dec {x = x} refl with (dec x x)
+... | inj₁ p = ap inj₁ (trans-syml _)
+... | inj₂ p = ⊥-elim (p refl)
+
+UIP-from-dec : ∀ {ℓ} {A : Set ℓ} → dec-eq A → UIP-on A
+UIP-from-dec dec p q with (trans (sym (transparent-dec-eq-refl dec p)) (transparent-dec-eq-refl dec q))
+... | refl = refl
 
 Maybe-code : {A : Set} → Maybe A → Maybe A → Set
 Maybe-code (just x) (just x₁) = x ≡ x₁
@@ -175,9 +200,6 @@ suc a + b = suc (a + b)
 data List {ℓ} (A : Set ℓ) : Set ℓ where
   [] : List A
   _∷_ : A → List A → List A
-
-ap : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {x y : A} (p : x ≡ y) → f x ≡ f y
-ap f refl = refl
 
 record IsEquiv {ℓ} {A B : Set ℓ} (f : A → B) : Set ℓ where
   constructor is-eqv
