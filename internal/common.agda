@@ -93,7 +93,7 @@ record ⊤ {ℓ : Level} : Set ℓ where
 
 infixr 1 _⊎_
 
-data _⊎_ (A : Set) (B : Set) : Set where
+data _⊎_ {a} {b} (A : Set a) (B : Set b) : Set (a ⊔ b) where
   inj₁ : (x : A) → A ⊎ B
   inj₂ : (y : B) → A ⊎ B
 
