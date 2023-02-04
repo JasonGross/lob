@@ -49,7 +49,7 @@ module _
       (⌜_⌝ₜ : ∀ {Γ C A} → TmSyntax {C} A → TmSyntax {Γ} (‘Π’ 𝟙 ((⌜ C ⌝c ‘,Σ’ ⌜ A ⌝) ⨾𝒰 ‘TmSyntax’)))
       (‘quote’ : ∀ {Γ} → TmSyntax {Γ} (‘Σ’ ‘CtxSyntax’ ‘TySyntax’ ‘→’ □ (‘Σ’ ‘CtxSyntax’ ‘TySyntax’))) -- quotes the quoted context, and then the quoted type.  We should have `(‘quote’ ‘⨾’ ‘proj₂’) ≈ (proj₂ ⨾ quot)` (if that were a thing that typechecked)
       (semidec-eq-proj₁ : ∀ {Γ A} {B : TySyntax Γ} → (c : TmSyntax {Γ} (𝟙 ‘→’ ‘CtxSyntax’)) → ((‘Π’ 𝟙 (c ⨾𝒰 A)) ~> B) → (𝟙 ~> B) → (‘Σ’ ‘CtxSyntax’ A ~> B))
-      (‘subst’ : ∀ {Γ A B} → (‘Π’ 𝟙 (⌜ Γ ▻ A ⌝c ⨾𝒰 B) ~> (□ A ‘→’ ‘Π’ 𝟙 (⌜ Γ ⌝c ⨾𝒰 B)))) -- TODO: is there a better type for this?
+      (‘subst’ : ∀ {Γ A} → (‘Π’ 𝟙 (⌜ Γ ▻ A ⌝c ⨾𝒰 ‘TySyntax’) ~> (□ A ‘→’ ‘Π’ 𝟙 (⌜ Γ ⌝c ⨾𝒰 ‘TySyntax’)))) -- TODO: is there a better type for this?
       --(Wk : ∀ {Γ A} → TySyntax Γ → TySyntax (Γ ▻ A))
       --(wk : ∀ {Γ A B} → TmSyntax {Γ} A → TmSyntax {Γ ▻ B} (Wk A))
       where
