@@ -30,14 +30,13 @@ module _
     (‘TySyntax’ : ∀ {Γ} → TySyntax (Γ ▻ ‘CtxSyntax’))
     (‘TmSyntax’ : ∀ {Γ} → TySyntax (Γ ▻ ‘Σ’ ‘CtxSyntax’ ‘TySyntax’))
     (⌜_⌝c : ∀ {Γ} → CtxSyntax → (𝟙 {Γ} ~> ‘CtxSyntax’))
-    (𝟙-law : ∀ {Γ} → TySyntax (Γ ▻ 𝟙) → TySyntax Γ)
     (_‘,Σ’_ : ∀ {Γ X A B} → (a : TmSyntax {Γ} (X ‘→’ A)) → TmSyntax {Γ} (‘Π’ X (a ⨾𝒰 B)) → TmSyntax {Γ} (X ‘→’ ‘Σ’ A B))
     (⌜_⌝ : ∀ {Γ C} → TySyntax C → TmSyntax {Γ} (‘Π’ 𝟙 (⌜ C ⌝c ⨾𝒰 ‘TySyntax’)))
     where
     □𝒰 : ∀ {Γ} → TySyntax Γ
     □𝒰 {Γ} = ‘Π’ 𝟙 (⌜ Γ ⌝c ⨾𝒰 ‘TySyntax’)
     □ : ∀ {Γ} → TySyntax Γ → TySyntax Γ
-    □ {Γ} T = 𝟙-law ((⌜ Γ ⌝c ‘,Σ’ ⌜ T ⌝) ⨾𝒰 ‘TmSyntax’)
+    □ {Γ} T = ‘Π’ 𝟙 ((⌜ Γ ⌝c ‘,Σ’ ⌜ T ⌝) ⨾𝒰 ‘TmSyntax’)
     module _
       (□-map : ∀ {Γ} {a b : TySyntax Γ} → (a ~> b) → (□ a ~> □ b))
       (□-map𝒰 : ∀ {Γ} {a : TySyntax Γ} → (a ~>𝒰) → (□ a ~> □𝒰))

@@ -77,6 +77,95 @@ lawvere f = ϕ⁻¹-□-map𝒰 (rewrap f) ⨾𝒰 (rewrap f)
 
 open import common
 
+CtxSyntax-code : CtxSyntax → CtxSyntax → Set
+CtxSyntax-code ε ε = ⊤
+CtxSyntax-code ε (_ ▻ _) = ⊥
+CtxSyntax-code (x ▻ y) (x' ▻ y') = Σ (x ≡ x') λ p → sub TySyntax p y ≡ y'
+CtxSyntax-code (_ ▻ _) ε = ⊥
+
+CtxSyntax-encode : ∀ {x y : CtxSyntax} → x ≡ y → CtxSyntax-code x y
+CtxSyntax-encode {ε} refl = tt
+CtxSyntax-encode {x ▻ t} refl = refl , refl
+
+CtxSyntax-decode : ∀ {x y : CtxSyntax} → CtxSyntax-code x y → x ≡ y
+CtxSyntax-decode {ε} {ε} tt = refl
+CtxSyntax-decode {x ▻ y} {_ ▻ _} (refl , refl) = refl
+
+CtxSyntax-deencode : ∀ {x y : CtxSyntax} {p : x ≡ y} → CtxSyntax-decode (CtxSyntax-encode p) ≡ p
+CtxSyntax-deencode {ε} {_} {refl} = refl
+CtxSyntax-deencode {x ▻ y} {_} {refl} = refl
+
+CtxSyntax-endecode : ∀ {x y : CtxSyntax} (p : CtxSyntax-code x y) → CtxSyntax-encode {x} {y} (CtxSyntax-decode p) ≡ p
+CtxSyntax-endecode {ε} {ε} tt = refl
+CtxSyntax-endecode {x ▻ x₁} {_ ▻ _} (refl , refl) = refl
+
+TySyntax-code : ∀ {Γ} → TySyntax Γ → TySyntax Γ → Set
+TySyntax-code (a ‘→’ b) (a' ‘→’ b') = (a ≡ a') × (b ≡ b')
+TySyntax-code (a ‘×’ b) (a' ‘×’ b') = (a ≡ a') × (b ≡ b')
+TySyntax-code 𝟙 𝟙 = ⊤
+TySyntax-code ‘CtxSyntax’ ‘CtxSyntax’ = ⊤
+TySyntax-code ‘TySyntax’ ‘TySyntax’ = ⊤
+TySyntax-code ‘TmSyntax’ ‘TmSyntax’ = ⊤
+TySyntax-code (‘Σ’ A B) (‘Σ’ A' B') = Σ (A ≡ A') (λ{ p → sub (λ{ A → TySyntax (_ ▻ A) }) p B ≡ B' })
+TySyntax-code (‘Π’ A B) (‘Π’ A' B') = Σ (A ≡ A') (λ{ p → sub (λ{ A → TySyntax (_ ▻ A) }) p B ≡ B' })
+TySyntax-code (_⨾𝒰_ {Γ} {a} {b} s T) (_⨾𝒰_ {Γ} {a} {b'} s' T') = Σ (b ≡ b') (λ{ p → (sub (λ{ b → _ }) p s ≡ s') × (sub (λ{ b → _ }) p T ≡ T') })
+TySyntax-code (a ‘→’ b) _ = ⊥
+TySyntax-code (a ‘×’ b) _ = ⊥
+TySyntax-code 𝟙 _ = ⊥
+TySyntax-code ‘CtxSyntax’ _ = ⊥
+TySyntax-code ‘TySyntax’ _ = ⊥
+TySyntax-code ‘TmSyntax’ _ = ⊥
+TySyntax-code (‘Σ’ A B) _ = ⊥
+TySyntax-code (‘Π’ A B) _ = ⊥
+TySyntax-code (s ⨾𝒰 T) _ = ⊥
+
+TySyntax-encode : ∀ {Γ} {x y : TySyntax Γ} → x ≡ y → TySyntax-code x y
+TySyntax-encode {x = a ‘→’ b} refl = refl , refl
+TySyntax-encode {x = s ⨾𝒰 T} refl = refl , (refl , refl)
+TySyntax-encode {x = a ‘×’ b} refl = refl , refl
+TySyntax-encode {x = 𝟙} refl = tt
+TySyntax-encode {x = ‘Σ’ A B} refl = refl , refl
+TySyntax-encode {x = ‘Π’ A B} refl = refl , refl
+TySyntax-encode {x = ‘CtxSyntax’} refl = tt
+TySyntax-encode {x = ‘TySyntax’} refl = tt
+TySyntax-encode {x = ‘TmSyntax’} refl = tt
+
+TySyntax-decode : ∀ {Γ} {x y : TySyntax Γ} → TySyntax-code x y → x ≡ y
+TySyntax-decode {x = a ‘→’ b} {.a ‘→’ .b} (refl , refl) = refl
+TySyntax-decode {x = s ⨾𝒰 T} {_ ⨾𝒰 _} (refl , (refl , refl)) = refl
+TySyntax-decode {x = a ‘×’ b} {y} p = {!!}
+TySyntax-decode {x = 𝟙} {y} p = {!!}
+TySyntax-decode {x = ‘Σ’ A B} {y} p = {!!}
+TySyntax-decode {x = ‘Π’ A B} {y} p = {!!}
+TySyntax-decode {x = ‘CtxSyntax’} {y} p = {!!}
+TySyntax-decode {x = ‘TySyntax’} {y} p = {!!}
+TySyntax-decode {x = ‘TmSyntax’} {y} p = {!!}
+
+TySyntax-deencode : ∀ {Γ} {x y : TySyntax Γ} {p : x ≡ y} → TySyntax-decode (TySyntax-encode p) ≡ p
+TySyntax-deencode {x = x} {p = refl} = {!!}
+
+TySyntax-endecode : ∀ {Γ} {x y : TySyntax Γ} (p : TySyntax-code x y) → TySyntax-encode {x = x} {y} (TySyntax-decode p) ≡ p
+TySyntax-endecode {x = x} {y} p = {!!}
+
+{-
+
+
+CtxSyntax-decode {A} {just .x₁} {just x₁} refl = refl
+CtxSyntax-decode {A} {just x} {nothing} ()
+CtxSyntax-decode {A} {nothing} {just x} ()
+CtxSyntax-decode {A} {nothing} {nothing} tt = refl
+
+CtxSyntax-deencode : ∀ {A} {x y : CtxSyntax A} {p : x ≡ y} → CtxSyntax-decode (CtxSyntax-encode p) ≡ p
+CtxSyntax-deencode {A} {just x} {.(just x)} {refl} = refl
+CtxSyntax-deencode {A} {nothing} {.nothing} {refl} = refl
+
+CtxSyntax-endecode : ∀ {A} {x y : CtxSyntax A} (p : CtxSyntax-code x y) → CtxSyntax-encode {A} {x} {y} (CtxSyntax-decode p) ≡ p
+CtxSyntax-endecode {A} {just .x'} {just x'} refl = refl
+CtxSyntax-endecode {A} {just x} {nothing} ()
+CtxSyntax-endecode {A} {nothing} {just x} ()
+CtxSyntax-endecode {A} {nothing} {nothing} tt = refl
+-}
+
 CtxSyntax-dec-eq : dec-eq CtxSyntax
 TySyntax-dec-eq : ∀ {Γ} → dec-eq (TySyntax Γ)
 CtxSyntax-dec-eq ε ε = inj₁ refl
@@ -85,7 +174,7 @@ CtxSyntax-dec-eq (x ▻ y) ε = inj₂ λ()
 CtxSyntax-dec-eq (x ▻ y) (x' ▻ y') with (CtxSyntax-dec-eq x x')
 ...                                | inj₁ refl with TySyntax-dec-eq y y'
 ...                                            | inj₁ refl = inj₁ refl
-...                                            | inj₂ n = inj₂ (λ{ p → {!!} })
+...                                            | inj₂ n = inj₂ (λ{ p → n {!!} })
 CtxSyntax-dec-eq (x ▻ y) (x' ▻ y') | inj₂ n  = inj₂ (λ{ refl → n refl })
 
 semidec-eq-proj₁-implTy : ∀ {Γ} {a b} {A : TySyntax Γ → Set a} {B : Set b}
@@ -171,7 +260,7 @@ TmSyntax⇓-semidec-eq-proj₁' : ∀ {Γ A} {B : TySyntax Γ} → (c : TmSyntax
 
 
 TmSyntax⇓-□-map {Γ} {a} {b} f Γ⇓ = TmSyntax⇓-□-map' {Γ} {a} {b} f Γ⇓
-TmSyntax⇓-□-map𝒰 f Γ⇓ = {!!} -- λ x _ → lift (𝟙-law (const (lower x) ⨾𝒰 f))
+TmSyntax⇓-□-map𝒰 f Γ⇓ = λ x _ → lift {!‘Π’ 𝟙 ?!} -- λ x _ → lift (𝟙-law (const (lower x) ⨾𝒰 f))
 TmSyntax⇓-□-×-codistr Γ⇓ = {!!} -- λ (x , y) → lift ((dup ⨾ (const (lower x) ‘××’ const (lower y))) ‘’ₐ ‘tt’)
 TmSyntax⇓-□-𝟙-codistr Γ⇓ = {!!} -- λ _ → lift ‘tt’
 -- TmSyntax⇓-‘subst’ {Γ} {A} Γ⇓ = {!λ T a _ → lift (𝟙-law (const (lower a) ⨾𝒰 lower (T tt)))!}
