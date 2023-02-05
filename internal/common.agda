@@ -101,7 +101,7 @@ data _≡_ {ℓ} {A : Set ℓ} (x : A) : A → Set ℓ where
   refl : x ≡ x
 
 _≢_ : ∀ {ℓ} {A : Set ℓ} → A → A → Set ℓ
-x ≢ y = x ≡ y → ⊥ {lzero}
+x ≢ y = ¬ (x ≡ y)
 
 dec-eq-on : ∀ {ℓ} {A : Set ℓ} → (x : A) → (y : A) → Set ℓ
 dec-eq-on x y = (x ≡ y) ⊎ (x ≢ y)
@@ -139,6 +139,9 @@ sub B refl b = b
 ap : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {x y : A} (p : x ≡ y) → f x ≡ f y
 ap f refl = refl
 
+ap2 : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : Set ℓ₂} {C : Set ℓ₃} (f : A → B → C) {x y : A} (p : x ≡ y) {x' y' : B} (q : x' ≡ y') → f x x' ≡ f y y'
+ap2 f refl refl = refl
+
 transparent-dec-eq : ∀ {ℓ} {A : Set ℓ} → dec-eq A → dec-eq A
 transparent-dec-eq dec x y with (dec x x) | (dec x y)
 ... | inj₁ p | inj₁ q = inj₁ (trans (sym p) q)
@@ -154,6 +157,16 @@ transparent-dec-eq-refl dec {x = x} refl with (dec x x)
 UIP-from-dec : ∀ {ℓ} {A : Set ℓ} → dec-eq A → UIP-on A
 UIP-from-dec dec p q with (trans (sym (transparent-dec-eq-refl dec p)) (transparent-dec-eq-refl dec q))
 ... | refl = refl
+
+eq-dec-from-endecode : ∀ {ℓ} {A : Set ℓ} {c}
+  (code : A → A → Set c)
+  (encode : ∀ x → code x x)
+  (decode : ∀ {x y} → code x y → x ≡ y)
+  (dec-code : ∀ {x y} → (code x y) ⊎ (¬ code x y))
+  → dec-eq A
+eq-dec-from-endecode {A = A} code encode decode dec-code x y with (dec-code {x} {y})
+... | inj₁ c = inj₁ (decode c)
+... | inj₂ n = inj₂ (λ{ refl → n (encode x) })
 
 Maybe-code : {A : Set} → Maybe A → Maybe A → Set
 Maybe-code (just x) (just x₁) = x ≡ x₁
