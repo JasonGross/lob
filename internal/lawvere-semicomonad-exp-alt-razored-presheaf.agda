@@ -3,23 +3,23 @@ module lawvere-semicomonad-exp-alt-razored-presheaf
   {o a}
   (𝒞 : Set o)
   (_~>_ : 𝒞 → 𝒞 → Set a)
-  {u} (_~>𝒰 : 𝒞 → Set u)
+  {u} (_~>𝒳 : 𝒞 → Set u)
   (_⨾_ : ∀ {a b c} → a ~> b → b ~> c → a ~> c)
-  (_⨾𝒰_ : ∀ {a b} → a ~> b → b ~>𝒰 → a ~>𝒰)
+  (_⨾𝒳_ : ∀ {a b} → a ~> b → b ~>𝒳 → a ~>𝒳)
   (_×_ : 𝒞 → 𝒞 → 𝒞)
   (dup : ∀ {a} → (a ~> (a × a)))
   (_××_ : ∀ {a b c d} → (a ~> b) → (c ~> d) → ((a × c) ~> (b × d)))
   (𝟙 : 𝒞)
   (□ : 𝒞 → 𝒞)
-  (□𝒰 : 𝒞)
+  (□𝒳 : 𝒞)
   (□-map : ∀ {a b} → (a ~> b) → (□ a ~> □ b))
-  (□-map𝒰 : ∀ {a} → (a ~>𝒰) → (□ a ~> □𝒰))
+  (□-map𝒳 : ∀ {a} → (a ~>𝒳) → (□ a ~> □𝒳))
   (□-×-codistr : ∀ {a b} → (□ a × □ b) ~> □ (a × b))
   (□-𝟙-codistr : 𝟙 ~> □ 𝟙)
   (quot : ∀ {a} → □ a ~> □ (□ a))
-  {pu} (P𝒰 : (𝟙 ~>𝒰) → Set pu)
-  {p} (P : (𝟙 ~> □𝒰) → Set p)
-  (ΣP : 𝒞) -- Σ_(□𝒰) P
+  {pu} (P𝒳 : (𝟙 ~>𝒳) → Set pu)
+  {p} (P : (𝟙 ~> □𝒳) → Set p)
+  (ΣP : 𝒞) -- Σ_(□𝒳) P
   (ΣP^_ : 𝒞 → 𝒞)
   (apply : ∀ {a} → (a × (ΣP^ a)) ~> ΣP)
   (S : 𝒞) -- Δ Σ_(Σ_□S R → Σ_□X P) Q
@@ -28,25 +28,29 @@ module lawvere-semicomonad-exp-alt-razored-presheaf
   (quote-pair-ΣR : (s : 𝟙 ~> S) → R s → (𝟙 ~> ΣR))
   (proj₁-S : ΣR ~> □ S)
   (quote-R : ΣR ~> □ ΣR)
-  (pair-ΣP : ∀ {a} (f : a ~> □𝒰) → (∀ (s : 𝟙 ~> a) → P (s ⨾ f)) → (a ~> ΣP)) -- the `∀` here should really be internal to the category ...
+  {pi} (□Π : ∀ a → (P : (𝟙 ~> a) → Set _) → Set pi) -- represents □(Π_a P)
+  (pair-ΣP : ∀ {a} (f : a ~> □𝒳) → (□Π a (λ{ s → P (s ⨾ f) })) → (a ~> ΣP))
   (ϕ : S ~> (ΣP^ ΣR))
-  (ϕ⁻¹ : (ΣR ~> ΣP) → (𝟙 ~> S))
-  (f : ΣP ~>𝒰)
+  (ψ : (ΣR ~> ΣP) → (𝟙 ~> S))
+  (f : ΣP ~>𝒳)
   where
 
-rewrap : (s : (𝟙 ~> S)) → R s → (𝟙 ~>𝒰)
-rewrap = λ s rs → (dup ⨾ ((quote-pair-ΣR s rs ×× (s ⨾ ϕ)) ⨾ apply)) ⨾𝒰 f
+rewrap : (s : (𝟙 ~> S)) → R s → (𝟙 ~>𝒳)
+rewrap = λ s rs → (dup ⨾ ((quote-pair-ΣR s rs ×× (s ⨾ ϕ)) ⨾ apply)) ⨾𝒳 f
 
-
-rewrap2 : ΣR ~> □𝒰
-rewrap2 = ((dup ⨾ (quote-R ×× (proj₁-S ⨾ □-map ϕ))) ⨾ (□-×-codistr ⨾ □-map apply)) ⨾ □-map𝒰 f
+rewrap2 : ΣR ~> □𝒳
+rewrap2 = ((dup ⨾ (quote-R ×× (proj₁-S ⨾ □-map ϕ))) ⨾ (□-×-codistr ⨾ □-map apply)) ⨾ □-map𝒳 f
 
 module _
-  (Hp : ∀ (s : 𝟙 ~> ΣR) → P (s ⨾ rewrap2))
-  (Hq : R (ϕ⁻¹ (pair-ΣP rewrap2 Hp)))
+  (Hp : □Π ΣR (λ{ s → P (s ⨾ rewrap2) }))
+  (Hq : R (ψ (pair-ΣP rewrap2 Hp)))
   where
-  lawvere : (𝟙 ~>𝒰)
-  lawvere = rewrap (ϕ⁻¹ (pair-ΣP rewrap2 Hp)) Hq
+  lawvere : (𝟙 ~>𝒳)
+  lawvere = rewrap (ψ (pair-ΣP rewrap2 Hp)) Hq
+
+  module _
+    (Hp𝒳 : P𝒳 lawvere)
+    where
 
 {-
 module _
