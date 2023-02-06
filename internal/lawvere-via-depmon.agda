@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --allow-unsolved-metas #-}
 open import common using (Σ ; _,_)
 module lawvere-via-depmon
   {o a}

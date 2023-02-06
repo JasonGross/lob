@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --allow-unsolved-metas #-}
 module mini-lob-with-context-weaken-from-diag where
 open import common
 
@@ -171,7 +171,7 @@ Type⇓ (‘Type’⌜ C ⌝) Γ⇓ = Lifted (Type C)
 Γ != Γ ▻ A of type Context
 when checking that the expression Σ.proj₂ Γ⇓ has type
 Type⇓ B (Σ.proj₁ Γ⇓ , Term⇓ a (Σ.proj₁ Γ⇓)) -}
-Type⇓ (T ‘’₁ a) Γ⇓ = Type⇓ T (Σ.proj₁ Γ⇓ , Term⇓ a (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓)
+Type⇓ (T ‘’₁ a) Γ⇓ = Type⇓ T ((Σ.proj₁ Γ⇓ , Term⇓ a (Σ.proj₁ Γ⇓)) , Σ.proj₂ Γ⇓)
 Type⇓ ‘Term’ Γ⇓ = Lifted (Term (lower (Σ.proj₂ Γ⇓)))
 Type⇓ (A ‘→’ B) Γ⇓ = Type⇓ A Γ⇓ → Type⇓ B Γ⇓
 Type⇓ ‘⊤’ Γ⇓ = ⊤

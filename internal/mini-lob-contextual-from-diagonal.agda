@@ -267,7 +267,7 @@ Context⇓ (Γ ▻ T) = Σ (Context⇓ Γ) (Type⇓ {Γ} T)
 Type⇓Wk₁ : ∀ {Γ A B} (T : Type (Γ ▻ B)) → Context⇓ (Γ ▻ A ▻ Wk B) → Set max-level
 
 Type⇓ (T ‘’ x) Γ⇓ = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓)
-Type⇓ (T ‘’₁ x) Γ⇓ = Type⇓ T (Σ.proj₁ Γ⇓ , Term⇓ x (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓)
+Type⇓ (T ‘’₁ x) Γ⇓ = Type⇓ T ((Σ.proj₁ Γ⇓ , Term⇓ x (Σ.proj₁ Γ⇓)) , Σ.proj₂ Γ⇓)
 Type⇓ ‘Typeε’ Γ⇓ = Lifted (Type ε)
 Type⇓ ‘□’ Γ⇓ = Lifted (Term {ε} (lower (Σ.proj₂ Γ⇓)))
 Type⇓ (A ‘→’ B) Γ⇓ = Type⇓ A Γ⇓ → Type⇓ B Γ⇓
@@ -291,7 +291,7 @@ Term⇓-‘,Σ→’ : ∀ {Γ X A B} → (a : Term {Γ} (X ‘→’ A)) → (b
 
 Term⇓-red1↔ : ∀ {Γ} (T : Type Γ) Γ⇓ → Type⇓ T Γ⇓ ↔ Type⇓ (red1 T) Γ⇓
 Term⇓-subst1↔ : ∀ {Γ A} → (T : Type (Γ ▻ A)) (a : Term {Γ} A) → ∀ Γ⇓ → Type⇓ T (Γ⇓ , Term⇓ a Γ⇓) ↔ Type⇓ (subst1 T a) Γ⇓
-Term⇓-subst1₁↔ : ∀ {Γ A B} → (T : Type (Γ ▻ A ▻ B)) → (a : Term {Γ} A) → ∀ Γ⇓ → Type⇓ T (Σ.proj₁ Γ⇓ , Term⇓ a (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓) ↔ Type⇓ (subst1₁ T a) Γ⇓
+Term⇓-subst1₁↔ : ∀ {Γ A B} → (T : Type (Γ ▻ A ▻ B)) → (a : Term {Γ} A) → ∀ Γ⇓ → Type⇓ T ((Σ.proj₁ Γ⇓ , Term⇓ a (Σ.proj₁ Γ⇓)) , Σ.proj₂ Γ⇓) ↔ Type⇓ (subst1₁ T a) Γ⇓
 Term⇓-Wk1↔ : ∀ {Γ A} (T : Type Γ) Γ⇓ → Type⇓ T (Σ.proj₁ Γ⇓) ↔ Type⇓ (Wk1 {Γ} {A} T) Γ⇓
 Term⇓-Wk1₁↔ : ∀ {Γ A B} (T : Type (Γ ▻ B)) Γ⇓ → Type⇓ T (Σ.proj₁ (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓) ↔ Type⇓ (Wk1₁ {Γ} {A} {B} T) Γ⇓
 

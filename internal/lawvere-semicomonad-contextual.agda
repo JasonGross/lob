@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --allow-unsolved-metas #-}
 module lawvere-semicomonad-contextual
   {o a}
   (𝒞 : Set o)

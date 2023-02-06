@@ -1,7 +1,7 @@
 {-# OPTIONS --without-K #-}
 module mini-lob-from-diagonal-lawvere where
 open import common
-import lawvere
+import lawvere-compressed
 
 infixl 2 _▻_
 infixl 3 _‘’_
@@ -93,7 +93,7 @@ Lӧb {X} = λ f → lawvere f ‘’ₐ ‘tt’
     ϕ⁻¹ : (□ inf ~> B) → (𝟙 ~> □ inf)
     ϕ⁻¹ f = ‘const’ ⌜ ‘Δ-bak’ f ⌝ₜ
 
-    open lawvere 𝒞 _~>_ _∘_ _‘×’_ 𝟙 □ id×quot∘dup B inf ϕ ϕ⁻¹
+    open lawvere-compressed 𝒞 _~>_ _∘_ _‘×’_ 𝟙 □ id×quot∘dup B inf ϕ ϕ⁻¹
 
 □ : Type ε → Set _
 □ = Term {ε}

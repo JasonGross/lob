@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --allow-unsolved-metas #-}
 module mini-lob-contextual-dependent-from-diagonal-language where
 open import common
 
@@ -216,7 +216,7 @@ Type⇓‘Term’ : ∀ {Γ} → Context⇓ (Γ ▻ ‘Context’ ▻ ‘Type’
 Type⇓‘Eq’ : ∀ {Γ A} → Context⇓ (Γ ▻ A ▻ Wk A) → Set max-level
 Type⇓‘Δ’ : ∀ {Γ} → Type (Γ ▻ ‘Type’⌜ Γ ⌝) → Context⇓ Γ → Set max-level
 Type⇓ (T ‘’ x) Γ⇓ = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓)
-Type⇓ (T ‘’₁ x) Γ⇓ = Type⇓ T (Σ.proj₁ Γ⇓ , Term⇓ x (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓)
+Type⇓ (T ‘’₁ x) Γ⇓ = Type⇓ T ((Σ.proj₁ Γ⇓ , Term⇓ x (Σ.proj₁ Γ⇓)) , Σ.proj₂ Γ⇓)
 Type⇓ ‘Context’ Γ⇓ = Lifted Context
 Type⇓ (‘Type’ {Γ}) Γ⇓ = Type⇓‘Type’ {Γ} Γ⇓
 Type⇓ (‘Term’ {Γ}) Γ⇓ = Type⇓‘Term’ {Γ} Γ⇓
@@ -242,7 +242,7 @@ Term⇓-‘××Σ'’ : ∀ {Γ} {A} {B} {A′} {B′} (f : Term {Γ} (‘Σ’ 
 
 Term⇓-red1↔ : ∀ {Γ} (T : Type Γ) Γ⇓ → Type⇓ T Γ⇓ ↔ Type⇓ (red1 T) Γ⇓
 Term⇓-subst1↔ : ∀ {Γ A} → (T : Type (Γ ▻ A)) (a : Term {Γ} A) → ∀ Γ⇓ → Type⇓ T (Γ⇓ , Term⇓ a Γ⇓) ↔ Type⇓ (subst1 T a) Γ⇓
-Term⇓-subst1₁↔ : ∀ {Γ A B} → (T : Type (Γ ▻ A ▻ B)) → (a : Term {Γ} A) → ∀ Γ⇓ → Type⇓ T (Σ.proj₁ Γ⇓ , Term⇓ a (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓) ↔ Type⇓ (subst1₁ T a) Γ⇓
+Term⇓-subst1₁↔ : ∀ {Γ A B} → (T : Type (Γ ▻ A ▻ B)) → (a : Term {Γ} A) → ∀ Γ⇓ → Type⇓ T ((Σ.proj₁ Γ⇓ , Term⇓ a (Σ.proj₁ Γ⇓)) , Σ.proj₂ Γ⇓) ↔ Type⇓ (subst1₁ T a) Γ⇓
 Term⇓-Wk1↔ : ∀ {Γ A} (T : Type Γ) Γ⇓ → Type⇓ T (Σ.proj₁ Γ⇓) ↔ Type⇓ (Wk1 {Γ} {A} T) Γ⇓
 Term⇓-Wk1₁↔ : ∀ {Γ A B} (T : Type (Γ ▻ B)) Γ⇓ → Type⇓ T (Σ.proj₁ (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓) ↔ Type⇓ (Wk1₁ {Γ} {A} {B} T) Γ⇓
 {-

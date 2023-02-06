@@ -1,6 +1,6 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --allow-unsolved-metas #-}
 module mini-diagonal-from-lawvere.interp where
-open import mini-diagonal-from-lawvere
+open import mini-diagonal-from-lawvere.core
 open import mini-diagonal-from-lawvere.eq-dec
 open import common
 

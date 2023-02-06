@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K #-}
 module mini-diagonal-from-lawvere.eq-dec.endecode.Ctx where
-open import mini-diagonal-from-lawvere
+open import mini-diagonal-from-lawvere.core
 open import common
 
 CtxSyntax-code : CtxSyntax → CtxSyntax → Set

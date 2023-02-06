@@ -71,7 +71,7 @@ mutual
   Type⇓ : {Γ : Context} → Type Γ → Context⇓ Γ → Set max-level
   Type⇓ (‘Type’ {Γ}) Γ⇓ = Lifted (Type Γ)
   Type⇓ (T ‘’ x) Γ⇓ = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓)
-  Type⇓ (T ‘’₁ x) Γ⇓ = Type⇓ T (Σ.proj₁ Γ⇓ , Term⇓ x (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓)
+  Type⇓ (T ‘’₁ x) Γ⇓ = Type⇓ T ((Σ.proj₁ Γ⇓ , Term⇓ x (Σ.proj₁ Γ⇓)) , Σ.proj₂ Γ⇓)
   Type⇓ (‘Term’ {Γ}) Γ⇓ = Lifted (Term {Γ} (lower (Σ.proj₂ Γ⇓)))
   Type⇓ (A ‘→’ B) Γ⇓ = Type⇓ A Γ⇓ → Type⇓ B Γ⇓
   Type⇓ ‘⊤’ Γ⇓ = ⊤
@@ -81,7 +81,7 @@ mutual
   Type⇓ wk₁‘Term’ T ‘var₀’ Γ⇓ = Term (T ‘’ ⌜ lower (Σ.proj₂ Γ⇓) ⌝)
   Type⇓ wk₂‘Term’‘var₁’‘~’wk₂wk₂ T ‘’₁⌜var₁⌝‘’var₀ Γ⇓ =
     Term (lower (Σ.proj₂ (Σ.proj₁ Γ⇓)) ‘~’ (T ‘’₁ ⌜ lower (Σ.proj₂ (Σ.proj₁ Γ⇓)) ⌝ ‘’ Σ.proj₂ Γ⇓))
-  Type⇓ (‘Δ’ H T h) Γ⇓ = Type⇓ T (Γ⇓ , lift (‘Δ’ H T h) , Term⇓ h (Γ⇓ , lift (‘Δ’ H T h) , _ , ‘δ’ H T h))
+  Type⇓ (‘Δ’ H T h) Γ⇓ = Type⇓ T ((Γ⇓ , lift (‘Δ’ H T h)) , Term⇓ h (((Γ⇓ , lift (‘Δ’ H T h)) , _) , ‘δ’ H T h))
 
   Term⇓ : ∀ {Γ : Context} {T : Type Γ} → Term T → (Γ⇓ : Context⇓ Γ) → Type⇓ T Γ⇓
   Term⇓ ⌜ x ⌝ Γ⇓ = lift x
@@ -91,8 +91,8 @@ mutual
   Term⇓ (‘fwd’ e) Γ⇓ = let open _~_ in Term⇓ e Γ⇓ .fwd
   Term⇓ (‘bak’ e) Γ⇓ = let open _~_ in Term⇓ e Γ⇓ .bak
   Term⇓ (f ‘’w x) Γ⇓ = Term⇓ f (Γ⇓ , Term⇓ x Γ⇓)
-  Term⇓ (f ‘’w₁ x) Γ⇓ = Term⇓ f (Σ.proj₁ Γ⇓ , Term⇓ x (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓)
-  Term⇓ (f ‘’t₂ x) Γ⇓ = Term⇓ f (Σ.proj₁ (Σ.proj₁ Γ⇓) , Term⇓ x (Σ.proj₁ (Σ.proj₁ Γ⇓)) , Σ.proj₂ (Σ.proj₁ Γ⇓) , Σ.proj₂ Γ⇓)
+  Term⇓ (f ‘’w₁ x) Γ⇓ = Term⇓ f ((Σ.proj₁ Γ⇓ , Term⇓ x (Σ.proj₁ Γ⇓)) , Σ.proj₂ Γ⇓)
+  Term⇓ (f ‘’t₂ x) Γ⇓ = Term⇓ f (((Σ.proj₁ (Σ.proj₁ Γ⇓) , Term⇓ x (Σ.proj₁ (Σ.proj₁ Γ⇓))) , Σ.proj₂ (Σ.proj₁ Γ⇓)) , Σ.proj₂ Γ⇓)
   Term⇓ (‘‘δ-h’’ H T h) Γ⇓ = (((h ‘’t₂ ⌜ ‘Δ’ H T h ⌝) ‘’w₁ (‘‘δ-h’’ H T h)) ‘’w (‘‘δ’’ H T h))
   Term⇓ (‘‘δ’’ H T h) Γ⇓ = ‘δ’ H T h
   Term⇓ (‘δ’ H T h) Γ⇓ = refl~

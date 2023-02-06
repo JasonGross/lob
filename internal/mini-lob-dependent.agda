@@ -104,9 +104,9 @@ Term⇓ : ∀ {Γ : Context} {T : Type Γ} → Term T → (Γ⇓ : Context⇓ Γ
 
 Type⇓ (‘Type’ {Γ}) Γ⇓ = Lifted (Type Γ)
 Type⇓ (T ‘’ x) Γ⇓ = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓)
-Type⇓ (T ‘’₁ x) (Γ⇓ , A) = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓ , A)
-Type⇓ (T ‘’₂ x) (Γ⇓ , A , B) = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓ , A , B)
-Type⇓ (T ‘’₃ x) (Γ⇓ , A , B , C) = Type⇓ T (Γ⇓ , Term⇓ x Γ⇓ , A , B , C)
+Type⇓ (T ‘’₁ x) (Γ⇓ , A) = Type⇓ T ((Γ⇓ , Term⇓ x Γ⇓) , A)
+Type⇓ (T ‘’₂ x) ((Γ⇓ , A) , B) = Type⇓ T (((Γ⇓ , Term⇓ x Γ⇓) , A) , B)
+Type⇓ (T ‘’₃ x) (((Γ⇓ , A) , B) , C) = Type⇓ T ((((Γ⇓ , Term⇓ x Γ⇓) , A) , B) , C)
 Type⇓ (‘Term’ {Γ}) (Γ⇓ , lift T) = Lifted (Term {Γ} T)
 Type⇓ (A ‘→’ B) Γ⇓ = Type⇓ A Γ⇓ → Type⇓ B Γ⇓
 Type⇓ ‘⊤’ Γ⇓ = ⊤
@@ -114,39 +114,39 @@ Type⇓ ‘⊥’ Γ⇓ = ⊥
 Type⇓ (A ‘~’ B) Γ⇓ = Type⇓ A Γ⇓ ~ Type⇓ B Γ⇓
 Type⇓ (x ‘≡’ y) Γ⇓ = Term⇓ x Γ⇓ ≡ Term⇓ y Γ⇓
 Type⇓ (wk₀ T) (Γ⇓ , _) = Type⇓ T Γ⇓
-Type⇓ wk‘Term’ T ⌜‘var₁’⌝⌜‘var₀’⌝ₜ (Γ⇓ , lift A , lift a ) = Term (T ‘’₁ ⌜ A ⌝ ‘’ ⌜ a ⌝ₜ)
-Type⇓ wk‘Term’‘var₂’‘~’wk T ‘’₂⌜var₂⌝‘’₁⌜var₁⌝‘’var₀ (Γ⇓ , lift A , lift a , h)
+Type⇓ wk‘Term’ T ⌜‘var₁’⌝⌜‘var₀’⌝ₜ ((Γ⇓ , lift A) , lift a ) = Term (T ‘’₁ ⌜ A ⌝ ‘’ ⌜ a ⌝ₜ)
+Type⇓ wk‘Term’‘var₂’‘~’wk T ‘’₂⌜var₂⌝‘’₁⌜var₁⌝‘’var₀ (((Γ⇓ , lift A) , lift a) , h)
   = Term (A ‘~’ T ‘’₂ ⌜ A ⌝ ‘’₁ ⌜ a ⌝ₜ ‘’ h)
-Type⇓ wk‘Term’‘var₁’‘≡’wk h ‘’t₃⌜var₃⌝‘’t₂⌜var₂⌝‘’w₁⌜var₁⌝‘’w⌜var₀⌝ (Γ⇓ , lift A , lift a , ‘h’ , ‘e’)
+Type⇓ wk‘Term’‘var₁’‘≡’wk h ‘’t₃⌜var₃⌝‘’t₂⌜var₂⌝‘’w₁⌜var₁⌝‘’w⌜var₀⌝ ((((Γ⇓ , lift A) , lift a) , ‘h’) , ‘e’)
   = Term (‘h’ ‘≡’ (h ‘’t₃ ⌜ A ⌝ ‘’t₂ ⌜ a ⌝ₜ ‘’w₁ ⌜ ‘h’ ⌝ₜ₂ ‘’w ⌜ ‘e’ ⌝ₜ₃))
-Type⇓ wk T ‘’₂var₄‘’₁var₃‘’₀ h ‘’₃var₄‘’₂var₃‘’₁var₂‘’₀var₁ (Γ⇓ , A , a , ‘h’ , ‘e’ , p)
-  = Type⇓ T (Γ⇓ , A , a , Term⇓ h (Γ⇓ , A , a , ‘h’ , ‘e’))
-Type⇓ (‘Δ’ H T h f) Γ⇓ = Type⇓ T
-  (Γ⇓
-  , lift (‘Δ’ H T h f)
-  , lift (löb f)
-  , Term⇓ h (Γ⇓
-            , lift (‘Δ’ H T h f)
-            , lift (löb f)
-            , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’
+Type⇓ wk T ‘’₂var₄‘’₁var₃‘’₀ h ‘’₃var₄‘’₂var₃‘’₁var₂‘’₀var₁ (((((Γ⇓ , A) , a) , ‘h’) , ‘e’) , p)
+  = Type⇓ T (((Γ⇓ , A) , a) , Term⇓ h ((((Γ⇓ , A) , a) , ‘h’) , ‘e’))
+Type⇓ (‘Δ’ H T h f) Γ⇓ = Type⇓ T (((
+  Γ⇓
+  , lift (‘Δ’ H T h f))
+  , lift (löb f))
+  , Term⇓ h ((((Γ⇓
+            , lift (‘Δ’ H T h f))
+            , lift (löb f))
+            , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’)
             , iso))
 
 
 -- Work around AGDABUG(https://github.com/agda/agda/issues/6181)
 Term⇓-helper1-cast
   : ∀ {H T h f} Γ⇓
-      → Term⇓ h (Γ⇓ , lift (‘Δ’ H T h f) , lift (löb f) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’ , iso)
+      → Term⇓ h ((((Γ⇓ , lift (‘Δ’ H T h f)) , lift (löb f)) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’) , iso)
         ≡
-        Term⇓ h (Γ⇓ , lift (‘Δ’ H T h f) , lift (löb f) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’ , iso)
+        Term⇓ h ((((Γ⇓ , lift (‘Δ’ H T h f)) , lift (löb f)) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’) , iso)
       → Type⇓ ((h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’)
               ‘≡’
               (h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ⌜ h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’ ⌝ₜ₂ ‘’w ⌜ iso ⌝ₜ₃)) Γ⇓
 
 Term⇓-helper2-cast
   : ∀ {H T h f} Γ⇓
-      → Type⇓ T (Γ⇓ , lift (‘Δ’ H T h f) , lift (löb f) , Term⇓ h (Γ⇓ , lift (‘Δ’ H T h f) , lift (löb f) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’ , iso))
+      → Type⇓ T (((Γ⇓ , lift (‘Δ’ H T h f)) , lift (löb f)) , Term⇓ h ((((Γ⇓ , lift (‘Δ’ H T h f)) , lift (löb f)) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’) , iso))
         ~
-        Type⇓ T (Γ⇓ , lift (‘Δ’ H T h f) , lift (löb f) , Term⇓ h (Γ⇓ , lift (‘Δ’ H T h f) , lift (löb f) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’ , iso))
+        Type⇓ T (((Γ⇓ , lift (‘Δ’ H T h f)) , lift (löb f)) , Term⇓ h ((((Γ⇓ , lift (‘Δ’ H T h f)) , lift (löb f)) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’) , iso))
       → Type⇓ (‘Δ’ H T h f ‘~’ (T ‘’₂ ⌜ ‘Δ’ H T h f ⌝ ‘’₁ ⌜ löb f ⌝ₜ ‘’ ((h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ) ‘’w₁ ‘löb-h’ f ‘’w ‘iso’))) Γ⇓
 
 Term⇓ ⌜ x ⌝ Γ⇓ = lift x
@@ -156,13 +156,13 @@ Term⇓ ⌜ t ⌝ₜ Γ⇓ = lift t
 Term⇓ ⌜ t ⌝ₜ₂ Γ⇓ = t
 Term⇓ ⌜ t ⌝ₜ₃ Γ⇓ = t
 Term⇓ (f ‘’w a) Γ⇓ = Term⇓ f (Γ⇓ , Term⇓ a Γ⇓)
-Term⇓ (f ‘’w₁ a) (Γ⇓ , b) = Term⇓ f (Γ⇓ , Term⇓ a Γ⇓ , b)
-Term⇓ (f ‘’t₂ a) (Γ⇓ , b , c) = Term⇓ f (Γ⇓ , Term⇓ a Γ⇓ , b , c)
-Term⇓ (f ‘’t₃ a) (Γ⇓ , b , c , d) = Term⇓ f (Γ⇓ , Term⇓ a Γ⇓ , b , c , d)
+Term⇓ (f ‘’w₁ a) (Γ⇓ , b) = Term⇓ f ((Γ⇓ , Term⇓ a Γ⇓) , b)
+Term⇓ (f ‘’t₂ a) ((Γ⇓ , b) , c) = Term⇓ f (((Γ⇓ , Term⇓ a Γ⇓) , b) , c)
+Term⇓ (f ‘’t₃ a) (((Γ⇓ , b) , c) , d) = Term⇓ f ((((Γ⇓ , Term⇓ a Γ⇓) , b) , c) , d)
 Term⇓ ‘refl~’ Γ⇓ = refl~
 Term⇓ ‘refl’ Γ⇓ = refl
 Term⇓ (löb {H} {T} {h} f) Γ⇓
-  = Term⇓ f (Γ⇓ , lift (‘Δ’ H T h f) , lift (löb f) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’ , iso , ‘löb-h-refl’)
+  = Term⇓ f (((((Γ⇓ , lift (‘Δ’ H T h f)) , lift (löb f)) , h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’) , iso) , ‘löb-h-refl’)
 Term⇓ (‘löb-h’ {H} {T} {h} f) Γ⇓ = h ‘’t₃ ⌜ ‘Δ’ H T h f ⌝ ‘’t₂ ⌜ löb f ⌝ₜ ‘’w₁ ‘löb-h’ f ‘’w ‘iso’
 Term⇓ ‘iso’ Γ⇓ = iso
 Term⇓ (iso {H} {T} {h} {f}) Γ⇓ = Term⇓-helper2-cast {H} {T} {h} {f} Γ⇓ refl~

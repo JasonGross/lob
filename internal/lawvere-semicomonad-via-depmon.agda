@@ -37,13 +37,14 @@ postulate
   □ : 𝒞 → 𝒞
   □-map : ∀ {a b} → (a ~> b) → (□ a ~> □ b)
   □-×-codistr : ∀ {a b} → (□ a × □ b) ~> □ (a × b)
+  □-𝟙-codistr : 𝟙 ~> □ 𝟙
   quot : ∀ {a} → □ a ~> □ (□ a)
   B : 𝒞
   inf : 𝒞
   ϕ : (inf × □ inf) ~> B
-  ϕ⁻¹ : (□ inf ~> B) → (𝟙 ~> □ inf)
+  ϕ⁻¹ : (□ inf ~> B) → (𝟙 ~> inf)
   f : □ B ~> B
-open lawvere-semicomonad 𝒞 _~>_ id _⨾_ _×_ dup _××_ 𝟙 □ □-map □-×-codistr quot B inf ϕ ϕ⁻¹ f public
+open lawvere-semicomonad 𝒞 _~>_ id _⨾_ _×_ dup _××_ 𝟙 □ □-map □-×-codistr □-𝟙-codistr quot B inf ϕ ϕ⁻¹ f public
 -- _~>_ _⨾_ _×_ _^_ apply dup _××_ 𝟙 □ □-map □-×-codistr quot B inf ϕ ϕ⁻¹ f public
 {-
 

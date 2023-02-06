@@ -1,4 +1,4 @@
-module modal-lob-reduced where
+module modal-logic-lob-reduced where
 data TYP : Set where
   ARR : TYP → TYP → TYP -- the type of implications, or function types
   BOX : TYP → TYP -- the modal □ operator, denoted to TERM

@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --allow-unsolved-metas #-}
 module mini-diagonal-from-lawvere.eq-dec where
 open import mini-diagonal-from-lawvere.core
 open import common

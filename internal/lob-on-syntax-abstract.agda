@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --allow-unsolved-metas #-}
 -- We develop Löb's theorem from first principles on a fully abstract type of syntax, contexts, etc
 module lob-on-syntax-abstract where
 
