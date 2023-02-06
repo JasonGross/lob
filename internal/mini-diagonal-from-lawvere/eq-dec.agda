@@ -47,15 +47,15 @@ args-of-tag-ctx 0 = ⊤
 args-of-tag-ctx 1 = Σ CtxSyntax TySyntax
 args-of-tag-ctx _ = ⊥
 
-reconstruct-ctx : ∀ n → args-of-tag-ctx n → CtxSyntax
-reconstruct-ctx 0 a = ε
-reconstruct-ctx 1 (Γ , T) = Γ ▻ T
+reconstruct-ctx : Σ _ args-of-tag-ctx → CtxSyntax
+reconstruct-ctx (0 , a) = ε
+reconstruct-ctx (1 , (Γ , T)) = Γ ▻ T
 
 deconstruct-ctx : ∀ Γ → args-of-tag-ctx (tag-ctx Γ)
 deconstruct-ctx ε = tt
 deconstruct-ctx (Γ ▻ T) = Γ , T
 
-reconstruct-ctx-eq : ∀ Γ → reconstruct-ctx (tag-ctx Γ) (deconstruct-ctx Γ) ≡ Γ
+reconstruct-ctx-eq : ∀ Γ → reconstruct-ctx (tag-ctx Γ , deconstruct-ctx Γ) ≡ Γ
 reconstruct-ctx-eq ε = refl
 reconstruct-ctx-eq (Γ ▻ x) = refl
 
@@ -71,16 +71,16 @@ args-of-tag-ty 7 = CtxSyntax
 args-of-tag-ty 8 = CtxSyntax
 args-of-tag-ty _ = ⊥
 
-reconstruct-ty : ∀ n → args-of-tag-ty n → Σ _ TySyntax
-reconstruct-ty 0 (Γ , (A , B)) = _ , (A ‘→’ B)
-reconstruct-ty 1 (Γ , ((a , b) , (s , T))) = _ , s ⨾𝒰 T
-reconstruct-ty 2 (Γ , (A , B)) = _ , A ‘×’ B
-reconstruct-ty 3 Γ = _ , 𝟙 {Γ}
-reconstruct-ty 4 (Γ , (A , B)) = _ , ‘Σ’ A B
-reconstruct-ty 5 (Γ , (A , B)) = _ , ‘Π’ A B
-reconstruct-ty 6 Γ = _ , ‘CtxSyntax’ {Γ}
-reconstruct-ty 7 Γ = _ , ‘TySyntax’ {Γ}
-reconstruct-ty 8 Γ = _ , ‘TmSyntax’ {Γ}
+reconstruct-ty : Σ _ args-of-tag-ty → Σ _ TySyntax
+reconstruct-ty (0 , (Γ , (A , B))) = _ , (A ‘→’ B)
+reconstruct-ty (1 , (Γ , ((a , b) , (s , T)))) = _ , s ⨾𝒰 T
+reconstruct-ty (2 , (Γ , (A , B))) = _ , A ‘×’ B
+reconstruct-ty (3 , Γ) = _ , 𝟙 {Γ}
+reconstruct-ty (4 , (Γ , (A , B))) = _ , ‘Σ’ A B
+reconstruct-ty (5 , (Γ , (A , B))) = _ , ‘Π’ A B
+reconstruct-ty (6 , Γ) = _ , ‘CtxSyntax’ {Γ}
+reconstruct-ty (7 , Γ) = _ , ‘TySyntax’ {Γ}
+reconstruct-ty (8 , Γ) = _ , ‘TmSyntax’ {Γ}
 
 deconstruct-ty : ∀ {Γ} T → args-of-tag-ty (tag-ty {Γ} T)
 deconstruct-ty (A ‘→’ B) = _ , (A , B)
@@ -93,7 +93,7 @@ deconstruct-ty (‘CtxSyntax’ {Γ}) = Γ
 deconstruct-ty (‘TySyntax’ {Γ}) = Γ
 deconstruct-ty (‘TmSyntax’ {Γ}) = Γ
 
-reconstruct-ty-eq : ∀ {Γ} T → reconstruct-ty (tag-ty T) (deconstruct-ty T) ≡ (Γ , T)
+reconstruct-ty-eq : ∀ {Γ} T → reconstruct-ty (tag-ty T , deconstruct-ty T) ≡ (Γ , T)
 reconstruct-ty-eq (A ‘→’ B) = refl
 reconstruct-ty-eq (s ⨾𝒰 T) = refl
 reconstruct-ty-eq (A ‘×’ B) = refl
@@ -103,52 +103,182 @@ reconstruct-ty-eq (‘Π’ A B) = refl
 reconstruct-ty-eq ‘CtxSyntax’ = refl
 reconstruct-ty-eq ‘TySyntax’ = refl
 reconstruct-ty-eq ‘TmSyntax’ = refl
-{-
+
 args-of-tag-tm : ℕ → Set
-args-of-tag-tm 0 = Σ _ λ{ Γ → TmSyntax Γ × TmSyntax Γ }
-args-of-tag-tm 1 = Σ _ λ{ Γ → Σ (TmSyntax Γ × TmSyntax Γ) λ{ (a , b) → TmSyntax (a ‘→’ b) × (b ~>𝒰) } }
-args-of-tag-tm 2 = Σ _ λ{ Γ → TmSyntax Γ × TmSyntax Γ }
-args-of-tag-tm 3 = CtxSyntax
-args-of-tag-tm 4 = Σ _ λ{ Γ → Σ (TmSyntax Γ) λ{ A → TmSyntax (Γ ▻ A) } }
-args-of-tag-tm 5 = Σ _ λ{ Γ → Σ (TmSyntax Γ) λ{ A → TmSyntax (Γ ▻ A) } }
-args-of-tag-tm 6 = CtxSyntax
-args-of-tag-tm 7 = CtxSyntax
-args-of-tag-tm 8 = CtxSyntax
+args-of-tag-tm 0 = Σ _ TySyntax
+args-of-tag-tm 1 = Σ _ λ{ Γ → Σ (TySyntax Γ × TySyntax Γ × TySyntax Γ) λ{ (a , b , c) → (a ~> b) × (b ~> c) } }
+args-of-tag-tm 2 = Σ _ λ{ Γ → TySyntax Γ × TySyntax Γ }
+args-of-tag-tm 3 = Σ _ λ{ Γ → Σ (TySyntax Γ × TySyntax Γ × TySyntax Γ) λ{ (a , b , c) → ((a ‘×’ b) ~> c) } }
+args-of-tag-tm 4 = Σ _ λ{ Γ → TySyntax Γ }
+args-of-tag-tm 5 = Σ _ λ{ Γ → Σ (TySyntax Γ × TySyntax Γ × TySyntax Γ × TySyntax Γ) λ{ (a , b , c , d) → (a ~> b) × (c ~> d) } }
+args-of-tag-tm 6 = CtxSyntax × CtxSyntax
+args-of-tag-tm 7 = Σ _ λ{ Γ → Σ (TySyntax Γ × TySyntax Γ) λ{ (a , b) → (a ~> b) } }
+args-of-tag-tm 8 = Σ _ λ{ Γ → Σ (TySyntax Γ) λ{ a → (a ~>𝒰) } }
+args-of-tag-tm 9 = Σ _ λ{ Γ → TySyntax Γ × TySyntax Γ }
+args-of-tag-tm 10 = CtxSyntax
+args-of-tag-tm 11 = Σ _ λ{ Γ → TySyntax Γ }
+args-of-tag-tm 12 = Σ _ λ{ Γ → TySyntax Γ × TySyntax Γ }
+args-of-tag-tm 13 = Σ _ λ { Γ → Σ (TySyntax Γ × TySyntax Γ) λ{ (X , A) → Σ _ λ{ B → Σ (TmSyntax {Γ} (X ‘→’ A)) λ{ a → TmSyntax {Γ} (‘Π’ X (a ⨾𝒰 B)) } } } }
+args-of-tag-tm 14 = Σ _ λ{ Γ → Σ (TySyntax Γ × TySyntax Γ) λ{ (a , b) → TmSyntax {Γ} b } }
+args-of-tag-tm 15 = Σ _ λ{ Γ → Σ (TySyntax Γ × TySyntax Γ) λ{ (a , b) → (a ~> b) × TmSyntax {Γ} a } }
+args-of-tag-tm 16 = CtxSyntax
+args-of-tag-tm 17 = Σ (CtxSyntax × CtxSyntax) λ{ (Γ , C) → TySyntax C }
+args-of-tag-tm 18 = Σ (CtxSyntax × CtxSyntax) λ{ (Γ , C) → Σ _ λ{ A → TmSyntax {C} A } }
+args-of-tag-tm 19 = CtxSyntax
+args-of-tag-tm 20 = Σ _ λ{ Γ → Σ (_ × TySyntax Γ) λ{ (A , B) → Σ (TmSyntax {Γ} (𝟙 ‘→’ ‘CtxSyntax’)) λ{ c → ((‘Π’ 𝟙 (c ⨾𝒰 A)) ~> B) × (𝟙 ~> B) } } }
+args-of-tag-tm (suc 20) = Σ _ λ{ Γ → TySyntax Γ }
 args-of-tag-tm _ = ⊥
 
-reconstruct-tm : ∀ n → args-of-tag-tm n → Σ _ TmSyntax
-reconstruct-tm 0 (Γ , (A , B)) = _ , (A ‘→’ B)
-reconstruct-tm 1 (Γ , ((a , b) , (s , T))) = _ , s ⨾𝒰 T
-reconstruct-tm 2 (Γ , (A , B)) = _ , A ‘×’ B
-reconstruct-tm 3 Γ = _ , 𝟙 {Γ}
-reconstruct-tm 4 (Γ , (A , B)) = _ , ‘Σ’ A B
-reconstruct-tm 5 (Γ , (A , B)) = _ , ‘Π’ A B
-reconstruct-tm 6 Γ = _ , ‘CtxSyntax’ {Γ}
-reconstruct-tm 7 Γ = _ , ‘TmSyntax’ {Γ}
-reconstruct-tm 8 Γ = _ , ‘TmSyntax’ {Γ}
+reconstruct-tm : Σ _ args-of-tag-tm → Σ (Σ _ TySyntax) (λ{ (Γ , T) → TmSyntax {Γ} T })
+reconstruct-tm (0 , (Γ , a)) = (_ , _) , ‘id’ {Γ} {a}
+reconstruct-tm (1 , (_ , (_ , (f , g)))) = (_ , _) , (f ⨾ g)
+reconstruct-tm (2 , (_ , (a , b))) = (_ , _) , apply {_} {a} {b}
+reconstruct-tm (3 , (_ , (_ , f))) = (_ , _) , (curry f)
+reconstruct-tm (4 , (_ , a)) = (_ , _) , dup {_} {a}
+reconstruct-tm (5 , (_ , (_ , (f , g)))) = (_ , _) , (f ‘××’ g)
+reconstruct-tm (6 , (Γ , c)) = (_ , _) , ⌜_⌝c {Γ} c
+reconstruct-tm (7 , (_ , (_ , f))) = (_ , _) , □-map f
+reconstruct-tm (8 , (_ , (_ , f))) = (_ , _) , □-map𝒰 f
+reconstruct-tm (9 , (_ , (a , b))) = (_ , _) , □-×-codistr {_} {a} {b}
+reconstruct-tm (10 , Γ) = (_ , _) , □-𝟙-codistr {Γ}
+reconstruct-tm (11 , (_ , a)) = (_ , _) , quot {_} {a}
+reconstruct-tm (12 , (_ , (a , b))) = (_ , _) , fst {_} {a} {b}
+reconstruct-tm (13 , (_ , (_ , (_ , (x , y))))) = (_ , _) , (x ‘,Σ’ y)
+reconstruct-tm (14 , (_ , ((a , b) , v))) = (_ , _) , (const {_} {a} {b} v)
+reconstruct-tm (15 , (_ , (_ , (f , x)))) = (_ , _) , (f ‘’ₐ x)
+reconstruct-tm (16 , Γ) = (_ , _) , ‘tt’ {Γ}
+reconstruct-tm (17 , ((Γ , C) , T)) = (Γ , _) , ⌜ T ⌝
+reconstruct-tm (18 , ((Γ , C) , (T , t))) = (Γ , _) , ⌜ t ⌝ₜ
+reconstruct-tm (19 , Γ) = (_ , _) , (‘quote’ {Γ})
+reconstruct-tm (20 , (_ , (_ , (c , (t , f))))) = (_ , _) , (semidec-eq-proj₁ c t f)
+reconstruct-tm (suc 20 , (Γ , A)) = (_ , _) , ‘subst’ {Γ} {A}
 
-deconstruct-tm : ∀ {Γ} T → args-of-tag-tm (tag-tm {Γ} T)
-deconstruct-tm (A ‘→’ B) = _ , (A , B)
-deconstruct-tm (s ⨾𝒰 T) = _ , ((_ , _) , (s , T))
-deconstruct-tm (A ‘×’ B) = _ , (A , B)
-deconstruct-tm (𝟙 {Γ}) = Γ
-deconstruct-tm (‘Σ’ A B) = _ , (A , B)
-deconstruct-tm (‘Π’ A B) = _ , (A , B)
-deconstruct-tm (‘CtxSyntax’ {Γ}) = Γ
-deconstruct-tm (‘TmSyntax’ {Γ}) = Γ
-deconstruct-tm (‘TmSyntax’ {Γ}) = Γ
+deconstruct-tm : ∀ {Γ T} t → args-of-tag-tm (tag-tm {Γ} {T} t)
+deconstruct-tm (‘id’ {Γ} {a}) = _ , a
+deconstruct-tm (f ⨾ g) = _ , (_ , _ , _) , f , g
+deconstruct-tm (apply {Γ} {a} {b}) = Γ , (a , b)
+deconstruct-tm (curry f) = _ , (_ , f)
+deconstruct-tm (dup {Γ} {a}) = Γ , a
+deconstruct-tm (f ‘××’ g) = _ , (_ , (f , g))
+deconstruct-tm (⌜_⌝c {Γ} c) = Γ , c
+deconstruct-tm (□-map f) = _ , (_ , f)
+deconstruct-tm (□-map𝒰 f) = _ , (_ , f)
+deconstruct-tm (□-×-codistr {_} {a} {b}) = _ , (a , b)
+deconstruct-tm (□-𝟙-codistr {Γ}) = Γ
+deconstruct-tm (quot {_} {a}) = _ , a
+deconstruct-tm (fst {_} {a} {b}) = _ , (a , b)
+deconstruct-tm (x ‘,Σ’ y) = _ , (_ , (_ , (x , y)))
+deconstruct-tm (const {_} {a} {b} t) = _ , ((a , _) , t)
+deconstruct-tm (f ‘’ₐ x) = _ , ((_ , _) , (f , x))
+deconstruct-tm (‘tt’ {Γ}) = Γ
+deconstruct-tm (⌜_⌝ {Γ} T) = (Γ , _) , T
+deconstruct-tm (⌜_⌝ₜ {Γ} t) = (Γ , _) , (_ , t)
+deconstruct-tm (‘quote’ {Γ}) = Γ
+deconstruct-tm (semidec-eq-proj₁ c t f) = _ , ((_ , _) , (c , (t , f)))
+deconstruct-tm (‘subst’ {Γ} {A}) = Γ , A
 
-reconstruct-tm-eq : ∀ {Γ} T → reconstruct-tm (tag-tm T) (deconstruct-tm T) ≡ (Γ , T)
-reconstruct-tm-eq (A ‘→’ B) = refl
-reconstruct-tm-eq (s ⨾𝒰 T) = refl
-reconstruct-tm-eq (A ‘×’ B) = refl
-reconstruct-tm-eq 𝟙 = refl
-reconstruct-tm-eq (‘Σ’ A B) = refl
-reconstruct-tm-eq (‘Π’ A B) = refl
-reconstruct-tm-eq ‘CtxSyntax’ = refl
-reconstruct-tm-eq ‘TmSyntax’ = refl
-reconstruct-tm-eq ‘TmSyntax’ = refl
--}
+reconstruct-tm-eq : ∀ {Γ T} t → reconstruct-tm (tag-tm t , deconstruct-tm t) ≡ ((Γ , T) , t)
+reconstruct-tm-eq ‘id’ = refl
+reconstruct-tm-eq (f ⨾ g) = refl
+reconstruct-tm-eq apply = refl
+reconstruct-tm-eq (curry f) = refl
+reconstruct-tm-eq dup = refl
+reconstruct-tm-eq (f ‘××’ g) = refl
+reconstruct-tm-eq ⌜ c ⌝c = refl
+reconstruct-tm-eq (□-map f) = refl
+reconstruct-tm-eq (□-map𝒰 f) = refl
+reconstruct-tm-eq □-×-codistr = refl
+reconstruct-tm-eq □-𝟙-codistr = refl
+reconstruct-tm-eq quot = refl
+reconstruct-tm-eq fst = refl
+reconstruct-tm-eq (x ‘,Σ’ y) = refl
+reconstruct-tm-eq (const t) = refl
+reconstruct-tm-eq (f ‘’ₐ x) = refl
+reconstruct-tm-eq ‘tt’ = refl
+reconstruct-tm-eq ⌜ T ⌝ = refl
+reconstruct-tm-eq ⌜ t ⌝ₜ = refl
+reconstruct-tm-eq ‘quote’ = refl
+reconstruct-tm-eq (semidec-eq-proj₁ c t f) = refl
+reconstruct-tm-eq ‘subst’ = refl
+
+Ctx-dec-eq : dec-eq CtxSyntax
+Ty-dec-eq : dec-eq (Σ _ TySyntax)
+Tm-dec-eq : dec-eq (Σ (Σ _ TySyntax) λ{ (Γ , T) → TmSyntax {Γ} T })
+
+Ty-dec-eq-homogenous : ∀ {Γ} → dec-eq (TySyntax Γ)
+Ty-dec-eq-homogenous T₁ T₂ with (Ty-dec-eq (_ , T₁) (_ , T₂))
+... | inj₁ p = inj₁ (trans (K-from-dec Ctx-dec-eq (λ{ p → T₁ ≡ sub TySyntax p T₁ }) refl) (apD-proj₂ p))
+... | inj₂ n = inj₂ λ{ refl → n refl }
+
+Tm-dec-eq-homogenous : ∀ {Γ T} → dec-eq (TmSyntax {Γ} T)
+Tm-dec-eq-homogenous T₁ T₂ with (Tm-dec-eq (_ , T₁) (_ , T₂))
+... | inj₁ p = inj₁ (trans (K-from-dec Ty-dec-eq (λ{ p → T₁ ≡ sub (λ{ (Γ , T) → TmSyntax {Γ} T }) p T₁ }) refl) (apD-proj₂ p))
+... | inj₂ n = inj₂ λ{ refl → n refl }
+
+args-of-tag-ctx-dec-eq : ∀ {n} → dec-eq (args-of-tag-ctx n)
+args-of-tag-ctx-dec-eq {0} tt tt = inj₁ refl
+args-of-tag-ctx-dec-eq {1} = Ty-dec-eq
+args-of-tag-ctx-dec-eq {suc (suc _)} ()
+
+args-of-tag-ty-dec-eq : ∀ {n} → dec-eq (args-of-tag-ty n)
+args-of-tag-ty-dec-eq {0} = Σ-dec-eq {!Ctx-dec-eq!} (×-dec-eq {!Ty-dec-eq-homogenous!} {!Ty-dec-eq-homogenous!})
+args-of-tag-ty-dec-eq {1} = Σ-dec-eq {!Ctx-dec-eq!} (Σ-dec-eq (×-dec-eq {!!} {!!}) (×-dec-eq {!!} {!!}))
+args-of-tag-ty-dec-eq {2} = {!!}
+args-of-tag-ty-dec-eq {3} = {!!}
+args-of-tag-ty-dec-eq {4} = {!!}
+args-of-tag-ty-dec-eq {5} = {!!}
+args-of-tag-ty-dec-eq {6} = {!!}
+args-of-tag-ty-dec-eq {7} = {!!}
+args-of-tag-ty-dec-eq {8} = {!!}
+args-of-tag-ty-dec-eq {suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))} ()
+
+args-of-tag-tm-dec-eq : ∀ {n} → dec-eq (args-of-tag-tm n)
+args-of-tag-tm-dec-eq {n} = {!!}
+
+Ctx-dec-eq Γ₁ Γ₂ = res
+  module Ctx-dec-eq where
+    dec-tag : dec-eq-on (tag-ctx Γ₁) (tag-ctx Γ₂)
+    dec-tag = ℕ-dec-eq _ _
+
+    dec-args : (p : tag-ctx Γ₁ ≡ tag-ctx Γ₂) → dec-eq-on (sub args-of-tag-ctx p (deconstruct-ctx Γ₁)) (deconstruct-ctx Γ₂)
+    dec-args p = args-of-tag-ctx-dec-eq _ _
+
+    res : dec-eq-on Γ₁ Γ₂
+    res with dec-tag
+    ... | inj₁ p with (dec-args p)
+    ...          | inj₁ q = inj₁ (trans (sym (reconstruct-ctx-eq _)) (trans (ap reconstruct-ctx (p ,≡ q)) (reconstruct-ctx-eq _)))
+    ...          | inj₂ q = inj₂ (λ{ refl → q (ℕ-K (λ{ p → sub args-of-tag-ctx p (deconstruct-ctx Γ₁) ≡ _ }) refl) })
+    res | inj₂ p = inj₂ (λ{ refl → p refl })
+
+Ty-dec-eq ΓT₁@(Γ₁ , T₁) ΓT₂@(Γ₂ , T₂) = res
+  module Ty-dec-eq where
+    dec-tag : dec-eq-on (tag-ty T₁) (tag-ty T₂)
+    dec-tag = ℕ-dec-eq _ _
+
+    dec-args : (p : tag-ty T₁ ≡ tag-ty T₂) → dec-eq-on (sub args-of-tag-ty p (deconstruct-ty T₁)) (deconstruct-ty T₂)
+    dec-args p = args-of-tag-ty-dec-eq _ _
+
+    res : dec-eq-on ΓT₁ ΓT₂
+    res with dec-tag
+    ... | inj₁ p with (dec-args p)
+    ...          | inj₁ q = inj₁ (trans (sym (reconstruct-ty-eq _)) (trans (ap reconstruct-ty (p ,≡ q)) (reconstruct-ty-eq _)))
+    ...          | inj₂ q = inj₂ (λ{ refl → q (ℕ-K (λ{ p → sub args-of-tag-ty p (deconstruct-ty T₁) ≡ _ }) refl) })
+    res | inj₂ p = inj₂ (λ{ refl → p refl })
+
+Tm-dec-eq Γt₁@(_ , t₁) Γt₂@(_ , t₂) = res
+  module Tm-dec-eq where
+    dec-tag : dec-eq-on (tag-tm t₁) (tag-tm t₂)
+    dec-tag = ℕ-dec-eq _ _
+
+    dec-args : (p : tag-tm t₁ ≡ tag-tm t₂) → dec-eq-on (sub args-of-tag-tm p (deconstruct-tm t₁)) (deconstruct-tm t₂)
+    dec-args p = args-of-tag-tm-dec-eq _ _
+
+    res : dec-eq-on Γt₁ Γt₂
+    res with dec-tag
+    ... | inj₁ p with (dec-args p)
+    ...          | inj₁ q = inj₁ (trans (sym (reconstruct-tm-eq _)) (trans (ap reconstruct-tm (p ,≡ q)) (reconstruct-tm-eq _)))
+    ...          | inj₂ q = inj₂ (λ{ refl → q (ℕ-K (λ{ p → sub args-of-tag-tm p (deconstruct-tm t₁) ≡ _ }) refl) })
+    res | inj₂ p = inj₂ (λ{ refl → p refl })
 
 
 {-
