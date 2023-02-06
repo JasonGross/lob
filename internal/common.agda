@@ -4,7 +4,8 @@ module common where
 open import Agda.Primitive public
   using    (Level; _⊔_; lzero; lsuc)
 
-infixl 1 _,_
+infixr 1 _,_
+infixr 1 _,≡_
 infixl 1 _≡_
 infixr 1 _~_
 infixr 2 _∧_
@@ -142,6 +143,19 @@ ap f refl = refl
 ap2 : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : Set ℓ₂} {C : Set ℓ₃} (f : A → B → C) {x y : A} (p : x ≡ y) {x' y' : B} (q : x' ≡ y') → f x x' ≡ f y y'
 ap2 f refl refl = refl
 
+apD : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : A → Set ℓ₂} (f : (a : A) → B a) {x y : A} (p : x ≡ y) → sub B p (f x) ≡ f y
+apD f refl = refl
+
+_,≡_ : ∀ {ℓ ℓ′} {A : Set ℓ} {P : A → Set ℓ′} {x y : A} {p : P x} {q : P y}
+  → (h : x ≡ y)
+  → (sub P h p ≡ q)
+  → (x , p) ≡ (y , q)
+refl ,≡ refl = refl
+
+-- slightly nicer form
+apD-proj₂ : ∀ {ℓ ℓ′} {A : Set ℓ} {P : A → Set ℓ′} {x y : Σ A P} → (p : x ≡ y) → sub P (ap Σ.proj₁ p) (Σ.proj₂ x) ≡ Σ.proj₂ y
+apD-proj₂ refl = refl
+
 transparent-dec-eq : ∀ {ℓ} {A : Set ℓ} → dec-eq A → dec-eq A
 transparent-dec-eq dec x y with (dec x x) | (dec x y)
 ... | inj₁ p | inj₁ q = inj₁ (trans (sym p) q)
@@ -158,6 +172,10 @@ UIP-from-dec : ∀ {ℓ} {A : Set ℓ} → dec-eq A → UIP-on A
 UIP-from-dec dec p q with (trans (sym (transparent-dec-eq-refl dec p)) (transparent-dec-eq-refl dec q))
 ... | refl = refl
 
+K-from-dec : ∀ {ℓ} {A : Set ℓ} → dec-eq A → ∀ {x : A} {ℓ′} (P : x ≡ x → Set ℓ′) → P refl → ∀ {p} → P p
+K-from-dec dec P h {p} with (UIP-from-dec dec p refl)
+... | refl = h
+
 eq-dec-from-endecode : ∀ {ℓ} {A : Set ℓ} {c}
   (code : A → A → Set c)
   (encode : ∀ x → code x x)
@@ -167,6 +185,16 @@ eq-dec-from-endecode : ∀ {ℓ} {A : Set ℓ} {c}
 eq-dec-from-endecode {A = A} code encode decode dec-code x y with (dec-code {x} {y})
 ... | inj₁ c = inj₁ (decode c)
 ... | inj₂ n = inj₂ (λ{ refl → n (encode x) })
+
+Σ-dec-eq : ∀ {ℓ ℓ′} {A : Set ℓ} {B : A → Set ℓ′} → dec-eq A → (∀ {a} → dec-eq (B a)) → dec-eq (Σ A B)
+Σ-dec-eq {B = B} decA decB (a , b) (a' , b') with (decA a a')
+... | inj₁ p with (decB (sub B p b) b')
+...          | inj₁ q = inj₁ (p ,≡ q)
+...          | inj₂ n = inj₂ λ{ refl → n (K-from-dec decA (λ{ p → sub B p b ≡ b }) refl) }
+Σ-dec-eq _ _ _ _ | inj₂ n = inj₂ (λ{ refl → n refl })
+
+×-dec-eq : ∀ {ℓ ℓ′} {A : Set ℓ} {B : Set ℓ′} → dec-eq A → dec-eq B → dec-eq (A × B)
+×-dec-eq decA decB = Σ-dec-eq decA decB
 
 Maybe-code : {A : Set} → Maybe A → Maybe A → Set
 Maybe-code (just x) (just x₁) = x ≡ x₁
@@ -200,6 +228,17 @@ data ℕ : Set where
   suc  : (n : ℕ) → ℕ
 
 {-# BUILTIN NATURAL ℕ #-}
+
+ℕ-dec-eq : dec-eq ℕ
+ℕ-dec-eq zero zero = inj₁ refl
+ℕ-dec-eq (suc x) (suc y) with (ℕ-dec-eq x y)
+... | inj₁ p = inj₁ (ap suc p)
+... | inj₂ n = inj₂ (λ{ refl → n refl })
+ℕ-dec-eq zero (suc _) = inj₂ λ()
+ℕ-dec-eq (suc _) zero = inj₂ λ()
+
+ℕ-K : ∀ {ℓ} {n : ℕ} (P : n ≡ n → Set ℓ) → P refl → ∀ {p} → P p
+ℕ-K P h = K-from-dec ℕ-dec-eq P h
 
 max : ℕ → ℕ → ℕ
 max 0 y = y
