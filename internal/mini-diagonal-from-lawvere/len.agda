@@ -18,11 +18,11 @@ Ty-len (‘Σ’ A B) = suc (max (Ty-len A) (Ty-len B))
 Ty-len (‘Π’ A B) = suc (max (Ty-len A) (Ty-len B))
 Ty-len (‘CtxSyntax’ {Γ}) = suc (Ctx-len Γ)
 Ty-len (‘TySyntax’ {Γ}) = suc (suc (suc (Ctx-len Γ)))
-Ty-len (‘TmSyntax’ {Γ}) = suc (suc (suc (suc (max (Ctx-len Γ) (suc (suc (Ctx-len Γ)))))))
+Ty-len (‘TmSyntax’ {Γ}) = suc (suc (suc (suc (suc (suc (Ctx-len Γ))))))
 
 Tm-len (‘id’ {Γ} {a}) = suc (suc (max (Ty-len a) (Ty-len a)))
 Tm-len (f ⨾ g) = suc (max (Tm-len f) (Tm-len g))
-Tm-len (apply {Γ} {a} {b}) = suc (max (Ty-len a) (Ty-len b))
+Tm-len (apply {Γ} {a} {b}) = suc (suc (suc (suc (max (Ty-len a) (Ty-len b)))))
 Tm-len (curry f) = suc (Tm-len f)
 Tm-len (dup {Γ} {a}) = suc (Ty-len a)
 Tm-len (f ‘××’ g) = suc (max (Tm-len f) (Tm-len g))
@@ -56,12 +56,12 @@ Ty-len< (‘Σ’ A B) = <-trans (Ty-len< A) (<-max-spec-L-suc <-suc)
 Ty-len< (‘Π’ A B) = <-trans (Ty-len< A) (<-max-spec-L-suc <-suc)
 Ty-len< (‘CtxSyntax’) = <-suc
 Ty-len< (‘TySyntax’) = <-suc
-Ty-len< (‘TmSyntax’) = <-suc
+Ty-len< (‘TmSyntax’) = <-suc→ (<-suc→ (<-suc→ (max-<-spec-build (<-suc ■< <-suc ■< <-suc) <-suc)))
 
 Tm-len< ‘id’ = <-suc
-Tm-len< (_⨾_ {Γ} {a} {b} {c} f g) = <-suc→ (<-max {Ty-len a} {Tm-len f} {Ty-len c} {Tm-len g} {!!} {!!})
-Tm-len< apply = {!!}
-Tm-len< (curry f) = {!!}
+Tm-len< (_⨾_ {Γ} {a} {b} {c} f g) = <-suc→ (<-max {Ty-len a} {Tm-len f} {Ty-len c} {Tm-len g} (<-max-spec-L-suc <-suc ■< Tm-len< f) (<-max-spec-R-suc <-suc ■< Tm-len< g))
+Tm-len< (apply {Γ} {a} {b}) = <-suc→ (max-<-spec-build {_} {_} {Ty-len b} (<-suc→ (max-<-spec-build {_} {_} {Ty-len a} <-suc (<-suc ■< <-max-spec-L-suc {_} {_} {suc _} <-suc))) (<-suc ■< <-suc ■< <-suc→ (<-suc→ (<-max-spec-R-suc {_} {_} <-suc))))
+Tm-len< (curry {Γ} {a} {b} {c} f) = <-suc→ (max-<-spec-build {_} {Ty-len a} (<-max-spec-L {_} {_} {Ty-len c} (<-max-spec-L-suc <-suc) ■< <-suc) (<-suc→ (max-<-spec-build {_} {Ty-len b} {!!} {!!})) ■< Tm-len< f)
 Tm-len< dup = {!!}
 Tm-len< (f ‘××’ g) = {!!}
 Tm-len< ⌜ C ⌝c = {!!}
@@ -81,8 +81,6 @@ Tm-len< ‘quote’ = {!!}
 Tm-len< (semidec-eq-proj₁ t x x₁) = {!!}
 Tm-len< ‘subst’ = {!!}
 
-invert-len-_▻_ : ∀ Γ T → let l = Ctx-len (Γ ▻ T) in (Ctx-len Γ < l) × (Ty-len T < l)
-invert-len- Γ ▻ T = {!!}
 {-
   ε : CtxSyntax
   _▻_ : (Γ : CtxSyntax) → (T : TySyntax Γ) → CtxSyntax
