@@ -4,57 +4,58 @@ module lob-on-syntax-abstract where
 
 {- First the diagonal lemma -}
 module _
-  {ℓ₁} {CtxSyntax : Set ℓ₁}
-  {ℓ₂} {TySyntax : CtxSyntax → Set ℓ₂}
-  {ℓ₃} {TmSyntax : ∀ {Γ} → TySyntax Γ → Set ℓ₃}
-  (_‘→’_ : ∀ {Γ} → TySyntax Γ → TySyntax Γ → TySyntax Γ)
-  (_▻_ : (Γ : CtxSyntax) → TySyntax Γ → CtxSyntax)
+  {ℓ₁} {Ctx : Set ℓ₁}
+  {ℓ₂} {Ty : Ctx → Set ℓ₂}
+  {ℓ₃} {Tm : ∀ {Γ} → Ty Γ → Set ℓ₃}
+  (_‘→’_ : ∀ {Γ} → Ty Γ → Ty Γ → Ty Γ)
+  (_▻_ : (Γ : Ctx) → Ty Γ → Ctx)
   where
-  _~>_ : ∀ {Γ} → TySyntax Γ → TySyntax Γ → Set _
-  a ~> b = TmSyntax (a ‘→’ b)
-  _~>𝒰 : ∀ {Γ} → TySyntax Γ → Set _
-  T ~>𝒰 = TySyntax (_ ▻ T)
+  _~>_ : ∀ {Γ} → Ty Γ → Ty Γ → Set _
+  a ~> b = Tm (a ‘→’ b)
+  _~>𝒰 : ∀ {Γ} → Ty Γ → Set _
+  T ~>𝒰 = Ty (_ ▻ T)
   module _
-    (‘id’ : ∀ {Γ} {a : TySyntax Γ} → a ~> a)
-    (_⨾_ : ∀ {Γ} {a b c : TySyntax Γ} → a ~> b → b ~> c → a ~> c)
-    (_⨾𝒰_ : ∀ {Γ} {a b : TySyntax Γ} → a ~> b → b ~>𝒰 → a ~>𝒰) -- substitution
-    (_‘×’_ : ∀ {Γ} → TySyntax Γ → TySyntax Γ → TySyntax Γ)
-    (apply : ∀ {Γ} {a b : TySyntax Γ} → ((a ‘→’ b) ‘×’ a) ~> b)
-    (curry : ∀ {Γ} {a b c : TySyntax Γ} → ((a ‘×’ b) ~> c) → (a ~> (b ‘→’ c)))
-    (dup : ∀ {Γ} {a : TySyntax Γ} → (a ~> (a ‘×’ a)))
-    (_‘××’_ : ∀ {Γ} {a b c d : TySyntax Γ} → (a ~> b) → (c ~> d) → ((a ‘×’ c) ~> (b ‘×’ d)))
-    (𝟙 : ∀ {Γ} → TySyntax Γ)
-    (‘Σ’ : ∀ {Γ} → (A : TySyntax Γ) → TySyntax (Γ ▻ A) → TySyntax Γ)
-    (‘Π’ : ∀ {Γ} → (A : TySyntax Γ) → TySyntax (Γ ▻ A) → TySyntax Γ)
-    (‘CtxSyntax’ : ∀ {Γ} → TySyntax Γ)
-    (‘TySyntax’ : ∀ {Γ} → TySyntax (Γ ▻ ‘CtxSyntax’))
-    (‘TmSyntax’ : ∀ {Γ} → TySyntax (Γ ▻ ‘Σ’ ‘CtxSyntax’ ‘TySyntax’))
-    (⌜_⌝c : ∀ {Γ} → CtxSyntax → (𝟙 {Γ} ~> ‘CtxSyntax’))
-    (_‘,Σ’_ : ∀ {Γ X A B} → (a : TmSyntax {Γ} (X ‘→’ A)) → TmSyntax {Γ} (‘Π’ X (a ⨾𝒰 B)) → TmSyntax {Γ} (X ‘→’ ‘Σ’ A B))
-    (⌜_⌝ : ∀ {Γ C} → TySyntax C → TmSyntax {Γ} (‘Π’ 𝟙 (⌜ C ⌝c ⨾𝒰 ‘TySyntax’)))
+    (‘id’ : ∀ {Γ} {a : Ty Γ} → a ~> a)
+    (_⨾_ : ∀ {Γ} {a b c : Ty Γ} → a ~> b → b ~> c → a ~> c)
+    (𝟙 : ∀ {Γ} → Ty Γ)
+    (_‘×’_ : ∀ {Γ} → Ty Γ → Ty Γ → Ty Γ)
+    (dup : ∀ {Γ} {a : Ty Γ} → (a ~> (a ‘×’ a)))
+    (getl : ∀ {Γ} {a b : Ty Γ} → (a ‘×’ b) ~> a)
+    (getr : ∀ {Γ} {a b : Ty Γ} → (a ‘×’ b) ~> a)
+    (_‘××’_ : ∀ {Γ} {a b c d : Ty Γ} → (a ~> b) → (c ~> d) → ((a ‘×’ c) ~> (b ‘×’ d)))
+    (apply : ∀ {Γ} {a b : Ty Γ} → ((a ‘→’ b) ‘×’ a) ~> b)
+    (curry : ∀ {Γ} {a b c : Ty Γ} → ((a ‘×’ b) ~> c) → (a ~> (b ‘→’ c)))
+    (_⨾𝒰_ : ∀ {Γ} {a b : Ty Γ} → a ~> b → b ~>𝒰 → a ~>𝒰) -- substitution
+    (‘Σ’ : ∀ {Γ} → (A : Ty Γ) → Ty (Γ ▻ A) → Ty Γ)
+    (‘Π’ : ∀ {Γ} → (A : Ty Γ) → Ty (Γ ▻ A) → Ty Γ)
+    (‘Ctx’ : ∀ {Γ} → Ty Γ)
+    (‘Ty’ : ∀ {Γ} → Ty (Γ ▻ ‘Ctx’))
+    (‘Tm’ : ∀ {Γ} → Ty (Γ ▻ ‘Σ’ ‘Ctx’ ‘Ty’))
+    (⌜_⌝c : ∀ {Γ} → Ctx → (𝟙 {Γ} ~> ‘Ctx’))
+    (_‘,Σ’_ : ∀ {Γ X A B} → (a : Tm {Γ} (X ‘→’ A)) → Tm {Γ} (‘Π’ X (a ⨾𝒰 B)) → Tm {Γ} (X ‘→’ ‘Σ’ A B))
+    (⌜_⌝ : ∀ {Γ C} → Ty C → Tm {Γ} (‘Π’ 𝟙 (⌜ C ⌝c ⨾𝒰 ‘Ty’)))
     where
-    □𝒰 : ∀ {Γ} → TySyntax Γ
-    □𝒰 {Γ} = ‘Π’ 𝟙 (⌜ Γ ⌝c ⨾𝒰 ‘TySyntax’)
-    □ : ∀ {Γ} → TySyntax Γ → TySyntax Γ
-    □ {Γ} T = ‘Π’ 𝟙 ((⌜ Γ ⌝c ‘,Σ’ ⌜ T ⌝) ⨾𝒰 ‘TmSyntax’)
+    □𝒰 : ∀ {Γ} → Ty Γ
+    □𝒰 {Γ} = ‘Π’ 𝟙 (⌜ Γ ⌝c ⨾𝒰 ‘Ty’)
+    □ : ∀ {Γ} → Ty Γ → Ty Γ
+    □ {Γ} T = ‘Π’ 𝟙 ((⌜ Γ ⌝c ‘,Σ’ ⌜ T ⌝) ⨾𝒰 ‘Tm’)
     module _
-      (□-map : ∀ {Γ} {a b : TySyntax Γ} → (a ~> b) → (□ a ~> □ b))
-      (□-map𝒰 : ∀ {Γ} {a : TySyntax Γ} → (a ~>𝒰) → (□ a ~> □𝒰))
-      (□-×-codistr : ∀ {Γ} {a b : TySyntax Γ} → (□ a ‘×’ □ b) ~> □ (a ‘×’ b))
+      (□-map : ∀ {Γ} {a b : Ty Γ} → (a ~> b) → (□ a ~> □ b))
+      (□-map𝒰 : ∀ {Γ} {a : Ty Γ} → (a ~>𝒰) → (□ a ~> □𝒰))
+      (□-×-codistr : ∀ {Γ} {a b : Ty Γ} → (□ a ‘×’ □ b) ~> □ (a ‘×’ b))
       (□-𝟙-codistr : ∀ {Γ} → 𝟙 {Γ} ~> □ 𝟙)
-      (quot : ∀ {Γ} {a : TySyntax Γ} → □ a ~> □ (□ a))
-      (fst : ∀ {Γ} {a b : TySyntax Γ} → (a ‘×’ b) ~> a)
-      (const : ∀ {Γ} {a b : TySyntax Γ} → TmSyntax {Γ} b → (a ~> b))
-      (⌜_⌝ₜ : ∀ {Γ C A} → TmSyntax {C} A → TmSyntax {Γ} (‘Π’ 𝟙 ((⌜ C ⌝c ‘,Σ’ ⌜ A ⌝) ⨾𝒰 ‘TmSyntax’)))
-      (‘quote’ : ∀ {Γ} → TmSyntax {Γ} (‘Σ’ ‘CtxSyntax’ ‘TySyntax’ ‘→’ □ (‘Σ’ ‘CtxSyntax’ ‘TySyntax’))) -- quotes the quoted context, and then the quoted type.  We should have `(‘quote’ ‘⨾’ ‘proj₂’) ≈ (proj₂ ⨾ quot)` (if that were a thing that typechecked)
-      (semidec-eq-proj₁ : ∀ {Γ A} {B : TySyntax Γ} → (c : TmSyntax {Γ} (𝟙 ‘→’ ‘CtxSyntax’)) → ((‘Π’ 𝟙 (c ⨾𝒰 A)) ~> B) → (𝟙 ~> B) → (‘Σ’ ‘CtxSyntax’ A ~> B))
-      (‘subst’ : ∀ {Γ A} → (‘Π’ 𝟙 (⌜ Γ ▻ A ⌝c ⨾𝒰 ‘TySyntax’) ~> (□ A ‘→’ ‘Π’ 𝟙 (⌜ Γ ⌝c ⨾𝒰 ‘TySyntax’)))) -- TODO: is there a better type for this?
-      --(Wk : ∀ {Γ A} → TySyntax Γ → TySyntax (Γ ▻ A))
-      --(wk : ∀ {Γ A B} → TmSyntax {Γ} A → TmSyntax {Γ ▻ B} (Wk A))
+      (quot : ∀ {Γ} {a : Ty Γ} → □ a ~> □ (□ a))
+      (const : ∀ {Γ} {a b : Ty Γ} → Tm {Γ} b → (a ~> b))
+      (⌜_⌝ₜ : ∀ {Γ C A} → Tm {C} A → Tm {Γ} (‘Π’ 𝟙 ((⌜ C ⌝c ‘,Σ’ ⌜ A ⌝) ⨾𝒰 ‘Tm’)))
+      (‘quote’ : ∀ {Γ} → Tm {Γ} (‘Σ’ ‘Ctx’ ‘Ty’ ‘→’ □ (‘Σ’ ‘Ctx’ ‘Ty’))) -- quotes the quoted context, and then the quoted type.  We should have `(‘quote’ ‘⨾’ ‘proj₂’) ≈ (proj₂ ⨾ quot)` (if that were a thing that typechecked)
+      (semidec-eq-proj₁ : ∀ {Γ A} {B : Ty Γ} → (c : Tm {Γ} (𝟙 ‘→’ ‘Ctx’)) → ((‘Π’ 𝟙 (c ⨾𝒰 A)) ~> B) → (𝟙 ~> B) → (‘Σ’ ‘Ctx’ A ~> B))
+      (‘subst’ : ∀ {Γ A} → (‘Π’ 𝟙 (⌜ Γ ▻ A ⌝c ⨾𝒰 ‘Ty’) ~> (□ A ‘→’ ‘Π’ 𝟙 (⌜ Γ ⌝c ⨾𝒰 ‘Ty’)))) -- TODO: is there a better type for this?
+      --(Wk : ∀ {Γ A} → Ty Γ → Ty (Γ ▻ A))
+      --(wk : ∀ {Γ A B} → Tm {Γ} A → Tm {Γ ▻ B} (Wk A))
       where
 
-      S : ∀ {Γ} → TySyntax Γ
-      S = ‘Σ’ ‘CtxSyntax’ ‘TySyntax’
+      S : ∀ {Γ} → Ty Γ
+      S = ‘Σ’ ‘Ctx’ ‘Ty’
       quote-S : ∀ {Γ} → S {Γ} ~> □ S
       quote-S = ‘quote’
       ϕ : ∀ {Γ} → S {Γ} ~> (□ S ‘→’ □𝒰)
@@ -71,7 +72,7 @@ module _
       -- □-map-quote-S : ∀ {f : 𝟙 ~> S} → (f ⨾ quote-S) ≈ (□-𝟙-codistr ⨾ □-map f)
       -- ϕ-eq : ∀ {f : □ S ~> □𝒰} {g : 𝟙 ~> □ S} → (dup ⨾ (((ϕ⁻¹ f) ×× g) ⨾ ϕ)) ≈ (g ⨾ f)
       module _
-        {e} (_≈_ : ∀ {Γ} {a b : TySyntax Γ} → a ~> b → a ~> b → Set e)
+        {e} (_≈_ : ∀ {Γ} {a b : Ty Γ} → a ~> b → a ~> b → Set e)
         where
         foo : ∀ {Γ} {f : S {Γ} ~>𝒰} → ((ϕ⁻¹-□-map𝒰 f) ⨾ ϕ) ≈ {!!}
         foo = {!!}
@@ -165,7 +166,7 @@ module _
 
 
 
-  (S : TySyntax Γ) -- Δ (□(S → 𝒰))
+  (S : Ty Γ) -- Δ (□(S → 𝒰))
   (quote-S : S ~> □ S)
   (ϕ : S ~> (□𝒰 ^ □ S))
   (ϕ⁻¹ : (□ S ~> □𝒰) → (𝟙 ~> S))
@@ -174,7 +175,7 @@ module _
 
 
 
-(𝒰^_ : TySyntax Γ → TySyntax Γ)
+(𝒰^_ : Ty Γ → TySyntax Γ)
   (apply : ∀ {a} → (a × (𝒰^ a)) ~>𝒰)
   (dup : ∀ {a} → (a ~> (a × a)))
   (_××_ : ∀ {a b c d} → (a ~> b) → (c ~> d) → ((a × c) ~> (b × d)))
