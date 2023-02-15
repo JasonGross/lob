@@ -1,5 +1,5 @@
 {-# OPTIONS --without-K --allow-unsolved-metas #-}
-module lawvere-factored where
+module lawvere-factored-alt where
 open import Agda.Primitive
   using    (Level; _⊔_; lzero; lsuc; Setω)
 record CartesianClosedCat {ℓ₀ ℓ₁ ℓ₂} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
@@ -207,156 +207,42 @@ module generic
     -- incomplete musing: we need an analogue of (□ₚT : Presheaf □C) and of `_⨾ₛ_ : (Σ R [>] □ (Σ P)) → (□ₚT (□ (Σ P))) → □ₚT (Σ R)`, and ...
     -- incomplete musing: `Wk.uncurry (Σ.ι/dup ⨾ fst)` gives `Π[ a ] 𝟙 [→] (* ⨾ₛ Wk a)`, `pair *` gives `(Π[ a ] (𝟙 [→] (* ⨾ₛ □ₚT))) → (𝟙 [>] Σ a □ₚT)`, `□ₚf : □ₚT (□ (Σ P))`, if we treat `f` as  analogue of □ₚ gives us T a → □T (□a),
 
-    (S : C) -- Δ (Σ_□S R → Σ_QT P)
+    (S : C) -- Δ (T (Σ_□S R))
     (P : Ty QT)
     (R : Ty (□ S))
 
     -- TODO: we can eliminate this assumption by manually supplying R' ≔ Σ R quote-r, and then using wk-map cojoin to quote quote-r or something
     (quote-r : Π[ □ S ] R [→] (cojoin ⨾ₛ □ₚ R))
 
-    (ϕ : S [>] (Σ R ~> Σ P))
-    (ψ : (Σ R [>] Σ P) → (𝟙 [>] S))
+    (ϕ : T (S × Σ R))
+    (ψ : T (Σ R) → (𝟙 [>] S))
     (f : T (Σ P))
     where
 
     quote-R : Σ R [>] □ (Σ R)
     quote-R = (cojoin ΣΣ quote-r) ⨾ □-Σ-codistr
 
-    rewrap : (s : 𝟙 [>] S) → (Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map s) ⨾ₛ R)) → T 𝟙
-    rewrap = λ s rs → ((dup ⨾ ((s ⨾ ϕ) ×× pair (□-𝟙-codistr ⨾ □-map s) rs)) ⨾ apply) ⨾T f
-
-    rewrap2 : Σ R [>] QT
-    rewrap2 = ((dup ⨾ ((fst ⨾ □-map ϕ) ×× quote-R)) ⨾ (□-×-codistr ⨾ □-map apply)) ⨾ □-map-QT f
+    pre-unwrap : Σ R [>] QT
+    pre-unwrap = (dup ⨾ (fst ×× quote-R)) ⨾ (□-×-codistr ⨾ □-map-QT ϕ)
 
     module inner
-      (Hp : Π[ Σ R ] 𝟙ₚ [→] (rewrap2 ⨾ₛ P))
-      (Hq : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map (ψ (pair rewrap2 Hp))) ⨾ₛ R)) -- R (ψ (pair rewrap2 Hp))
+      (r2p : Π[ Σ R ] 𝟙ₚ [→] (pre-unwrap ⨾ₛ P))
       where
 
-      lawvere : T 𝟙
-      lawvere = rewrap (ψ (pair rewrap2 Hp)) Hq
+      unwrap : T (Σ R)
+      unwrap = pair pre-unwrap r2p ⨾T f
 
-    open inner public
+      rewrap : 𝟙 [>] S
+      rewrap = ψ unwrap
+
+      module inner
+        (r : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map rewrap) ⨾ₛ R))
+        where
+
+        lawvere : T 𝟙
+        lawvere = pair (□-𝟙-codistr ⨾ □-map rewrap) r ⨾T unwrap
+      open inner public
+    open inner hiding (module inner) public
   open inner hiding (module inner) public
   -- TODO: P lawvere
   -- TODO: fixpoint equation
-module diagonal
-  {ℓ₀ ℓ₁ ℓ₂ ℓty₀ ℓty₁ ℓtye₂ ℓty₂}
-  (CCat : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂})
-  (TyCat : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓty₀} {ℓty₁} {ℓtye₂} {ℓty₂} CCat)
-  (TyΣ : PresheafHasΣ TyCat)
-  (□Func : CodistributiveSemicomonad CCat TyCat TyΣ)
-  where
-
-  open CartesianClosedCat CCat renaming (Obj to C)
-  open Presheaf TyCat renaming (Psh to Ty)
-  open PresheafHasΣ TyΣ
-  open CodistributiveSemicomonad □Func
-
-  module _
-    (QTy𝟙 : C)
-    (QTy : Ty QTy𝟙)
-    (□-map-QTy : ∀ {a} → Ty a → (□ a [>] QTy𝟙))
-    (□-inj : C → (𝟙 [>] QTy𝟙)) -- analogue of □ but lands in the subcategory of C
---    (semidec-fst :  (Σ QTy
-    where
-
-    S : C
-    S = Σ {QTy𝟙} QTy
-
-    ϕ : S [>] (□ S ~> QTy𝟙)
-    ϕ = {!!} ⨾ 𝟙-law
-    ψ : (□ S [>] QTy𝟙) → (𝟙 [>] S)
-    ψ f = pair (□-inj S) {!!}
-
-
-
-private record ⊤ {ℓ} : Set ℓ where
-  constructor tt
-
-HomPresheafTo : ∀ {ℓ₀ ℓ₁ ℓ₂} (C : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂}) → CartesianClosedCat.Obj C → Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓ₁} {ℓ₁} {ℓ₂} {ℓ₂} C
-HomPresheafTo C X
-  = let open CartesianClosedCat C in
-    record
-      { Psh = λ{ c → c [>] X }
-      ; Π = λ _ _ → ⊤
-      ; _≈ₑ_ = _≈_
-      ; Πid = tt
-      ; _⨾ₚ_ = _
-      ; _⨾ₛ_ = _⨾_
-      ; _Π⨾ₛ_ = _
-      ; _■ₑ_ = _■_
-      ; _⁻¹ₑ = _⁻¹
-      ; 2idₑ = 2id
-      ; subst-id = lid
-      ; subst-⨾ = assoc
-      ; subst-map = _⨾-map 2id
-      }
-{-
-module adjust-R
-  {ℓ₀ ℓ₁ ℓ₂ ℓt₀ ℓt₁ ℓte₂ ℓt₂ ℓty₀ ℓty₁ ℓtye₂ ℓty₂}
-  (CCat : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂})
-  (TyCat : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓty₀} {ℓty₁} {ℓtye₂} {ℓty₂} CCat)
-  (TyΣ : PresheafHasΣ TyCat)
-  (□Func : CodistributiveSemicomonad CCat TyCat TyΣ)
-  where
-
-  open CartesianClosedCat CCat renaming (Obj to C)
-  open Presheaf hiding (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₛ_ ; _■ₑ_ ; _⁻¹ₑ)
-  open Presheaf TyCat using (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₛ_ ; _■ₑ_ ; _⁻¹ₑ) renaming (Psh to Ty)
-  open PresheafHasΣ TyΣ
-  open CodistributiveSemicomonad □Func
-
-  module inner
-    (S : C) -- Δ (Σ_□S R → Σ_QT P)
-    (R : Ty (□ S))
-    where
-
-    R' : Ty (□ S)
-    R' = {!!}
-
-    quote-r : Π[ □ S ] R' [→] (cojoin ⨾ₛ □ₚ R')
-    quote-r = {!!}
-  open inner public
--}
-
-module contextual
-  {ℓ₀ ℓ₁ ℓ₂ ℓty₀ ℓty₁ ℓtye₂ ℓty₂}
-  (CCat : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂})
-  (TyCat : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓty₀} {ℓty₁} {ℓtye₂} {ℓty₂} CCat)
-  (TyΣ : PresheafHasΣ TyCat)
-  (□Func : CodistributiveSemicomonad CCat TyCat TyΣ)
-  where
-
-  open CartesianClosedCat CCat renaming (Obj to C)
-  open Presheaf hiding (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₛ_ ; _■ₑ_ ; _⁻¹ₑ)
-  open Presheaf TyCat using (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₛ_ ; _■ₑ_ ; _⁻¹ₑ) renaming (Psh to Ty)
-  open PresheafHasΣ TyΣ
-  open CodistributiveSemicomonad □Func
-
-  module _
-    (X : C)
-    (S : C) -- Δ (Σ_□S R → Σ_□X P)
-    (P : Ty (□ X))
-    (R : Ty (□ S))
-
-    -- TODO: we can eliminate this assumption by manually supplying R' ≔ Σ R quote-r, and then using wk-map cojoin to quote quote-r or something
-    (quote-r : Π[ □ S ] R [→] (cojoin ⨾ₛ □ₚ R))
-
-    (ϕ : S [>] (Σ R ~> Σ P))
-    (ψ : (Σ R [>] Σ P) → (𝟙 [>] S))
-    (f : (Σ P) [>] X)
-    where
-
-    module l = generic CCat TyCat (HomPresheafTo CCat X) TyΣ □Func
-    module l' = l.inner (□ X) □-map S P R quote-r ϕ ψ f
-
-    module inner
-      (Hp : Π[ Σ R ] 𝟙ₚ [→] (l'.rewrap2 ⨾ₛ P))
-      (Hq : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map (ψ (pair l'.rewrap2 Hp))) ⨾ₛ R))
-      where
-
-      lawvere : 𝟙 [>] X
-      lawvere = l'.lawvere Hp Hq
-
-    open inner public
