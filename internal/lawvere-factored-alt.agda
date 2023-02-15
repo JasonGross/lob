@@ -2,50 +2,7 @@
 module lawvere-factored-alt where
 open import Agda.Primitive
   using    (Level; _⊔_; lzero; lsuc; Setω)
-record CartesianClosedCat {ℓ₀ ℓ₁ ℓ₂} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
-  field
-    Obj   : Set ℓ₀
-    _[>]_ : Obj → Obj → Set ℓ₁
-    _≈_   : ∀ {a b} → (a [>] b) → (a [>] b) → Set ℓ₂
-    id    : ∀ {a} → a [>] a
-    _⨾_   : ∀ {a b c} → a [>] b → b [>] c → a [>] c
-    𝟙     : Obj
-    _×_   : Obj → Obj → Obj
-    dup   : ∀ {a} → a [>] (a × a)
-    _××_  : ∀ {a b c d} → a [>] c → b [>] d → (a × b) [>] (c × d)
-    getl  : ∀ {a b} → (a × b) [>] a
-    getr  : ∀ {a b} → (a × b) [>] b
-    _~>_   : Obj → Obj → Obj
-    curry : ∀ {a b c} → ((a × b) [>] c) → (a [>] (b ~> c))
-    apply : ∀ {a b} → (((a ~> b) × a) [>] b)
-    *     : ∀ {a} → (a [>] 𝟙)
-
-    _■_      : ∀ {a b} {f g h : a [>] b} → f ≈ g → g ≈ h → f ≈ h
-    _⁻¹      : ∀ {a b} {f g : a [>] b} → f ≈ g → g ≈ f
-    2id      : ∀ {a b} {f : a [>] b} → f ≈ f
-    _⨾-map_ : ∀ {a b c} {f f‵ : a [>] b} {g g‵ : b [>] c} → f ≈ f‵ → g ≈ g‵ → (f ⨾ g) ≈ (f‵ ⨾ g‵)
-
-    lid   : ∀ {a b} {f : a [>] b} → (id ⨾ f) ≈ f
-    rid   : ∀ {a b} {f : a [>] b} → (f ⨾ id) ≈ f
-    assoc : ∀ {a b c d} {f : a [>] b} {g : b [>] c} {h : c [>] d}
-            → ((f ⨾ g) ⨾ h) ≈ (f ⨾ (g ⨾ h))
-
-    *-law : ∀ {a} {f g : a [>] 𝟙} → f ≈ g
-    ××id  : ∀ {a b} → (id {a} ×× id {b}) ≈ id
-    dup-getl : ∀ {a} → (dup {a} ⨾ getl) ≈ id
-    dup-getr : ∀ {a} → (dup {a} ⨾ getr) ≈ id
-    ××-natural : ∀ {a b c a′ b′ c′} {f : a [>] b} {g : b [>] c} {f′ : a′ [>] b′} {g′ : b′ [>] c′}
-                 → ((f ⨾ g) ×× (f′ ⨾ g′)) ≈ ((f ×× f′) ⨾ (g ×× g′))
-    dup-natural : ∀ {a b} {f : a [>] b} → (dup ⨾ (f ×× f)) ≈ (f ⨾ dup)
-    getl-natural : ∀ {a b a′ b′} {f : a [>] b} {f′ : a′ [>] b′}
-                   → ((f ×× f′) ⨾ getl) ≈ (getl ⨾ f)
-    getr-natural : ∀ {a b a′ b′} {f : a [>] b} {f′ : a′ [>] b′}
-                   → ((f ×× f′) ⨾ getr) ≈ (getr ⨾ f′)
-
-    exp-ρ : ∀ {a b c} {f : (a × b) [>] c}
-            → ((curry f ×× id) ⨾ apply) ≈ f
-    exp-ξ : ∀ {a b c} {f : a [>] (b ~> c)}
-            → curry ((f ×× id) ⨾ apply) ≈ f
+open import CCC public
 
 -- some bits of a Presheaf/Family-like object
 record Presheaf {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ lsuc (ℓp₀ ⊔ ℓp₁ ⊔ ℓe₂ ⊔ ℓp₂)) where
@@ -59,14 +16,15 @@ record Presheaf {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : Cart
   Π[ a ] x [→] y = Π {a} x y
   field
     _≈ₑ_ : ∀ {a} → Psh a → Psh a → Set ℓp₂ -- equivalence of categories or w/e
-    --_≈ₚ_ : ∀ {a x y} → (Π[ a ] x [→] y) → (Π[ a ] x [→] y) → Set ℓp₂
 
     Πid  : ∀ {a x} → Π[ a ] x [→] x
-    _⨾ₚ_ : ∀ {a} {x y z : Psh a} → Π x [→] y → Π y [→] z → Π x [→] z
+    -- _⨾ₚ_ : ∀ {a} {x y z : Psh a} → Π x [→] y → Π y [→] z → Π x [→] z
 
     _⨾ₛ_ : ∀ {a b} → (a [>] b) → Psh b → Psh a
 
-    _Π⨾ₛ_ : ∀ {a b x y} → (f : a [>] b) → Π[ b ] x [→] y → Π[ a ] (f ⨾ₛ x) [→] (f ⨾ₛ y)
+    _≈ₚ[_]_ : ∀ {a b x y} {f : a [>] b} {g} → (Π[ a ] x [→] (f ⨾ₛ y)) → f ≈ g → (Π[ a ] x [→] (g ⨾ₛ y)) → Set ℓp₂
+    -- _Π⨾ₛ_ : ∀ {a b x y} → (f : a [>] b) → Π[ b ] x [→] y → Π[ a ] (f ⨾ₛ x) [→] (f ⨾ₛ y)
+    _⨾ₚ_ : ∀ {a b c x y z} → {f : a [>] b} {g : b [>] c} → Π[ a ] x [→] (f ⨾ₛ y) → Π[ b ] y [→] (g ⨾ₛ z) → Π[ a ] x [→] ((f ⨾ g) ⨾ₛ z)
 
     --_■ₚ_   : ∀ {a x y} {f g h : Π[ a ] x [→] b} → f ≈ₚ g → g ≈ₚ h → f ≈ₚ h
     --_⁻¹ₚ   : ∀ {a x y} {f g   : Π[ a ] x [→] b} → f ≈ₚ g → g ≈ₚ f
@@ -88,8 +46,10 @@ record Presheaf {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : Cart
     2idₑ   : ∀ {a} {x : Psh a} → x ≈ₑ x
 
     subst-id  : ∀ {a} {x : Psh a} → (id ⨾ₛ x) ≈ₑ x
-    subst-⨾   : ∀ {a b c} {f : a [>] b} {g : b [>] c} {x : Psh c} → ((f ⨾ g) ⨾ₛ x) ≈ₑ (f ⨾ₛ (g ⨾ₛ x))
+    assocₛ    : ∀ {a b c} {f : a [>] b} {g : b [>] c} {x : Psh c} → ((f ⨾ g) ⨾ₛ x) ≈ₑ (f ⨾ₛ (g ⨾ₛ x))
     subst-map : ∀ {a b} {f g : a [>] b} {x : Psh b} → f ≈ g → (f ⨾ₛ x) ≈ₑ (g ⨾ₛ x)
+
+    _Π⨾ₑ_ : ∀ {a} {x y x' y' : Psh a} → x' ≈ₑ x → y ≈ₑ y' → (Π[ a ] x [→] y) → (Π[ a ] x' [→] y')
 
 record PresheafHasΣ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} {C : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂}}
                     (T : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓp₀} {ℓp₁} {ℓe₂} {ℓp₂} C)
@@ -103,6 +63,8 @@ record PresheafHasΣ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} {C :
 
   𝟙ₚ : ∀ {a} → Psh a
   𝟙ₚ = * ⨾ₛ Wk 𝟙
+  *ₚ : ∀ {a b} (f : a [>] b) → Π[ a ] 𝟙ₚ [→] (f ⨾ₛ 𝟙ₚ)
+  *ₚ f = (2idₑ Π⨾ₑ (subst-map *-law ■ₑ assocₛ)) Πid
 
   field
     Σ : ∀ {a : Obj} → Psh a → Obj
@@ -115,20 +77,21 @@ record PresheafHasΣ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} {C :
     -- Σ-map-id : ∀ {a x} → (id ΣΣ Πid) ≈ id {Σ {a} x} -- needs x = (id ⨾ₛ x)
     dup-fst : ∀ {a} → (dupΣ {a} ⨾ fst) ≈ id
     dup-snd : ∀ {a x} → (dupΣ {Σ {a} x} ⨾ (fst ΣΣ snd)) ≈ id
-    --ΣΣ-natural : ∀ {a b c x y z} {f : a [>] b} {g : b [>] c} {F : Π[ a ] x [→] (f ⨾ₛ y)} {G : Π[ b ] y [→] (g ⨾ₛ z)}
-    --             → ((f ⨾ g) ΣΣ (F ⨾ₚ {!f Π⨾ₛ G!})) ≈ ((f ΣΣ F) ⨾ (g ΣΣ G)) -- needs (f ⨾ g) ⨾ₛ z = f ⨾ₛ (g ⨾ₛ z)
-    --dup-ΣΣ : ∀ {a b} {f : a [>] b} → (dupΣ ⨾ (f ΣΣ {!Πid or wk-map *!})) ≈ (f ⨾ dupΣ) -- needs f ⨾ₛ (* ⨾ₛ Wk 𝟙) = (* ⨾ₛ Wk 𝟙)
+    ΣΣ-natural : ∀ {a b c x y z} {f : a [>] b} {g : b [>] c} {F : Π[ a ] x [→] (f ⨾ₛ y)} {G : Π[ b ] y [→] (g ⨾ₛ z)}
+                 → ((f ⨾ g) ΣΣ (F ⨾ₚ G)) ≈ ((f ΣΣ F) ⨾ (g ΣΣ G))
+    dup-ΣΣ : ∀ {a b} {f : a [>] b} → (dupΣ ⨾ (f ΣΣ *ₚ f)) ≈ (f ⨾ dupΣ)
+    _ΣΣ-2map_ : ∀ {a b x y} {f f′ : a [>] b} {g : Π[ a ] x [→] (f ⨾ₛ y)} {g′ : Π[ a ] x [→] (f′ ⨾ₛ y)}
+      → (e : f ≈ f′) → g ≈ₚ[ e ] g′ → (f ΣΣ g) ≈ (f′ ΣΣ g′)
 
     pair : ∀ {a b y} → (f : a [>] b) → (Π[ a ] 𝟙ₚ [→] (f ⨾ₛ y)) → (a [>] Σ {b} y) -- duplicative
-{-
-    -- alt formulation, also requires too many casts
-    fst  : ∀ {a x} → Σ {a} x [>] a
-    snd  : ∀ {a x} → Π[ Σ {a} x ] 𝟙ₚ [→] (fst ⨾ₛ x)
-
     pair-fst : ∀ {a b y f g} → (pair {a} {b} {y} f g ⨾ fst) ≈ f
     -- pair-snd : ∀ {a b y f g} → (pair {a} {b} {y} f g ⨾ₛ snd) ≈ₚ g
-    -- pair-ξ   : ∀ {a b y} {f : a [>] Σ {b} y} → (pair (f ⨾ fst) {!f Π⨾ₛ snd!}) ≈ f -- needs ((f ⨾ fst) ⨾ₛ y) = (f ⨾ₛ (fst ⨾ₛ y))
--}
+    pair-η   : ∀ {a b y} {f : a [>] Σ {b} y} → (pair (f ⨾ fst) (*ₚ f ⨾ₚ snd)) ≈ f
+    pair-2map : ∀ {a b y f f' g g'} → (e : f ≈ f') → g ≈ₚ[ e ] g' → pair {a} {b} {y} f g ≈ pair {a} {b} {y} f' g'
+
+    -- should be derivable...
+    pair-dup : ∀ {a b y f g} → pair {a} {b} {y} f g ≈ (dupΣ ⨾ (f ΣΣ g))
+    -- pair-dup = pair-2map ({!? ■ (2id ⨾-map  !} ■ (assoc ⁻¹)) {!!} ■ pair-η
 
 
     pair-wk : ∀ {a x} → Π[ a ] x [→] (* ⨾ₛ Wk (Σ {a} x))
@@ -141,6 +104,8 @@ record PresheafHasΣ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} {C :
     -- ε-natural : (Σ.μ * (μ p)); ε = ε; p
     -- alt: uncurryΣ : ∀ {a b x} → (Σ {a} x [>] b) → (Π[ a ] x [→] (* ⨾ₛ Wk b))
     uncurryΣ : ∀ {a b x} → (Σ {a} x [>] b) → (Π[ a ] x [→] (* ⨾ₛ Wk b))
+
+
 
 
 -- a semicomonad that codistributes over 𝟙 and _×_ (since behavior of
@@ -177,12 +142,19 @@ record CodistributiveSemicomonad {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ �
   open PresheafHasΣ TΣ
   field
     □ₚ : ∀ {a} → Psh a → Psh (□ a)
+    □ₚ-map : ∀ {a b x y} → {f : a [>] b} → (Π[ a ] x [→] (f ⨾ₛ y)) → (Π[ □ a ] (□ₚ x) [→] (□-map f ⨾ₛ □ₚ y))
+
     -- TODO: other fields
 
+    □ₚ-𝟙-codistr  : Π 𝟙ₚ [→] (□-𝟙-codistr ⨾ₛ □ₚ 𝟙ₚ)
+    -- □ₚ-𝟙-codistr'  : Π[ □ 𝟙 ] 𝟙ₚ [→] (id ⨾ₛ □ₚ 𝟙ₚ) -- ???
     □-Wk-codistr : ∀ {a} → Π[ 𝟙 ] (Wk (□ a)) [→] (□-𝟙-codistr ⨾ₛ □ₚ (Wk a))
     □-Σ-codistr : ∀ {a x} → (Σ {□ a} (□ₚ x)) [>] (□ (Σ {a} x))
 
     □-map-subst : ∀ {a b x} {f : a [>] b} → (□-map f ⨾ₛ □ₚ x) ≈ₑ □ₚ (f ⨾ₛ x)
+
+    --dupΣ-□-𝟙-ΣΣ-codistr : (dupΣ {𝟙} ⨾ (□-𝟙-codistr ΣΣ □ₚ-𝟙-codistr)) ≈ (□-𝟙-codistr ⨾ (dupΣ ⨾ (id ΣΣ {!!})))
+
 
 module generic
   {ℓ₀ ℓ₁ ℓ₂ ℓt₀ ℓt₁ ℓte₂ ℓt₂ ℓty₀ ℓty₁ ℓtye₂ ℓty₂}
@@ -194,10 +166,10 @@ module generic
   where
 
   open CartesianClosedCat CCat renaming (Obj to C)
-  open Presheaf hiding (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₛ_ ; _■ₑ_ ; _⁻¹ₑ)
-  open Presheaf TyCat using (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₛ_ ; _■ₑ_ ; _⁻¹ₑ) renaming (Psh to Ty)
+  -- open Presheaf hiding (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _≈ₚ[_]_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₑ_ ; _■ₑ_ ; _⁻¹ₑ ; 2idₑ)
+  open Presheaf TyCat renaming (Psh to Ty)
   -- arrows in T are unused
-  open Presheaf TCat using () renaming (Psh to T ; _≈ₑ_ to _≈T_ ; _⨾ₛ_ to _⨾T_ ; _■ₑ_ to _■T_ ; _⁻¹ₑ to _⁻¹T)
+  open Presheaf TCat using () renaming (Psh to T ; _≈ₑ_ to _≈T_ ; _⨾ₛ_ to _⨾T_ ; _■ₑ_ to _■T_ ; _⁻¹ₑ to _⁻¹T ; assocₛ to assocT ; subst-map to subst-mapT)
   open PresheafHasΣ TyΣ
   open CodistributiveSemicomonad □Func
 
@@ -213,6 +185,7 @@ module generic
 
     -- TODO: we can eliminate this assumption by manually supplying R' ≔ Σ R quote-r, and then using wk-map cojoin to quote quote-r or something
     (quote-r : Π[ □ S ] R [→] (cojoin ⨾ₛ □ₚ R))
+    (quote-r-□-map : ∀ {s : 𝟙 [>] S} {r : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map s) ⨾ₛ R)} → (r ⨾ₚ quote-r) ≈ₚ[ □-map-cojoin ] (□ₚ-𝟙-codistr ⨾ₚ □ₚ-map r))
 
     (ϕ : T (S × Σ R))
     (ψ : T (Σ R) → (𝟙 [>] S))
@@ -241,8 +214,33 @@ module generic
 
         lawvere : T 𝟙
         lawvere = pair (□-𝟙-codistr ⨾ □-map rewrap) r ⨾T unwrap
+
+
+        -- this one is a bit easier to prove
+        quote-R-□-map-pair : ∀ {f : 𝟙 [>] S} → let s = □-𝟙-codistr ⨾ □-map f in ∀ {r : Π 𝟙ₚ [→] (s ⨾ₛ R)} → (pair s r ⨾ quote-R) ≈ ((□-𝟙-codistr ⨾ pair (□-map s) {!!}) ⨾ □-Σ-codistr) -- □-map (pair (□-𝟙-codistr ⨾ □-map f) r))
+        quote-R-□-map-pair = (assoc ⁻¹) ■ ((((pair-dup ⨾-map 2id) ■ (assoc ■ ((2id ⨾-map ((ΣΣ-natural ⁻¹) ■ (□-map-cojoin ΣΣ-2map quote-r-□-map))) ■ ((2id ⨾-map ΣΣ-natural) ■ ((assoc ⁻¹) ■ (({!!} ⨾-map 2id) ■ {!!})) )))) ⨾-map 2id) ■ {!!})
+{-
+        {-quote-R-□-map : ∀ {f : 𝟙 [>] Σ R} → (f ⨾ quote-R) ≈ (□-𝟙-codistr ⨾ □-map f)
+        quote-R-□-map-pair = quote-R-□-map ■ {!!}-}
+
+        Plawvere : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map-QT lawvere) ⨾ₛ P)
+        Plawvere = {!? ⨾ₚ snd!}
+
+        lawvere-fix : lawvere ≈T (pair (□-𝟙-codistr ⨾ □-map-QT lawvere) Plawvere ⨾T f)
+        lawvere-fix = eq0
+          module lawvere-fix where
+            eq8 = {!!}
+            eq7 = (××-natural ⁻¹) ■ ((pair-fst ××-2map {!!}) ■ {!!})
+            eq6 = assoc ■ ((2id ⨾-map eq7) ■ eq8)
+            eq5 = dup-natural ⁻¹
+            eq4 = {!!}
+            eq3 = (assoc ⁻¹) ■ ((eq5 ⨾-map 2id) ■ eq6)
+            eq2 = (assoc ⁻¹) ■ ((eq3 ⨾-map 2id) ■ eq4)
+            eq1 = assoc ■ ((2id ⨾-map pair-fst) ■ eq2)
+            eq0 = (assocT ⁻¹T) ■T subst-mapT ((pair-η ⁻¹) ■ pair-2map eq1 {!!})
       open inner public
     open inner hiding (module inner) public
   open inner hiding (module inner) public
   -- TODO: P lawvere
   -- TODO: fixpoint equation
+-}
