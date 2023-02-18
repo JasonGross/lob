@@ -70,7 +70,7 @@ module generic
         lawvere = pair (□-𝟙-codistr ⨾ □-map rewrap) r ⨾T unwrap
 
 
-        -- this one is a bit easier to prove
+        -- this one is a bit easier to prove than alternative formulations
         quote-R-□-map-pair : ∀ {f : 𝟙 [>] S} → let s = □-𝟙-codistr ⨾ □-map f in ∀ {r : Π 𝟙ₚ [→] (s ⨾ₛ R)} → (pair s r ⨾ quote-R) ≈ (□-𝟙-codistr ⨾ □-map (pair s r))
         quote-R-□-map-pair =
           let eq13 = assoc ■ (assoc ■ (2id ⨾-map □-Σ-codistr-dup)) in
