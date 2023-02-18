@@ -5,21 +5,6 @@ open import Agda.Primitive
 open import CCC public
 open import CCCPresheaf public
 open import CCCCodistributiveSemicomonad public
-{-
-module _ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂})
-                                 (T : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓp₀} {ℓp₁} {ℓe₂} {ℓp₂} C)
-                                 (TΣ : PresheafHasΣ T)
-                                 (CM : CodistributiveSemicomonad C T TΣ)
-                                  where
-  open CartesianClosedCat C
-  open Presheaf T
-  open PresheafHasΣ TΣ
-  open CodistributiveSemicomonad CM
-
-  -- TODO: What is this???
-
-  dupΣ-□-𝟙-ΣΣ-codistr = {!!}
--}
 
 module generic
   {ℓ₀ ℓ₁ ℓ₂ ℓt₀ ℓt₁ ℓte₂ ℓt₂ ℓty₀ ℓty₁ ℓtye₂ ℓty₂}
@@ -52,7 +37,8 @@ module generic
 
     -- TODO: we can eliminate this assumption by manually supplying R' ≔ Σ R quote-r, and then using wk-map cojoin to quote quote-r or something
     (quote-r : Π[ □ S ] R [→] (cojoin ⨾ₛ □ₚ R))
-    (quote-r-□-map : ∀ {s : 𝟙 [>] S} {r : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map s) ⨾ₛ R)} → (r ⨾ₚ quote-r) ≈ₚ[ □-map-cojoin ] (□ₚ-𝟙-codistr ⨾ₚ □ₚ-map r))
+    -- TODO: figure out what's up with ((rid ⁻¹) ⨾-map 2id) (mirrors cojoinₚ)
+    (quote-r-□-map : ∀ {s : 𝟙 [>] S} {r : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map s) ⨾ₛ R)} → (r ⨾ₚ quote-r) ≈ₚ[ □-map-cojoin ■ ((rid ⁻¹) ⨾-map 2id) ] ((*ₚ □-𝟙-codistr ⨾ₚ □-𝟙ₚ-codistr) ⨾ₚ □ₚ-map r))
 
     (ϕ : T (S × Σ R))
     (ψ : T (Σ R) → (𝟙 [>] S))
@@ -87,35 +73,24 @@ module generic
         -- this one is a bit easier to prove
         quote-R-□-map-pair : ∀ {f : 𝟙 [>] S} → let s = □-𝟙-codistr ⨾ □-map f in ∀ {r : Π 𝟙ₚ [→] (s ⨾ₛ R)} → (pair s r ⨾ quote-R) ≈ (□-𝟙-codistr ⨾ □-map (pair s r))
         quote-R-□-map-pair =
-          let eq11 = ? in
-          let eq10 = ? in
-          let eq9 = (assoc ⁻¹) ■ (({!eq10!} ⨾-map 2id) ■ {!eq11!}) in
+          let eq13 = assoc ■ (assoc ■ (2id ⨾-map □-Σ-codistr-dup)) in
+          let eq12 = (((assoc ⁻¹) ■ (dup-ΣΣ ⨾-map 2id)) ⨾-map 2id) ■ eq13 in
+          let eq11 = (□-⨾-map ⁻¹) in
+          let eq10 = assoc ■ (2id ⨾-map eq11) in
+          let eq9 = assoc ■ ((2id ⨾-map (ΣΣ-natural ⨾-map 2id)) ■ ((assoc ⁻¹) ■ eq12)) in
           let eq8 = □-map-ΣΣ-codistr in
-          let eq7 = {!!} in
-          let eq6 = assoc ■ ((2id ⨾-map eq8) ■ eq9) in
-          let eq5 = (2id ⨾-map ΣΣ-natural) in -- ■ ((assoc ⁻¹) ■ ((eq6 ⨾-map 2id) ■ eq7)) in
-          let eq4 = (2id ⨾-map ((ΣΣ-natural ⁻¹) ■ (□-map-cojoin ΣΣ-2map quote-r-□-map))) ■ eq5 in
-          let eq3 = (pair-dup ⨾-map 2id) ■ (assoc ■ eq4) in
+          let eq7 = (assoc ⁻¹) ■ ((assoc ⁻¹) ■ ((eq9 ⨾-map 2id) ■ eq10)) in
+          let eq6 = assoc ■ (2id ⨾-map eq8) in
+          let eq5 = (2id ⨾-map ΣΣ-natural) in
+          let eq4 = (2id ⨾-map ((ΣΣ-natural ⁻¹) ■ ((□-map-cojoin ■ ((rid ⁻¹) ⨾-map 2id)) ΣΣ-2map quote-r-□-map))) ■ eq5 in
+          let eq3 = (assoc ■ eq4) in
           let eq2 = assoc ■ ((2id ⨾-map eq6) ■ eq7) in
-          let eq1 = (eq3 ⨾-map 2id) ■ eq2 in -- ((
---          ((pair-dup ⨾-map 2id) ■ (assoc ■
---
--- ((2id ⨾-map ((ΣΣ-natural ⁻¹) ■ (□-map-cojoin ΣΣ-2map quote-r-□-map))) ■
--- ((2id ⨾-map ΣΣ-natural) ■ ((assoc ⁻¹) ■ (({!!} ⨾-map 2id) ■ {!!})) ))
-
--- ))
---          ⨾-map 2id) ■ {!!}) in
+          let eq1 = (eq3 ⨾-map 2id) ■ eq2 in
           (assoc ⁻¹) ■ eq1
-{-
-        {-quote-R-□-map-pair : ∀ {f : 𝟙 [>] S} → let s = □-𝟙-codistr ⨾ □-map f in ∀ {r : Π 𝟙ₚ [→] (s ⨾ₛ R)} → (pair s r ⨾ quote-R) ≈ ((□-𝟙-codistr ⨾ pair (□-map s) {!!}) ⨾ □-Σ-codistr) -- □-map (pair (□-𝟙-codistr ⨾ □-map f) r))
-        quote-R-□-map-pair = (assoc ⁻¹) ■ ((((pair-dup ⨾-map 2id) ■ (assoc ■ ((2id ⨾-map ((ΣΣ-natural ⁻¹) ■ (□-map-cojoin ΣΣ-2map quote-r-□-map))) ■ ((2id ⨾-map ΣΣ-natural) ■ ((assoc ⁻¹) ■ (({!!} ⨾-map 2id) ■ {!!})) )))) ⨾-map 2id) ■ {!!})-}
-
-        {-quote-R-□-map : ∀ {f : 𝟙 [>] Σ R} → (f ⨾ quote-R) ≈ (□-𝟙-codistr ⨾ □-map f)
-        quote-R-□-map-pair = quote-R-□-map ■ {!!}-}
 
         module lawvere-fix-helper where
-          eq : ((pair (□-𝟙-codistr ⨾ □-map rewrap) r ⨾ pair pre-unwrap r2p) ⨾ fst) ≈ (□-𝟙-codistr ⨾ □-map-QT lawvere)
-          eq = assoc ■ ((2id ⨾-map pair-fst) ■ eq2)
+          eq : (pair (□-𝟙-codistr ⨾ □-map rewrap) r ⨾ pre-unwrap) ≈ (□-𝟙-codistr ⨾ □-map-QT lawvere)
+          eq = (2id ⨾-map 2id) ■ ((assoc ⁻¹) ■ ((eq3 ⨾-map 2id) ■ eq4))
             module eq where
               eq10 = ϕ-eq
               eq9 = (assoc ⁻¹) ■ ((((assoc ⁻¹) ■ ((□-×-codistr-dup ⨾-map 2id) ■ (□-⨾-map ⁻¹))) ⨾-map 2id) ■ (□-map-QT-subst ■ □-map-QT-2map eq10))
@@ -125,18 +100,28 @@ module generic
               eq5 = dup-natural ⁻¹
               eq4 = assoc ■ (2id ⨾-map (assoc ■ ((2id ⨾-map ((assoc ⁻¹) ■ (□-map-××-codistr ⨾-map 2id))) ■ eq9)))
               eq3 = (assoc ⁻¹) ■ ((eq5 ⨾-map 2id) ■ eq6)
-              eq2 = (assoc ⁻¹) ■ ((eq3 ⨾-map 2id) ■ eq4)
+              eq2 : (pair (□-𝟙-codistr ⨾ □-map rewrap) r ⨾ pre-unwrap) ≈ (□-𝟙-codistr ⨾ □-map-QT lawvere)
+              eq2 = (2id ⨾-map 2id) ■ ((assoc ⁻¹) ■ ((eq3 ⨾-map 2id) ■ eq4))
+
+          eq' : ((pair (□-𝟙-codistr ⨾ □-map rewrap) r ⨾ pair pre-unwrap r2p) ⨾ fst) ≈ (□-𝟙-codistr ⨾ □-map-QT lawvere)
+          eq' = (2id ⨾-map 2id) ■ (assoc ■ ((2id ⨾-map pair-fst) ■ eq))
 
         Plawvere : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map-QT lawvere) ⨾ₛ P)
-        Plawvere = let v = ((2idₑ Π⨾ₑ (subst-map *-law ■ₑ assocₛ)) Πid ⨾ₚ snd) in {!!}
+        Plawvere = subst-map-Π lawvere-fix-helper.eq (*ₚ (pair (□-𝟙-codistr ⨾ □-map rewrap) r) ⨾ₚ r2p)
+
+        module lawvere-fix-helperₚ where
+          open lawvere-fix-helper
+          eqₚ : (*ₚ (pair (□-𝟙-codistr ⨾ □-map rewrap) r) ⨾ₚ r2p) ≈ₚ[ eq ] Plawvere
+          eqₚ = subst-map-Π-eq
+
+          eqₚ' : (*ₚ (pair (□-𝟙-codistr ⨾ □-map rewrap) r ⨾ pair pre-unwrap r2p) ⨾ₚ snd) ≈ₚ[ eq' ] Plawvere
+          eqₚ' = (*ₚ-law {q = *ₚ _ ⨾ₚ *ₚ _} ⨾-mapₚ 2idₚ) ■ₚ (assocₚ ■ₚ ((2idₚ ⨾-mapₚ pair-snd) ■ₚ eqₚ))
+
 
         lawvere-fix : lawvere ≈T (pair (□-𝟙-codistr ⨾ □-map-QT lawvere) Plawvere ⨾T f)
         lawvere-fix = eq0
           module lawvere-fix where
-            eq0 = (assocT ⁻¹T) ■T subst-mapT ((pair-η ⁻¹) ■ pair-2map lawvere-fix-helper.eq {!!})
+            eq0 = (assocT ⁻¹T) ■T subst-mapT ((pair-η ⁻¹) ■ pair-2map lawvere-fix-helper.eq' lawvere-fix-helperₚ.eqₚ')
       open inner public
     open inner hiding (module inner) public
   open inner hiding (module inner) public
-  -- TODO: P lawvere
-  -- TODO: fixpoint equation
--}

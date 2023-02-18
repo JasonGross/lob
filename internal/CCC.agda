@@ -11,14 +11,14 @@ record CartesianClosedCat {ℓ₀ ℓ₁ ℓ₂} : Set (lsuc (ℓ₀ ⊔ ℓ₁ 
     _⨾_   : ∀ {a b c} → a [>] b → b [>] c → a [>] c
     𝟙     : Obj
     _×_   : Obj → Obj → Obj
+    *     : ∀ {a} → (a [>] 𝟙)
     dup   : ∀ {a} → a [>] (a × a)
     _××_  : ∀ {a b c d} → a [>] c → b [>] d → (a × b) [>] (c × d)
-    getl  : ∀ {a b} → (a × b) [>] a
+    {-getl  : ∀ {a b} → (a × b) [>] a
     getr  : ∀ {a b} → (a × b) [>] b
     _~>_   : Obj → Obj → Obj
     curry : ∀ {a b c} → ((a × b) [>] c) → (a [>] (b ~> c))
-    apply : ∀ {a b} → (((a ~> b) × a) [>] b)
-    *     : ∀ {a} → (a [>] 𝟙)
+    apply : ∀ {a b} → (((a ~> b) × a) [>] b)-}
 
     _■_      : ∀ {a b} {f g h : a [>] b} → f ≈ g → g ≈ h → f ≈ h
     _⁻¹      : ∀ {a b} {f g : a [>] b} → f ≈ g → g ≈ f
@@ -32,18 +32,18 @@ record CartesianClosedCat {ℓ₀ ℓ₁ ℓ₂} : Set (lsuc (ℓ₀ ⊔ ℓ₁ 
 
     *-law : ∀ {a} {f g : a [>] 𝟙} → f ≈ g
     ××id  : ∀ {a b} → (id {a} ×× id {b}) ≈ id
-    dup-getl : ∀ {a} → (dup {a} ⨾ getl) ≈ id
-    dup-getr : ∀ {a} → (dup {a} ⨾ getr) ≈ id
+    {-dup-getl : ∀ {a} → (dup {a} ⨾ getl) ≈ id
+    dup-getr : ∀ {a} → (dup {a} ⨾ getr) ≈ id-}
     ××-natural : ∀ {a b c a′ b′ c′} {f : a [>] b} {g : b [>] c} {f′ : a′ [>] b′} {g′ : b′ [>] c′}
                  → ((f ⨾ g) ×× (f′ ⨾ g′)) ≈ ((f ×× f′) ⨾ (g ×× g′))
     dup-natural : ∀ {a b} {f : a [>] b} → (dup ⨾ (f ×× f)) ≈ (f ⨾ dup)
-    getl-natural : ∀ {a b a′ b′} {f : a [>] b} {f′ : a′ [>] b′}
+    {-getl-natural : ∀ {a b a′ b′} {f : a [>] b} {f′ : a′ [>] b′}
                    → ((f ×× f′) ⨾ getl) ≈ (getl ⨾ f)
     getr-natural : ∀ {a b a′ b′} {f : a [>] b} {f′ : a′ [>] b′}
-                   → ((f ×× f′) ⨾ getr) ≈ (getr ⨾ f′)
+                   → ((f ×× f′) ⨾ getr) ≈ (getr ⨾ f′)-}
     _××-2map_ : ∀ {a b a′ b′} {f g : a [>] b} {f′ g′ : a′ [>] b′} → f ≈ g → f′ ≈ g′ → (f ×× f′) ≈ (g ×× g′)
 
-    exp-ρ : ∀ {a b c} {f : (a × b) [>] c}
+    {-exp-ρ : ∀ {a b c} {f : (a × b) [>] c}
             → ((curry f ×× id) ⨾ apply) ≈ f
     exp-η : ∀ {a b c} {f : a [>] (b ~> c)}
-            → curry ((f ×× id) ⨾ apply) ≈ f
+            → curry ((f ×× id) ⨾ apply) ≈ f-}
