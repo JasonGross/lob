@@ -37,8 +37,6 @@ module generic
 
     -- TODO: we can eliminate this assumption by manually supplying R' ≔ Σ R quote-r, and then using wk-map cojoin to quote quote-r or something
     (quote-r : Π[ □ S ] R [→] (cojoin ⨾ₛ □ₚ R))
-    -- TODO: figure out what's up with ((rid ⁻¹) ⨾-map 2id) (mirrors cojoinₚ)
-    (quote-r-□-map : ∀ {s : 𝟙 [>] S} {r : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map s) ⨾ₛ R)} → (r ⨾ₚ quote-r) ≈ₚ[ □-map-cojoin ■ ((rid ⁻¹) ⨾-map 2id) ] ((*ₚ □-𝟙-codistr ⨾ₚ □-𝟙ₚ-codistr) ⨾ₚ □ₚ-map r))
 
     (ϕ : T (S × Σ R))
     (ψ : T (Σ R) → (𝟙 [>] S))
@@ -64,6 +62,10 @@ module generic
 
       module inner
         (r : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map rewrap) ⨾ₛ R))
+        -- TODO: figure out what's up with ((rid ⁻¹) ⨾-map 2id) (mirrors cojoinₚ)
+        -- This isn't going to hold on-the-nose in general, so we only demand it for r
+        --(quote-r-□-map : ∀ {s : 𝟙 [>] S} {r : Π[ 𝟙 ] 𝟙ₚ [→] ((□-𝟙-codistr ⨾ □-map s) ⨾ₛ R)} → (r ⨾ₚ quote-r) ≈ₚ[ □-map-cojoin ■ ((rid ⁻¹) ⨾-map 2id) ] ((*ₚ □-𝟙-codistr ⨾ₚ □-𝟙ₚ-codistr) ⨾ₚ □ₚ-map r))
+        (quote-r-□-map : (r ⨾ₚ quote-r) ≈ₚ[ □-map-cojoin ■ ((rid ⁻¹) ⨾-map 2id) ] ((*ₚ □-𝟙-codistr ⨾ₚ □-𝟙ₚ-codistr) ⨾ₚ □ₚ-map r))
         where
 
         lawvere : T 𝟙
@@ -71,7 +73,7 @@ module generic
 
 
         -- this one is a bit easier to prove than alternative formulations
-        quote-R-□-map-pair : ∀ {f : 𝟙 [>] S} → let s = □-𝟙-codistr ⨾ □-map f in ∀ {r : Π 𝟙ₚ [→] (s ⨾ₛ R)} → (pair s r ⨾ quote-R) ≈ (□-𝟙-codistr ⨾ □-map (pair s r))
+        quote-R-□-map-pair : let s = □-𝟙-codistr ⨾ □-map rewrap in (pair s r ⨾ quote-R) ≈ (□-𝟙-codistr ⨾ □-map (pair s r))
         quote-R-□-map-pair =
           let eq13 = assoc ■ (assoc ■ (2id ⨾-map □-Σ-codistr-dup)) in
           let eq12 = (((assoc ⁻¹) ■ (dup-ΣΣ ⨾-map 2id)) ⨾-map 2id) ■ eq13 in
