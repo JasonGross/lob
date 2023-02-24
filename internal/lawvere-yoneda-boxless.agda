@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --allow-unsolved-metas #-}
+{-# OPTIONS --without-K #-}
 module lawvere-yoneda-boxless where
 open import Agda.Primitive
   using    (Level; _⊔_; lzero; lsuc; Setω)
