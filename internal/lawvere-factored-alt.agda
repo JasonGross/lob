@@ -2,26 +2,26 @@
 module lawvere-factored-alt where
 open import Agda.Primitive
   using    (Level; _⊔_; lzero; lsuc; Setω)
-open import CCC public
-open import CCCPresheaf public
-open import CCCCodistributiveSemicomonad public
+open import CC public
+open import CCPresheaf public
+open import CCLaxMonoidalSemicomonad public
 
 module generic
   {ℓ₀ ℓ₁ ℓ₂ ℓt₀ ℓt₁ ℓte₂ ℓt₂ ℓty₀ ℓty₁ ℓtye₂ ℓty₂}
-  (CCat : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂})
+  (CCat : CartesianCat {ℓ₀} {ℓ₁} {ℓ₂})
   (TyCat : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓty₀} {ℓty₁} {ℓtye₂} {ℓty₂} CCat)
   (TCat : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓt₀} {ℓt₁} {ℓte₂} {ℓt₂} CCat) -- like (_[>] X)
   (TyΣ : PresheafHasΣ TyCat)
-  (□Func : CodistributiveSemicomonad CCat TyCat TyΣ)
+  (□Func : LaxMonoidalSemicomonad CCat TyCat TyΣ)
   where
 
-  open CartesianClosedCat CCat renaming (Obj to C)
+  open CartesianCat CCat renaming (Obj to C)
   -- open Presheaf hiding (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _≈ₚ[_]_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₑ_ ; _■ₑ_ ; _⁻¹ₑ ; 2idₑ)
   open Presheaf TyCat renaming (Psh to Ty)
   -- arrows in T are unused
   open Presheaf TCat using () renaming (Psh to T ; _≈ₑ_ to _≈T_ ; _⨾ₛ_ to _⨾T_ ; _■ₑ_ to _■T_ ; _⁻¹ₑ to _⁻¹T ; assocₛ to assocT ; subst-map to subst-mapT)
   open PresheafHasΣ TyΣ
-  open CodistributiveSemicomonad □Func
+  open LaxMonoidalSemicomonad □Func
 
   module inner
     (QT : C) -- (Σ {𝟙} (* ⨾ₛ □ₚT))

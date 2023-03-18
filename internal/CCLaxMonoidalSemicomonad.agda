@@ -1,54 +1,70 @@
 {-# OPTIONS --without-K #-}
-module CCCCodistributiveSemicomonad where
+module CCLaxMonoidalSemicomonad where
 open import Agda.Primitive
   using    (Level; _⊔_; lzero; lsuc; Setω)
-open import CCC
-open import CCCPresheaf
+open import CC
+open import CCPresheaf
 
 -- a semicomonad that codistributes over 𝟙 and _×_ (since behavior of
 -- _~>_ is determined by _×_, we do not need any laws about
 -- interaction with _~>_) and Σ
-record CodistributiveSemicomonad {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂})
+record LaxMonoidalSemicomonad {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : CartesianCat {ℓ₀} {ℓ₁} {ℓ₂})
                                  (T : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓp₀} {ℓp₁} {ℓe₂} {ℓp₂} C)
                                  (TΣ : PresheafHasΣ T)
                                  : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓp₀ ⊔ ℓp₁ ⊔ ℓe₂ ⊔ ℓp₂) where
-  open CartesianClosedCat C
+  open CartesianCat C
   open Presheaf T
   open PresheafHasΣ TΣ
+  -- functor
   field
     □     : Obj → Obj
     □-map : ∀ {a b} → a [>] b → □ a [>] □ b
-
-    cojoin : ∀ {a} → □ a [>] □ (□ a)
-
-    □-𝟙-codistr  : 𝟙 [>] □ 𝟙
-    □-×-codistr  : ∀ {a b} → (□ a × □ b) [>] □ (a × b)
 
     □-id    : ∀ {a} → □-map (id {a}) ≈ id
     □-⨾-map : ∀ {a b c} {f : a [>] b} {g : b [>] c} → □-map (f ⨾ g) ≈ (□-map f ⨾ □-map g)
 
     □-2map  : ∀ {a b} {f f′ : a [>] b} → (f ≈ f′) → (□-map f) ≈ (□-map f′)
+  -- semicomonad
+  field
+    cojoin : ∀ {a} → □ a [>] □ (□ a)
 
+    cojoin-cohere : ∀ {a} → (cojoin {a} ⨾ cojoin {□ a}) ≈ (cojoin {a} ⨾ □-map (cojoin {a}))
+  -- lax monoidal
+  field
+    □-𝟙-codistr  : 𝟙 [>] □ 𝟙
+    □-×-codistr  : ∀ {a b} → (□ a × □ b) [>] □ (a × b)
+
+    -- naturality for □-×-codistr
+    □-map-××-codistr : ∀ {a b c d} {f : a [>] b} {g : c [>] d}
+                       → ((□-map f ×× □-map g) ⨾ □-×-codistr) ≈ (□-×-codistr ⨾ □-map (f ×× g))
+
+    -- TODO: interaction with (not yet written ×-assoc)
+    -- TODO: unitality interaction
+
+  -- extra???
+  field
     -- points are quoted with `□-𝟙-codistr ⨾ □-map`, quoted terms are
     -- requoted with `cojoin`; these must agree on closed quoted terms
     □-map-cojoin : ∀ {a} {f : 𝟙 [>] □ a} → (f ⨾ cojoin) ≈ (□-𝟙-codistr ⨾ □-map f)
 
     □-×-codistr-dup  : ∀ {a} → (dup {□ a} ⨾ □-×-codistr) ≈ □-map dup
-    □-map-××-codistr : ∀ {a b c d} {f : a [>] b} {g : c [>] d}
-                       → ((□-map f ×× □-map g) ⨾ □-×-codistr) ≈ (□-×-codistr ⨾ □-map (f ×× g))
 
+  -- Psh functor
   field
     □ₚ : ∀ {a} → Psh a → Psh (□ a)
     □ₚ-map : ∀ {a b x y} → {f : a [>] b} → (Π[ a ] x [→] (f ⨾ₛ y)) → (Π[ □ a ] (□ₚ x) [→] (□-map f ⨾ₛ □ₚ y))
-
-    cojoinₚ : ∀ {a x} → Π[ □ a ] □ₚ x [→] (cojoin ⨾ₛ □ₚ (□ₚ x))
 
     □ₚ-id    : ∀ {a x} → □ₚ-map (idₚ {a} {x}) ≈ₚ[ □-id ] idₚ
     □ₚ-⨾-map : ∀ {a b c x y z} {f : a [>] b} {g : b [>] c} {F : Π[ a ] x [→] (f ⨾ₛ y)} → {G : Π[ b ] y [→] (g ⨾ₛ z)}
       → □ₚ-map (F ⨾ₚ G) ≈ₚ[ □-⨾-map ] (□ₚ-map F ⨾ₚ □ₚ-map G)
 
     □ₚ-2map  : ∀ {a b x y} {f f′ : a [>] b} {F : Π[ a ] x [→] (f ⨾ₛ y)} {ff : f ≈ f′} {F′ : Π[ a ] x [→] (f′ ⨾ₛ y)} → (F ≈ₚ[ ff ] F′) → (□ₚ-map F) ≈ₚ[ □-2map ff ] (□ₚ-map F′)
+  -- Psh semicomonad
+  field
+    cojoinₚ : ∀ {a x} → Π[ □ a ] □ₚ x [→] (cojoin ⨾ₛ □ₚ (□ₚ x))
 
+  -- other???
+  field
     □-𝟙ₚ-codistr : ∀ {a} → Π[ □ a ] 𝟙ₚ [→] (id ⨾ₛ □ₚ 𝟙ₚ)
     □-*ₚ-codistr : ∀ {a b} {f : a [>] b} → (*ₚ (□-map f) ⨾ₚ □-𝟙ₚ-codistr) ≈ₚ[ rid ■ (lid ⁻¹) ] (□-𝟙ₚ-codistr ⨾ₚ □ₚ-map (*ₚ f))
     □-Σ-codistr : ∀ {a x} → (Σ {□ a} (□ₚ x)) [>] (□ (Σ {a} x))

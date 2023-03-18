@@ -1,8 +1,8 @@
 {-# OPTIONS --without-K #-}
-module CCC where
+module CC where
 open import Agda.Primitive
   using    (Level; _⊔_; lzero; lsuc; Setω)
-record CartesianClosedCat {ℓ₀ ℓ₁ ℓ₂} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
+record CartesianCat {ℓ₀ ℓ₁ ℓ₂} : Set (lsuc (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂)) where
   field
     Obj   : Set ℓ₀
     _[>]_ : Obj → Obj → Set ℓ₁
@@ -15,10 +15,7 @@ record CartesianClosedCat {ℓ₀ ℓ₁ ℓ₂} : Set (lsuc (ℓ₀ ⊔ ℓ₁ 
     dup   : ∀ {a} → a [>] (a × a)
     _××_  : ∀ {a b c d} → a [>] c → b [>] d → (a × b) [>] (c × d)
     {-getl  : ∀ {a b} → (a × b) [>] a
-    getr  : ∀ {a b} → (a × b) [>] b
-    _~>_   : Obj → Obj → Obj
-    curry : ∀ {a b c} → ((a × b) [>] c) → (a [>] (b ~> c))
-    apply : ∀ {a b} → (((a ~> b) × a) [>] b)-}
+    getr  : ∀ {a b} → (a × b) [>] b-}
 
     _■_      : ∀ {a b} {f g h : a [>] b} → f ≈ g → g ≈ h → f ≈ h
     _⁻¹      : ∀ {a b} {f g : a [>] b} → f ≈ g → g ≈ f
@@ -42,8 +39,3 @@ record CartesianClosedCat {ℓ₀ ℓ₁ ℓ₂} : Set (lsuc (ℓ₀ ⊔ ℓ₁ 
     getr-natural : ∀ {a b a′ b′} {f : a [>] b} {f′ : a′ [>] b′}
                    → ((f ×× f′) ⨾ getr) ≈ (getr ⨾ f′)-}
     _××-2map_ : ∀ {a b a′ b′} {f g : a [>] b} {f′ g′ : a′ [>] b′} → f ≈ g → f′ ≈ g′ → (f ×× f′) ≈ (g ×× g′)
-
-    {-exp-ρ : ∀ {a b c} {f : (a × b) [>] c}
-            → ((curry f ×× id) ⨾ apply) ≈ f
-    exp-η : ∀ {a b c} {f : a [>] (b ~> c)}
-            → curry ((f ×× id) ⨾ apply) ≈ f-}

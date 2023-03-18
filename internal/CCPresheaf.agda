@@ -1,12 +1,12 @@
 {-# OPTIONS --without-K #-}
-module CCCPresheaf where
+module CCPresheaf where
 open import Agda.Primitive
   using    (Level; _⊔_; lzero; lsuc; Setω)
-open import CCC
+open import CC
 
 -- some bits of a Presheaf/Family-like object
-record Presheaf {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ lsuc (ℓp₀ ⊔ ℓp₁ ⊔ ℓe₂ ⊔ ℓp₂)) where
-  open CartesianClosedCat C
+record Presheaf {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : CartesianCat {ℓ₀} {ℓ₁} {ℓ₂}) : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ lsuc (ℓp₀ ⊔ ℓp₁ ⊔ ℓe₂ ⊔ ℓp₂)) where
+  open CartesianCat C
   field
     Psh  : Obj → Set ℓp₀
     Π    : ∀ {a} → Psh a → Psh a → Set ℓp₁
@@ -74,10 +74,10 @@ record Presheaf {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : Cart
     --≈ₚ-id : ∀ {a b x y} {f : a [>] b} {g} → (F : Π[ a ] x [→] (f ⨾ₛ y)) → (e : f ≈ g) → (G : Π[ a ] x [→] (g ⨾ₛ y)) → (? ≈
 
 
-record PresheafHasΣ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} {C : CartesianClosedCat {ℓ₀} {ℓ₁} {ℓ₂}}
+record PresheafHasΣ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} {C : CartesianCat {ℓ₀} {ℓ₁} {ℓ₂}}
                     (T : Presheaf {ℓ₀} {ℓ₁} {ℓ₂} {ℓp₀} {ℓp₁} {ℓe₂} {ℓp₂} C)
                     : Set (ℓ₀ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓp₀ ⊔ ℓp₁ ⊔ ℓe₂ ⊔ ℓp₂) where
-  open CartesianClosedCat C
+  open CartesianCat C
   open Presheaf T
   field
     𝟙ₚ : ∀ {a} → Psh a
