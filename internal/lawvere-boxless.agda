@@ -10,19 +10,17 @@ module _
   (_⨾_ : ∀ {a b c} → a [>] b → b [>] c → a [>] c)
   (ι : ∀ {a} → a [>] a)
   (QS : C) (QQS : C)
-  (𝟙 : C) (Q𝟙 : C)
-  (T : C) (QT : C)
-  (cojoinS : QS [>] QQS)
-  (□-map-T : (𝟙 [>] T) → (Q𝟙 [>] QT))
-  (□-𝟙-codistr : 𝟙 [>] Q𝟙)
+  (𝟙 : C) (T : C) (QT : C)
+  (requoteS : QS [>] QQS)
+  (quote-T : (𝟙 [>] T) → (𝟙 [>] QT))
   (□-map-QT-ϕ : ∀ {a} → (a [>] QS) → (a [>] QQS) → a [>] QT)
   (□-map-ψ : (QS [>] T) → (𝟙 [>] QS))
   (f : QT [>] T)
-  (□-map-ϕ-eq : ∀ {f : QS [>] T} {g : 𝟙 [>] QS} → □-map-QT-ϕ (□-map-ψ f) (g ⨾ cojoinS) ≈ (□-𝟙-codistr ⨾ □-map-T (g ⨾ f)))
+  (□-map-ϕ-eq : ∀ {f : QS [>] T} {g : 𝟙 [>] QS} → □-map-QT-ϕ (□-map-ψ f) (g ⨾ requoteS) ≈ quote-T (g ⨾ f))
   where
 
   pre-unwrap : QS [>] QT
-  pre-unwrap = □-map-QT-ϕ ι cojoinS
+  pre-unwrap = □-map-QT-ϕ ι requoteS
 
   unwrap : QS [>] T
   unwrap = pre-unwrap ⨾ f
@@ -44,5 +42,5 @@ module _
 
     where
 
-    eq : lawvere ≈ ((□-𝟙-codistr ⨾ □-map-T lawvere) ⨾ f)
+    eq : lawvere ≈ (quote-T lawvere ⨾ f)
     eq = assocT ■ ⨾T-map (□-map-QT-ϕ-distr ■ (□-map-QT-ϕ-2map rid 2id ■ □-map-ϕ-eq))
