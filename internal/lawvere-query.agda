@@ -16,7 +16,6 @@ module _
   (encode : A 𝟙 → (𝟙 [>] R))
   (pack : A S → (𝟙 [>] S))
   (query : ∀ {X} → (X [>] S) → (X [>] S) → (X [>] R))
-  (query-pack-encode : ∀ {a} {s} → query {𝟙} (pack a) s ≈ encode (s » a))
   (f : A R)
   where
 
@@ -27,6 +26,7 @@ module _
   lawvere = pack a » a
 
   module _
+    (query-pack-encode : ∀ {a} {s} → query {𝟙} (pack a) s ≈ encode (s » a))
     (_■_      : ∀ {a b} {f g h : a [>] b} → f ≈ g → g ≈ h → f ≈ h)
     (rid : ∀ {a b} {f : a [>] b} → (f ⨾ ι) ≈ f)
     (_■A_     : ∀ {a} {f g h : A a} → f A≈ g → g A≈ h → f A≈ h)
