@@ -72,6 +72,8 @@ record Presheaf {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} (C : Cart
     -- TODO: (f ⨾ g) Π⨾ₛ h = f Π⨾ₛ (g ⨾ₛ h)
 
     --≈ₚ-id : ∀ {a b x y} {f : a [>] b} {g} → (F : Π[ a ] x [→] (f ⨾ₛ y)) → (e : f ≈ g) → (G : Π[ a ] x [→] (g ⨾ₛ y)) → (? ≈
+  assocₛ⁻¹    : ∀ {a b c} {f : a [>] b} {g : b [>] c} {x : Psh c} → (f ⨾ₛ (g ⨾ₛ x)) ≈ₑ ((f ⨾ g) ⨾ₛ x)
+  assocₛ⁻¹ = assocₛ ⁻¹ₑ
 
 
 record PresheafHasΣ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} {C : CartesianCat {ℓ₀} {ℓ₁} {ℓ₂}}
@@ -114,6 +116,10 @@ record PresheafHasΣ {ℓ₀ ℓ₁ ℓ₂ ℓp₀ ℓp₁ ℓe₂ ℓp₂} {C :
   pair-η = (2id ⨾-map ΣΣ-natural) ■ ((assoc ⁻¹) ■ ((dup-ΣΣ ⨾-map 2id) ■ (assoc ■ ((2id ⨾-map dup-fst-snd) ■ rid))))
   pair-2map : ∀ {a b y f f' g g'} → (e : f ≈ f') → g ≈ₚ[ e ] g' → pair {a} {b} {y} f g ≈ pair {a} {b} {y} f' g'
   pair-2map ff gg = 2id ⨾-map (ff ΣΣ-2map gg)
+
+  pair-natural : ∀ {a b y z} → {f : a [>] b} {p : Π[ a ] 𝟙ₚ [→] (f ⨾ₛ y)} {g : z [>] a} → (g ⨾ pair f p) ≈ (pair (g ⨾ f) (*ₚ g ⨾ₚ p))
+  pair-natural = (assoc ⁻¹) ■ (((dup-ΣΣ ⁻¹) ⨾-map 2id) ■ (assoc ■ (2id ⨾-map (ΣΣ-natural ⁻¹))))
+
     {-
 
     pair-wk : ∀ {a x} → Π[ a ] x [→] (* ⨾ₛ Wk (Σ {a} x))

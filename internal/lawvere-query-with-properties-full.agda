@@ -1,7 +1,7 @@
 {-# OPTIONS --without-K #-}
 open import CC
 open import CCPresheaf
-open import CCLaxMonoidalSemicomonad
+--open import CCLaxMonoidalSemicomonad
 module lawvere-query-with-properties-full
   {ℓ₀ ℓ₁ ℓ₂ ℓt₀ ℓt₁ ℓte₂ ℓt₂ ℓty₀ ℓty₁ ℓtye₂ ℓty₂}
   (CCat : CartesianCat {ℓ₀} {ℓ₁} {ℓ₂})
@@ -15,94 +15,56 @@ module lawvere-query-with-properties-full
   -- open Presheaf hiding (Π_[→]_ ; Π[_]_[→]_ ; _≈ₑ_ ; _≈ₚ[_]_ ; _⨾ₚ_ ; _⨾ₛ_ ; _Π⨾ₑ_ ; _■ₑ_ ; _⁻¹ₑ ; 2idₑ)
   open Presheaf TyCat renaming (Psh to Ty)
   -- arrows in T are unused
-  open Presheaf ACat using () renaming (Psh to A ; _≈ₑ_ to _≈A_ ; _⨾ₛ_ to _»_ ; _■ₑ_ to _■A_ ; _⁻¹ₑ to _⁻¹A ; assocₛ to assocA ; subst-map to subst-mapA)
+  open Presheaf ACat using () renaming (Psh to A ; _≈ₑ_ to _≈A_ ; _⨾ₛ_ to _»_ ; subst-map to »-2map ; _■ₑ_ to _■A_ ; _⁻¹ₑ to _⁻¹A ; assocₛ⁻¹ to assocA )
   open PresheafHasΣ TyΣ
 --  open LaxMonoidalSemicomonad □Func
 
-  module inner where
+  module inner
+    (R : C) (S : C)
+    (Pᵣ : Ty R) (Pₛ : Ty S)
+    (encode : A 𝟙 → (𝟙 [>] R))
+    (pack : A (Σ Pₛ) → (𝟙 [>] S))
+    (query : ∀ {X} → (X [>] Σ Pₛ) → (X [>] Σ Pₛ) → (X [>] R))
+    (f : A (Σ Pᵣ))
+    where
 
-  {-
-  {ℓ₀} {ℓ₁} {ℓ₂}
-  (C : Set ℓ₀)
-  (_[>]_ : C → C → Set ℓ₁)
-  (_⨾_ : ∀ {a b c} → a [>] b → b [>] c → a [>] c)
-  (ι : ∀ {a} → a [>] a)
-  (A : C → Set ℓ₂)
-  (_»_ : ∀ {a b} → (a [>] b) → A b → A a)
-  (𝟙 : C) (R : C) (S : C)
-  {ℓ₃} (P₁ : A 𝟙 → Set ℓ₃)
-  -- (R : C) (S : C)
-  -- (Pᵣ : (𝟙 [>] R) → Set r)
-  -- (Pₛ : (𝟙 [>] S) → Set s)
-  (ΣR : C) -- Σ (□ R) Pᵣ
-  (ΣS : C) -- Σ (□ S) Pₛ
-  (encode : A 𝟙 → (𝟙 [>] R))
-  (pack : A ΣS → (𝟙 [>] ΣS))
-  (query : ∀ {X} → (X [>] S) → (X [>] S) → (X [>] ΣR))
-  (f : A ΣR)
-  where
+    pre-a : Σ Pₛ [>] R
+    pre-a = query {Σ Pₛ} ι ι
 
-a : A S
-a = query {S} ι ι » f
+    module inner
+      (s2p : Π[ Σ Pₛ ] 𝟙ₚ [→] (pre-a ⨾ₛ Pᵣ))
+      where
 
-lawvere : A 𝟙
-lawvere = pack a » a
+      a : A (Σ Pₛ)
+      a = pair pre-a s2p » f
 
-lawvere-pf : P₁ lawvere
-lawvere-pf = ?
+      module inner
+        (sa : Π[ 𝟙 ] 𝟙ₚ [→] (pack a ⨾ₛ Pₛ))
+        where
 
-{-
-  {o a} {p {-r-} r₂}
-  (𝒞 : Set o)
-  (_[>]_ : 𝒞 → 𝒞 → Set a)
-  (ι : ∀ {a} → a [>] a)
-  (_⨾_ : ∀ {a b c} → a [>] b → b [>] c → a [>] c)
-  (_×_ : 𝒞 → 𝒞 → 𝒞)
-  (dup : ∀ {a} → (a [>] (a × a)))
-  (_××_ : ∀ {a b c d} → (a [>] b) → (c [>] d) → ((a × c) [>] (b × d)))
-  (𝟙 : 𝒞)
---  (□ : 𝒞 → 𝒞)
-  (X : 𝒞)
-  (S : 𝒞) -- S := Δ (Σ (□S) R → X)
-  (P : (𝟙 [>] X) → Set p)
-  (ΣP : 𝒞) -- Σ (□ X) P
-  (f : ΣP [>] X)
---  (R : (𝟙 [>] S) → Set r)
-  (ΣR : 𝒞) -- Σ (□ S) R
-  (R₂ : (𝟙 [>] ΣR) → Set r₂)
-  (ΣR₂ : 𝒞) -- Σ (□ ΣR) R₂
-  (××ΣR₂P-but-this-needs-a-better-name : (l : ΣR [>] X) → (r : ∀ i → R₂ i → P (i ⨾ l)) → ΣR₂ [>] ΣP)
-  (quot : ΣR [>] ΣR₂)
-  (ϕ : (ΣR × ΣR₂) [>] ΣP) -- □ (S × □ S) [>] □ X
-  (ϕ⁻¹ : (ΣR₂ [>] ΣP) → (𝟙 [>] ΣR))
-  (f : ΣP [>] X)
-  where
+        lawvere : A 𝟙
+        lawvere = pair (pack a) sa » a
 
--- Σ_{m : a [>] X} (if a ≅ 𝟙 then P₁ m elif a ≅ S then P₂ m elif a ≅ R then P₃ m else ⊤)
+        module inner
+          (query-pack-encode : ∀ {a} {s} {pf : Π[ 𝟙 ] 𝟙ₚ [→] (pack a ⨾ₛ Pₛ)} → query {𝟙} (pair (pack a) pf) s ≈ encode (s » a))
+          (query-natural : ∀ {X Y} {m : Y [>] X} {f : X [>] Σ Pₛ} {g : X [>] Σ Pₛ} → (m ⨾ query {X} f g) ≈ query {Y} (m ⨾ f) (m ⨾ g))
+          (query-2map    : ∀ {X} {f f′ g g′} → f ≈ f′ → g ≈ g′ → query {X} f g ≈ query {X} f′ g′)
+          where
 
-module _ (s₁ : ∀ (i : 𝟙 ~> ΣR) → R₂ i → P (i ⨾ k)) where
-  pt : ΣR₂ ~> ΣP -- this needs a better name too
-  pt = ××ΣR₂P-but-this-needs-a-better-name k s₁
+          module helper where
 
-  lawvere : 𝟙 ~> B
-  lawvere = ϕ⁻¹ pt ⨾ k
+            eq1 : (pair (pack a) sa ⨾ pre-a) ≈ encode lawvere
+            eq1 = query-natural ■ (query-2map rid rid ■ query-pack-encode)
 
+          open helper
 
-query : ∀ {a} → a [>] ΣR → a [>] ΣR → a [>] ΣP
-query f g = (dup ⨾ (f ×× (g ⨾ quot))) ⨾ ϕ
+          lawvere-pf : Π[ 𝟙 ] 𝟙ₚ [→] (encode lawvere ⨾ₛ Pᵣ)
+          lawvere-pf = subst-map-Π eq1 (*ₚ (pair (pack a) sa) ⨾ₚ s2p)
 
+          eq : lawvere ≈A (pair (encode lawvere) lawvere-pf » f)
+          eq = assocA ■A »-2map (pair-natural ■ (2id ⨾-map (eq1 ΣΣ-2map subst-map-Π-eq)))
 
-import lawvere-query 𝒞 _[>]_ _⨾_ ι (_[>] X) _⨾_ 𝟙 ΣP ΣR {!!} {!!} query f as lawvere-query -- QT QS {!□-map-T!} {!□-map-ψ!} query f as lawvere-query
-{-
-k : ΣR [>] X
-k = ((dup ⨾ (id ×× quot)) ⨾ ϕ) ⨾ f
-
-module _ (s₁ : ∀ (i : 𝟙 [>] ΣR) → R₂ i → P (i ⨾ k)) where
-  pt : ΣR₂ [>] ΣP -- this needs a better name too
-  pt = ××ΣR₂P-but-this-needs-a-better-name k s₁
-
-  lawvere : 𝟙 [>] X
-  lawvere = ϕ⁻¹ pt ⨾ k
--}
--}
--}
+        open inner public
+      open inner public hiding (module inner)
+    open inner public hiding (module inner)
+  open inner public hiding (module inner)
