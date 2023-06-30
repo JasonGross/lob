@@ -36,6 +36,7 @@ module setup
   P : s [>] x → Set (ℓ₁ ⊔ ℓ₃ ⊔ ℓ₄)
   P f = ∀ (s₀ : 𝟙 [>] s) → is-very-very-very-short s₀ → is-very-very-short (s₀ ⨾ f)
 
+TODO FIXME
   module loopy-setup = loopy.setup C _[>]_ _⨾_ id _≈_ _■_ 2id assoc _⨾-2map_ 𝟙  -- is-very-short (Σ* (□ x) is-short) reflect s P pack qual key f
   open loopy-setup public using (introspect ; t)
 {-
